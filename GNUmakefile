@@ -6,6 +6,11 @@
 name := lsrp
 G4TARGET := $(name)
 G4EXLIB := true
+CPPFLAGS := -std=c++11 `root-config --cflags` -I./ -I$(HOME)/work -I$(WORKDIR)  
+LDFLAGS := \
+			`root-config --libs` -lMinuit  \
+			-L/usr/lib \
+			-lboost_program_options \
 
 ifndef G4INSTALL
   G4INSTALL = ../../../..

@@ -48,7 +48,6 @@ class EventAction : public G4UserEventAction
 
     // Set methods
     void SetPrintModulo(G4int value);
-
   private:
     G4int  fPrintModulo;
 };

@@ -29,12 +29,14 @@
 /// \brief Implementation of the EventAction class
 
 #include "EventAction.hh"
+#include "ROOTManager.hh"
 
 #include "G4Event.hh"
 #include "G4EventManager.hh"
 #include "G4TrajectoryContainer.hh"
 #include "G4Trajectory.hh"
 #include "G4ios.hh"
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -68,6 +70,10 @@ void EventAction::EndOfEventAction(const G4Event* event)
   G4int eventID = event->GetEventID();
   if ( eventID % fPrintModulo == 0)
     G4cout << "---> End of event: " << eventID << G4endl;
+
+  //
+  ROOTManager * ROOT = ROOTManager::Instance();
+  ROOT->tree->Fill(23.,48.);
 
   // get number of stored trajectories
 

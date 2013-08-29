@@ -29,6 +29,7 @@
 /// \brief Implementation of the RunAction class
 
 #include "RunAction.hh"
+#include "ROOTManager.hh"
 
 #include "G4Run.hh"
 #include "G4RunManager.hh"
@@ -58,6 +59,8 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void RunAction::EndOfRunAction(const G4Run* )
-{}
+{
+  ROOTManager::Instance()->tree->Write();
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
