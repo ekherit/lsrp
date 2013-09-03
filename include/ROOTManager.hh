@@ -28,8 +28,44 @@ class ROOTManager
 {
   public:
     static ROOTManager* Instance(void);
-    std::unique_ptr<TNtupleD> tree;
+    //std::unique_ptr<TNtupleD> tree2;
     std::unique_ptr<TFile> file;
+    std::unique_ptr<TTree> tree;
+    std::unique_ptr<TTree> gen_tree;
+    struct generator_t
+    {
+      Long64_t eventID; //event id
+      double P; //polarization of gamma quant
+      double Eb; //electron beam energy
+      double gamma; //gamma factor
+      double omega; //photon energy in r.f. of electron
+      double chi; //hardness of photon
+      double E; //energy of gamma quant, MeV
+      double kx; // x momentum, MeV
+      double ky; //
+      double kz; //
+      double nx;
+      double ny;
+      double nz;
+      double theta; 
+      double phi;
+      double x; //position
+      double y;
+      double z; 
+    } Gen;
+
+    struct hit_t
+    {
+      Long64_t trackID;
+      Long64_t volumeID;
+      double   E;
+      double x;
+      double y;
+      double z;
+      double rho;
+      double phi;
+    } Hit;
+
   private:
     ROOTManager(); 
     ~ROOTManager(); 

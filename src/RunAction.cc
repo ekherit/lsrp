@@ -34,6 +34,8 @@
 #include "G4Run.hh"
 #include "G4RunManager.hh"
 
+#include <ibn/valer.h>
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunAction::RunAction()
@@ -58,9 +60,27 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+ibn::valer<double> get_epsilon(Long64_t N1, Long64_t N2)
+{
+  ibn::valer<double> eps;
+  eps.value = double(N1-N2)/double(N1+N2);
+  eps.error = sqrt(ibn::sq(2.0*N2/ibn::sq(double(N1+N2)))*N1 + ibn::sq(2.0*N1/ibn::sq(double(N1+N2)))*N2);
+  return eps;
+}
+
 void RunAction::EndOfRunAction(const G4Run* )
 {
-  ROOTManager::Instance()->tree->Write();
+  auto RM = ROOTManager::Instance();
+  Long64_t Nup0 = RM->gen_tree->GetEntries("y>0");
+  Long64_t Ndown0 = RM->gen_tree->GetEntries("y<0");
+  ibn::valer<double> eps0 = get_epsilon(Nup0,Ndown0);
+  Long64_t Nup = RM->tree->GetEntries("hit.y>0");
+  Long64_t Ndown = RM->tree->GetEntries("hit.y<0");
+  ibn::valer<double> eps = get_epsilon(Nup,Ndown);
+  RM->tree->Write();
+  RM->gen_tree->Write();
+  G4cout << "Initial assymetry: " << eps0.value << "+-" << eps0.error << " ("<< eps0.error/eps0.value*100<< "%)" << G4endl;
+  G4cout << "Gem assymetry:     " << eps.value << "+-" << eps.error << " ("<< eps.error/eps.value*100<< "%)" << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

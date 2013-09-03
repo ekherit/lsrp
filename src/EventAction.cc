@@ -57,7 +57,7 @@ void EventAction::BeginOfEventAction(const G4Event* event)
   G4int eventID = event->GetEventID();
   if ( eventID % fPrintModulo == 0) { 
     G4cout << "\n---> Begin of event: " << eventID << G4endl;
-    //CLHEP::HepRandom::showEngineStatus();
+    CLHEP::HepRandom::showEngineStatus();
   }
 }
 
@@ -70,12 +70,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
   G4int eventID = event->GetEventID();
   if ( eventID % fPrintModulo == 0)
     G4cout << "---> End of event: " << eventID << G4endl;
-
-  //
-  ROOTManager * ROOT = ROOTManager::Instance();
-  ROOT->tree->Fill(23.,48.);
-
-  // get number of stored trajectories
 
   G4TrajectoryContainer* trajectoryContainer = event->GetTrajectoryContainer();
   G4int n_trajectories = 0;

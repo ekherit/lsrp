@@ -28,7 +28,9 @@
 /// \file TrackerSD.cc
 /// \brief Implementation of the TrackerSD class
 
+#include <ibn/math.h>
 #include "TrackerSD.hh"
+#include "ROOTManager.hh"
 #include "G4HCofThisEvent.hh"
 #include "G4Step.hh"
 #include "G4ThreeVector.hh"
@@ -85,6 +87,19 @@ G4bool TrackerSD::ProcessHits(G4Step* aStep,
   newHit->SetPos (aStep->GetPostStepPoint()->GetPosition());
 
   fHitsCollection->insert( newHit );
+
+  auto RM = ROOTManager::Instance();
+  RM->Hit.trackID = newHit->GetTrackID();
+  RM->Hit.volumeID = newHit->GetChamberNb();
+  RM->Hit.E = newHit->GetEdep()/MeV;
+  RM->Hit.x = newHit->GetPos().x()/mm;
+  RM->Hit.y = newHit->GetPos().y()/mm;
+  RM->Hit.z = newHit->GetPos().z()/mm;
+  RM->Hit.rho = sqrt(ibn::sq(RM->Hit.y) + ibn::sq(RM->Hit.y));
+  RM->Hit.phi = (RM->Hit.y >= 0 ? 1 : -1 )* acos(RM->Hit.x/RM->Hit.rho);
+
+  //ROOTManager::Instance()->tree->SetBranchAddress("hit",newHit->fTrackID);
+  ROOTManager::Instance()->tree->Fill();
 
   //newHit->Print();
 

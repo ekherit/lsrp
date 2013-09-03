@@ -31,8 +31,13 @@
 #ifndef PrimaryGeneratorAction_h
 #define PrimaryGeneratorAction_h 1
 
+
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
+
+#include <ibn/phys/compton.h>
+
+#include <memory>
 
 class G4ParticleGun;
 class G4Event;
@@ -47,16 +52,34 @@ class G4Event;
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
+    unique_ptr<ibn::phys::compton> fCompton; 
     PrimaryGeneratorAction();    
     virtual ~PrimaryGeneratorAction();
 
     virtual void GeneratePrimaries(G4Event* );
 
     G4ParticleGun* GetParticleGun() {return fParticleGun;}
-  
+
+    //main parameters
+    //double fP; //polarization of gamma quant
+    //double fEb; //electron beam energy
+    //double fgamma; //gamma factor
+    //double fomega; //photon energy in r.f. of electron
+    //double fchi; //hardness of photon
+    //double fE; //energy of gamma quant, MeV
+    //double fkx; // x momentum, MeV
+    //double fky; //
+    //double fkz; //
+    //double fnx;
+    //double fny;
+    //double fnz;
+    //double ftheta; 
+    //double fphi;
+    //double fx; //position
+    //double fy;
+    //double fz; 
     // Set methods
     void SetRandomFlag(G4bool );
-
   private:
     G4ParticleGun*          fParticleGun; // G4 particle gun
 };

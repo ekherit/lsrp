@@ -48,6 +48,7 @@ class MagneticField;
 /// SetMagField() method which can be activated via a command
 /// defined in the DetectorMessenger class. 
 
+
 class DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
@@ -64,6 +65,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetMaxStep (G4double );
     void SetCheckOverlaps(G4bool );
 
+    static DetectorConstruction * Instance();
+
+    G4double presampler_front_position;
+
   private:
     // methods
     void DefineMaterials();
@@ -72,10 +77,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     // data members
     G4int fNbOfChambers;
 
-    G4LogicalVolume*   fLogicTarget;     // pointer to the logical Target
+    G4LogicalVolume*   fLogicPresampler;
+    G4LogicalVolume*   fLogicGem;
+    //G4LogicalVolume*   fLogicTarget;     // pointer to the logical Target
     G4LogicalVolume**  fLogicChamber;    // pointer to the logical Chamber
 
-    G4Material*        fTargetMaterial;  // pointer to the target  material
+    //G4Material*        fTargetMaterial;  // pointer to the target  material
+    G4Material*        fPresamplerMaterial;  // pointer to the target  material
     G4Material*        fChamberMaterial; // pointer to the chamber material
 
     G4UserLimits* fStepLimit;            // pointer to user step limits
@@ -84,6 +92,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     MagneticField*      fMagField;     // magnetic field
     
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps 
+    static DetectorConstruction * fgInstance;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

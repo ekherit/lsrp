@@ -29,6 +29,8 @@
 /// \brief Implementation of the PrimaryGeneratorAction class
 
 #include "PrimaryGeneratorAction.hh"
+#include "ROOTManager.hh"
+#include "DetectorConstruction.hh"
 
 #include "G4LogicalVolumeStore.hh"
 #include "G4LogicalVolume.hh"
@@ -52,11 +54,12 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   // default particle kinematic
 
   G4ParticleDefinition* particleDefinition 
-    = G4ParticleTable::GetParticleTable()->FindParticle("proton");
+    = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
 
   fParticleGun->SetParticleDefinition(particleDefinition);
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-  fParticleGun->SetParticleEnergy(3.0*GeV);
+  fParticleGun->SetParticleEnergy(6.0*MeV);
+  fCompton.reset(new ibn::phys::compton(5000,2.5e-6,1,1));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -68,28 +71,59 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+//G4ThreeVector variate_agnle(G4ThreeVector & v, double angle_spread)
+//{
+//
+//
+//};
+
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   // This function is called at the begining of event
 
-  // In order to avoid dependence of PrimaryGeneratorAction
-  // on DetectorConstruction class we get world volume
-  // from G4LogicalVolumeStore.
+  //Simulate Compton Backscattering
+  double Pg = (G4UniformRand()-0.5) > 0 ? 1 : -1; //variate photon polarization
+  fCompton->SetPhotonPolarization(Pg);
+  //generate compton backscattering
+  //double theta_max = 20.0/5000.;
+  double theta_max = 1e-3;
+  fCompton->generate([](double xmin, double xmax) { return (xmax-xmin)*G4UniformRand()+xmin; },theta_max);
+  G4double E = fCompton->E*MeV;
+  fParticleGun->SetParticleEnergy(E);
 
-  G4double worldZHalfLength = 0;
-  G4LogicalVolume* worldLV
-    = G4LogicalVolumeStore::GetInstance()->GetVolume("World");
-  G4Box* worldBox = NULL;
-  if ( worldLV ) worldBox = dynamic_cast<G4Box*>(worldLV->GetSolid());
-  if ( worldBox ) worldZHalfLength = worldBox->GetZHalfLength();
-  else  {
-    G4cerr << "World volume of box not found." << G4endl;
-    G4cerr << "Perhaps you have changed geometry." << G4endl;
-    G4cerr << "The gun will be place in the center." << G4endl;
-  }
+  //fill internal class members
+  auto & G = ROOTManager::Instance()->Gen;
+  G.eventID = anEvent->GetEventID();
+  G.P = fCompton->Pg*fCompton->Pe;
+  G.Eb = fCompton->Ee;
+  G.gamma = fCompton->gamma;
+  G.omega = fCompton->omega;
+  G.chi = fCompton->chi;
+  G.E = fCompton->E;
+  G.kx = fCompton->kx;
+  G.ky = fCompton->ky;
+  G.kz = fCompton->kz;
+  G.nx = fCompton->kx/fCompton->E;
+  G.ny = fCompton->ky/fCompton->E;
+  G.nz = fCompton->kz/fCompton->E;
+  G.theta = fCompton->theta;
+  G.phi = fCompton->phi;
 
-  fParticleGun->SetParticlePosition(G4ThreeVector(0., 0., -worldZHalfLength));
+  //calculate position
+  G4double flight_length=5000*cm; //50 m
+  G.x = G.kx/G.kz*flight_length/mm;
+  G.y = G.ky/G.kz*flight_length/mm;
+  //G4cout << "detector construction instance: " << DetectorConstruction::Instance() << endl;
+  G.z = DetectorConstruction::Instance()->presampler_front_position/mm;
 
+  //set position
+  fParticleGun->SetParticlePosition(G4ThreeVector(G.x*mm, G.y*mm, G.z*mm));
+
+  //set direction
+  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(G.nx,G.ny,G.nz));
+
+  //set branch for tree
+  ROOTManager::Instance()->gen_tree->Fill();
   fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 

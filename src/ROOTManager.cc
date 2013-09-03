@@ -28,8 +28,13 @@ ROOTManager* ROOTManager::Instance(void)
 
 ROOTManager::ROOTManager(void)
 {
-  tree.reset(new TNtupleD("lsrp","Laser polarimeter simulation","zx:E:kx:ky:kz:phi:Edep"));
+  //tree2.reset(new TNtupleD("lsrp2","Laser polarimeter simulation","zx:E:kx:ky:kz:phi:Edep"));
   file.reset(new TFile("tmp.root","RECREATE"));
+  tree.reset(new TTree("lsrp","Laser polarimeter simulation"));
+  tree->Branch("gen",&Gen,"eventID/l:P/D:Eb:gamma:omega:chi:E:kx:ky:kz:nx:ny:nz:theta:phi:x:y:z");
+  tree->Branch("hit",&Hit,"trackID/l:volumeID:E/D:x:y:z:rho:phi");
+  gen_tree.reset(new TTree("gen_tree","Compton initial events"));
+  gen_tree->Branch("gen", &Gen,"eventID/l:P/D:Eb:gamma:omega:chi:E:kx:ky:kz:nx:ny:nz:theta:phi:x:y:z");
 }
 
 ROOTManager::~ROOTManager()
