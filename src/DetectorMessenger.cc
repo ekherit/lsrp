@@ -69,6 +69,12 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fStepMaxCmd->SetParameterName("stepMax",false);
   fStepMaxCmd->SetUnitCategory("Length");
   fStepMaxCmd->AvailableForStates(G4State_Idle);
+
+  fPresamplerWidthCmd = new G4UIcmdWithADoubleAndUnit("/slrp/det/presamplerWidth",this);
+  fPresamplerWidthCmd->SetGuidance("Define a width of the presampler");
+  fPresamplerWidthCmd->SetParameterName("presamplerWidth",false);
+  fPresamplerWidthCmd->SetUnitCategory("Length");
+  fPresamplerWidthCmd->AvailableForStates(G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -102,6 +108,12 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
     fDetectorConstruction
       ->SetMaxStep(fStepMaxCmd->GetNewDoubleValue(newValue));
   }   
+  if( command == fPresamplerWidthCmd )
+  {
+    fDetectorConstruction
+      ->SetPresamplerWidth(fStepMaxCmd->GetNewDoubleValue(newValue));
+  }   
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

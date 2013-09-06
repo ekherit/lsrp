@@ -71,11 +71,11 @@ ibn::valer<double> get_epsilon(Long64_t N1, Long64_t N2)
 void RunAction::EndOfRunAction(const G4Run* )
 {
   auto RM = ROOTManager::Instance();
-  Long64_t Nup0 = RM->gen_tree->GetEntries("y>0");
-  Long64_t Ndown0 = RM->gen_tree->GetEntries("y<0");
+  Long64_t Nup0 = RM->gen_tree->GetEntries("y>0&&P>0") + RM->gen_tree->GetEntries("y<0&&P<0");
+  Long64_t Ndown0 = RM->gen_tree->GetEntries("y<0&&P>0")+ RM->gen_tree->GetEntries("y>0&&P<0");
   ibn::valer<double> eps0 = get_epsilon(Nup0,Ndown0);
-  Long64_t Nup = RM->tree->GetEntries("hit.y>0");
-  Long64_t Ndown = RM->tree->GetEntries("hit.y<0");
+  Long64_t Nup = RM->tree->GetEntries("hit.y>0 && volumeID==1&& P>0") +  RM->tree->GetEntries("hit.y<0 && volumeID==1&& P<0");
+  Long64_t Ndown = RM->tree->GetEntries("hit.y<0 && volumeID==1 && P>0") +  RM->tree->GetEntries("hit.y>0 && volumeID==1 && P<0");
   ibn::valer<double> eps = get_epsilon(Nup,Ndown);
   RM->tree->Write();
   RM->gen_tree->Write();

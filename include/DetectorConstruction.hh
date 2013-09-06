@@ -64,6 +64,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetChamberMaterial(G4String );
     void SetMaxStep (G4double );
     void SetCheckOverlaps(G4bool );
+    void SetPresamplerWidth(G4double);
 
     static DetectorConstruction * Instance();
 

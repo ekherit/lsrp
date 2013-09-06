@@ -96,7 +96,8 @@ G4bool TrackerSD::ProcessHits(G4Step* aStep,
   RM->Hit.y = newHit->GetPos().y()/mm;
   RM->Hit.z = newHit->GetPos().z()/mm;
   RM->Hit.rho = sqrt(ibn::sq(RM->Hit.y) + ibn::sq(RM->Hit.y));
-  RM->Hit.phi = (RM->Hit.y >= 0 ? 1 : -1 )* acos(RM->Hit.x/RM->Hit.rho);
+  //RM->Hit.phi = (RM->Hit.y >= 0 ? 1 : -1 )* acos(RM->Hit.x/RM->Hit.rho);
+  RM->Hit.phi = newHit->GetPos().phi();
 
   //ROOTManager::Instance()->tree->SetBranchAddress("hit",newHit->fTrackID);
   ROOTManager::Instance()->tree->Fill();

@@ -60,6 +60,9 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
   fParticleGun->SetParticleEnergy(6.0*MeV);
   fCompton.reset(new ibn::phys::compton(5000,2.5e-6,1,1));
+  time_t seed = time(0);
+  G4cout << "Set seed" << seed << endl;
+  CLHEP::HepRandom::setTheSeed(seed);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -70,12 +73,30 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+G4ThreeVector variate_agnle(G4ThreeVector & v, double DX, double DY)
+{
+  double nx = G4RandGauss::shoot(v.x(), DX);
+  double ny = G4RandGauss::shoot(v.y(), DY);
+  //G4cout << nx - v.x() << " " << ny - v.y() << endl;
+  double nz = v.z();
+  G4ThreeVector v2=G4ThreeVector(nx,ny,nz);
+  return v2/v2.mag();
+}
 
-//G4ThreeVector variate_agnle(G4ThreeVector & v, double angle_spread)
-//{
-//
-//
-//};
+void variate_agnle(ibn::phys::compton & C, double dx , double dy)
+{
+  G4ThreeVector k(C.kx, C.ky, C.kz);
+  G4ThreeVector n = k/k.mag();
+  G4ThreeVector nnew=variate_agnle(n, dx, dy);
+  C.kx = C.E*nnew.x();
+  C.ky = C.E*nnew.y();
+  C.kz = C.E*nnew.z();
+  //G4cout << C.kx/C.E << " " << C.ky << " " << C.kz << G4endl;
+  C.theta = nnew.theta();
+  C.phi = nnew.phi();
+}
+
+
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
@@ -85,12 +106,16 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   double Pg = (G4UniformRand()-0.5) > 0 ? 1 : -1; //variate photon polarization
   fCompton->SetPhotonPolarization(Pg);
   //generate compton backscattering
-  //double theta_max = 20.0/5000.;
-  double theta_max = 1e-3;
+  double theta_max = 20.0/5000.;
   fCompton->generate([](double xmin, double xmax) { return (xmax-xmin)*G4UniformRand()+xmin; },theta_max);
-  G4double E = fCompton->E*MeV;
-  fParticleGun->SetParticleEnergy(E);
+  //fCompton->kx=0;
+  //fCompton->ky=0;
+  //fCompton->kz=fCompton->E;
+  double dx = 1e-4*fCompton->Ee/1850.0;
+  double kz_kx = 0.2;
+  variate_agnle(*fCompton,dx,dx*kz_kx); 
 
+  fParticleGun->SetParticleEnergy(fCompton->E*MeV);
   //fill internal class members
   auto & G = ROOTManager::Instance()->Gen;
   G.eventID = anEvent->GetEventID();
@@ -121,6 +146,8 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   //set direction
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(G.nx,G.ny,G.nz));
+    
+
 
   //set branch for tree
   ROOTManager::Instance()->gen_tree->Fill();

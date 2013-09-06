@@ -132,7 +132,8 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
 
   //my sizes
-  G4double psm_width  = 0.5*cm; //width of the Pb presampler
+  //G4double psm_width  = 0.5*cm; //width of the Pb presampler
+  G4double psm_width  = 1.9*cm; //width of the Pb presampler
   G4double psm_radius =  20*cm; //Radius of the presampler
   G4double gem_radius = 20*cm;
   G4double gem_width = 1*cm;
@@ -393,3 +394,19 @@ void DetectorConstruction::SetCheckOverlaps(G4bool checkOverlaps)
 {
   fCheckOverlaps = checkOverlaps;
 }  
+
+
+void DetectorConstruction::SetPresamplerWidth(G4double )
+{
+ // Open geometry for the physical volume to be modified ...
+ //G4GeometryManager::OpenGeometry();
+ //
+ //// Modify dimension of the solid ...
+ ////
+ //physCalor->GetLogicalVolume()->GetSolid()->SetXHalfLength(12.5*cm);
+ //
+ //// Close geometry for the portion modified ...
+ ////
+ //G4GeometryManager::CloseGeometry(physCalor);
+
+}
