@@ -85,7 +85,7 @@ G4bool TrackerSD::ProcessHits(G4Step* aStep,
                                                ->GetCopyNumber());
   newHit->SetEdep(edep);
   newHit->SetPos (aStep->GetPostStepPoint()->GetPosition());
-
+  newHit->SetMomentum(aStep->GetTrack()->GetVertexMomentumDirection());
   fHitsCollection->insert( newHit );
 
   auto RM = ROOTManager::Instance();

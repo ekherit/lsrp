@@ -108,12 +108,13 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   //generate compton backscattering
   double theta_max = 20.0/5000.;
   fCompton->generate([](double xmin, double xmax) { return (xmax-xmin)*G4UniformRand()+xmin; },theta_max);
-  //fCompton->kx=0;
-  //fCompton->ky=0;
-  //fCompton->kz=fCompton->E;
   double dx = 1e-4*fCompton->Ee/1850.0;
   double kz_kx = 0.2;
   variate_agnle(*fCompton,dx,dx*kz_kx); 
+  //no angular distribution
+  fCompton->kx=0;
+  fCompton->ky=0;
+  fCompton->kz=fCompton->E;
 
   fParticleGun->SetParticleEnergy(fCompton->E*MeV);
   //fill internal class members

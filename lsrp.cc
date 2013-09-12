@@ -28,6 +28,7 @@
 /// \file example.cc
 /// \brief Main program of the  example
 
+#include "Config.h"
 #include "DetectorConstruction.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "RunAction.hh"
@@ -38,6 +39,7 @@
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 #include "FTFP_BERT.hh"
+#include "QGSP_BERT_HP.hh"
 
 #include "Randomize.hh"
 
@@ -49,12 +51,91 @@
 #include "G4UIExecutive.hh"
 #endif
 
+#include <boost/program_options.hpp>
+
+#include <regex>
+#include <cstring>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+Config_t Cfg;
+
+void clean_argc_argv(int * ARGC, char ** ARGV, boost::program_options::variables_map & opt)
+{
+  int argc=0;
+  char ** argv = new char*[*ARGC];
+  for(int i=0; i<*ARGC;i++)
+  {
+    string s = ARGV[i];
+    bool ismatched=false;
+    for(auto & o : opt)
+    {
+      regex r(".*"+o.first+".*");
+      std::smatch match;
+      if(std::regex_match(s,match,r)) 
+      {
+        ismatched=true;
+      }
+    }
+    if(!ismatched)
+    {
+      argv[argc] = new char[s.size()+1];
+      strncpy(argv[argc], s.c_str(),s.size()+1);
+      argc++;
+    }
+  }
+  //for(int i=0;i<*ARGC;i++) delete[] ARGV[i];
+  *ARGC = argc;
+  for(int i=0;i<*ARGC;i++)
+  {
+    ARGV[i] = argv[i];
+  }
+}
 
 int main(int argc,char** argv)
 {
-  // Choose the Random engine
+  namespace po=boost::program_options;
+  po::options_description opt_desc("Allowed options");
+  opt_desc.add_options()
+    ("psm_width", po::value<double>(&Cfg.psm_width)->default_value(0.56), "Presampler width, cm")
+    ("gem_width", po::value<double>(&Cfg.gem_width)->default_value(0.03), "GEM width, cm")
+    ("psm_gem_length", po::value<double>(&Cfg.psm_gem_length)->default_value(1.0), "Distance between presampler and GEM, in cm")
+    ("help", "Print this help")
+    ;
+  po::positional_options_description pos;
+  //pos.add("input",-1);
+  po::variables_map opt; //options container
+  try
+  {
+    //po::store(po::command_line_parser(argc, argv).options(opt_desc).positional(pos).run(), opt);
+    po::store(parse_command_line(argc, argv, opt_desc), opt);
+    //std::ifstream config_file("fit.cfg");
+    //po::store(po::parse_config_file(config_file,opt_desc,true), opt);
+    po::notify(opt);
+    if(opt.count("help"))
+    {
+      std::clog << opt_desc;
+      return 0;
+    }
+    cout << "psm_width=" <<  Cfg.psm_width << endl;
+    cout << "gem_width=" <<  Cfg.gem_width << endl;
+    cout << "psm_gem_length=" <<  Cfg.psm_gem_length << endl;
+  } 
+  catch (boost::program_options::unknown_option & o)
+  {
+  }
+  catch (boost::program_options::error & po_error)
+  {
+    cerr << "WARGNING: configuration: "<< po_error.what() << endl;
+    exit(0);
+  }
+  //remove my own program options
+  clean_argc_argv(&argc, argv, opt);
+  for(int i=0;i<argc;i++)
+  {
+    cout << i << ": " << argv[i] << endl;
+  }
 
+  // Choose the Random engine
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
   
   // Construct the default run manager
@@ -66,6 +147,7 @@ int main(int argc,char** argv)
   runManager->SetUserInitialization(new DetectorConstruction());
 
   G4VModularPhysicsList* physicsList = new FTFP_BERT;
+  //G4VModularPhysicsList * physicsList  = new QGSP_BERT_HP;
   physicsList->RegisterPhysics(new G4StepLimiterBuilder());
   runManager->SetUserInitialization(physicsList);
     

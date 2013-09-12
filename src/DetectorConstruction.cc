@@ -27,6 +27,8 @@
 //
 /// \file DetectorConstruction.cc
 /// \brief Implementation of the DetectorConstruction class
+
+#include "Config.h"
  
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"
@@ -119,7 +121,7 @@ void DetectorConstruction::DefineMaterials()
   fPresamplerMaterial  = nistManager->FindOrBuildMaterial("G4_Pb", fromIsotopes);
   //fPresamplerMaterial  = nistManager->FindOrBuildMaterial("G4_AIR", fromIsotopes);
 
-  // Xenon gas defined using NIST Manager
+  // Argon gas defined using NIST Manager
   fChamberMaterial = nistManager->FindOrBuildMaterial("G4_Ar", fromIsotopes);
 
   // Print materials
@@ -128,44 +130,29 @@ void DetectorConstruction::DefineMaterials()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
 
   //my sizes
-  //G4double psm_width  = 0.5*cm; //width of the Pb presampler
-  G4double psm_width  = 1.9*cm; //width of the Pb presampler
+  G4double psm_width  = Cfg.psm_width*cm; //width of the Pb presampler
   G4double psm_radius =  20*cm; //Radius of the presampler
   G4double gem_radius = 20*cm;
-  G4double gem_width = 1*cm;
+  G4double gem_width = Cfg.gem_width*cm;
+  //G4double gem_width = 1*cm;
+  //G4double psm_gem_length=Cfg.psm_gem_length*cm; //distance between presampler and gem
   G4double psm_gem_length=1*cm; //distance between presampler and gem
-  G4double world_width=(psm_width+gem_width+psm_gem_length)*1.2;
+  G4double world_width=(psm_width/2.0+gem_width+psm_gem_length)*2.1;
   G4double world_size=2*psm_radius*1.2;
 
   G4ThreeVector psm_position = G4ThreeVector(0,0,0);
-  presampler_front_position = psm_position[3] - psm_width/2;
-  G4ThreeVector gem_position = G4ThreeVector(0,0,psm_width/2+gem_width/2+psm_gem_length) + psm_position;
-
-  // Sizes of the principal geometrical components (solids)
-  
-  //G4double chamberSpacing = 2*cm; // from chamber center to center!
-
-  //G4double chamberWidth = 1.0*cm; // width of the chambers
-  //G4double targetLength = 1*cm; // full length of Target
-  //G4double targetRadius = 20*cm;   // Radius of Target
-  //
-  //G4double trackerLength = (fNbOfChambers+1)*chamberSpacing;
-
-  //G4double worldLength = 1.2 * (2*targetLength + trackerLength);
-
-
-  //targetLength = 0.5*targetLength;             // Half length of the Target  
-  //G4double trackerSize   = 0.5*trackerLength;  // Half length of the Tracker
-
-  // Definitions of Solids, Logical Volumes, Physical Volumes
+  presampler_front_position = psm_position.z() - psm_width/2;
+  G4ThreeVector gem_position = G4ThreeVector(0,0,psm_width/2.0+gem_width/2.0+psm_gem_length) + psm_position;
 
   // World
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size);
   G4Material* air  = G4Material::GetMaterial("G4_AIR");
+  G4Material* Al  = G4Material::GetMaterial("G4_Al");
   G4cout << "Computed tolerance = "
     << G4GeometryTolerance::GetInstance()->GetSurfaceTolerance()/mm
     << " mm" << G4endl;
@@ -209,25 +196,20 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
       fCheckOverlaps); // checking overlaps 
 
 
-  //G4Tubs* targetS
-  //  = new G4Tubs("target",0.,targetRadius,targetLength,0.*deg,360.*deg);
-  //fLogicTarget
-  //  = new G4LogicalVolume(targetS, fTargetMaterial,"Target",0,0,0);
+  //G4Tubs* corpus_solid = new G4Tubs("corpus",0.,gem_radius, 0.5*mm,0.*deg,360.*deg);
+  //G4LogicalVolume * corpus_logic = new G4LogicalVolume(corpus_solid, Al,"Corpus",0,0,0);
   //new G4PVPlacement(0,               // no rotation
-  //                  positionTarget,  // at (x,y,z)
-  //                  fLogicTarget,    // its logical volume
-  //                  "Target",        // its name
-  //                  worldLV,         // its mother volume
-  //                  false,           // no boolean operations
-  //                  0,               // copy number
-  //                  fCheckOverlaps); // checking overlaps 
-
-  //G4cout << "Target is " << 2*targetLength/cm << " cm of "
-  //       << fTargetMaterial->GetName() << G4endl;
+  //    gem_position-G4ThreeVector(0,0,gem_width/2+0.5*mm),  // at (x,y,z)
+  //    corpus_logic,    // its logical volume
+  //    "Corpus",        // its name
+  //    worldLV,         // its mother volume
+  //    false,           // no boolean operations
+  //    0,               // copy number
+  //    fCheckOverlaps); // checking overlaps 
 
   // Tracker = gem
   G4Tubs* gem_solid = new G4Tubs("gem",0,gem_radius,gem_width/2,0.*deg, 360.*deg);
-  fLogicGem = new G4LogicalVolume(gem_solid, fChamberMaterial, "Gem",0,0,0);  
+  fLogicGem = new G4LogicalVolume(gem_solid,   fChamberMaterial, "Gem",0,0,0);  
   new G4PVPlacement(0,               // no rotation
                     gem_position, // at (x,y,z)
                     fLogicGem,       // its logical volume
@@ -255,6 +237,14 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   //fLogicPresampler->SetSensitiveDetector(aTrackerSD);
   fLogicGem->SetVisAttributes(chamberVisAtt);
   //BGO 145 22
+
+  //G4double maxStep = 0.5*gem_width;
+  //fStepLimit = new G4UserLimits(maxStep);
+  //fLogicGem->SetUserLimits(fStepLimit);
+
+  //G4double maxStep2 = 0.5*psm_width;
+  //fStepLimit = new G4UserLimits(maxStep2);
+  //fLogicPresampler->SetUserLimits(fStepLimit);
 
   // Tracker segments
 
