@@ -33,6 +33,7 @@
 
 
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4ParticleDefinition.hh"
 #include "globals.hh"
 
 #include <ibn/phys/compton.h>
@@ -60,26 +61,13 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
     G4ParticleGun* GetParticleGun() {return fParticleGun;}
 
-    //main parameters
-    //double fP; //polarization of gamma quant
-    //double fEb; //electron beam energy
-    //double fgamma; //gamma factor
-    //double fomega; //photon energy in r.f. of electron
-    //double fchi; //hardness of photon
-    //double fE; //energy of gamma quant, MeV
-    //double fkx; // x momentum, MeV
-    //double fky; //
-    //double fkz; //
-    //double fnx;
-    //double fny;
-    //double fnz;
-    //double ftheta; 
-    //double fphi;
-    //double fx; //position
-    //double fy;
-    //double fz; 
-    // Set methods
     void SetRandomFlag(G4bool );
+    
+    G4double fFlightLength;
+    G4double fThetaMax;
+    G4double fBeamEnergy;
+    G4ParticleDefinition * fElectron;
+    G4ParticleDefinition * fGamma;
   private:
     G4ParticleGun*          fParticleGun; // G4 particle gun
 };

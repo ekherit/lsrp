@@ -17,8 +17,8 @@
  */
 
 {
-  TFile f("tmp.root");
-  lsrp->Draw("hit.y>>h", "abs(hit.y)<10");
+  TFile f("save.root");
+  lsrp->Draw("hit.x>>h", "abs(hit.x)<100");
   double max = h->GetMaximum();
   int max_bin =  h->GetMaximumBin();
   cout << max_bin << " " << max << endl;

@@ -66,6 +66,19 @@ class ROOTManager
       double phi;
     } Hit;
 
+    struct Hit_t
+    {
+      Long64_t nhit; //number of hits
+      Long64_t trackID[100];
+      Long64_t volumeID[100];
+      Double_t E[100];
+      double x[100];
+      double y[100];
+      double z[100];
+      double rho[100];
+      double phi[100];
+    } hit;
+
   private:
     ROOTManager(); 
     ~ROOTManager(); 

@@ -37,6 +37,7 @@
 #include "G4SDManager.hh"
 #include "G4ios.hh"
 
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 TrackerSD::TrackerSD(const G4String& name,
@@ -88,19 +89,21 @@ G4bool TrackerSD::ProcessHits(G4Step* aStep,
   newHit->SetMomentum(aStep->GetTrack()->GetVertexMomentumDirection());
   fHitsCollection->insert( newHit );
 
-  auto RM = ROOTManager::Instance();
-  RM->Hit.trackID = newHit->GetTrackID();
-  RM->Hit.volumeID = newHit->GetChamberNb();
-  RM->Hit.E = newHit->GetEdep()/MeV;
-  RM->Hit.x = newHit->GetPos().x()/mm;
-  RM->Hit.y = newHit->GetPos().y()/mm;
-  RM->Hit.z = newHit->GetPos().z()/mm;
-  RM->Hit.rho = sqrt(ibn::sq(RM->Hit.y) + ibn::sq(RM->Hit.y));
-  //RM->Hit.phi = (RM->Hit.y >= 0 ? 1 : -1 )* acos(RM->Hit.x/RM->Hit.rho);
-  RM->Hit.phi = newHit->GetPos().phi();
+  //auto RM = ROOTManager::Instance();
+  //RM->Hit.trackID = newHit->GetTrackID();
+  //RM->Hit.volumeID = newHit->GetChamberNb();
+  //RM->Hit.E = newHit->GetEdep()/MeV;
 
-  //ROOTManager::Instance()->tree->SetBranchAddress("hit",newHit->fTrackID);
-  ROOTManager::Instance()->tree->Fill();
+  //Pad pad(1.0*mm, newHit->GetPos().x(), newHit->GetPos().y());
+  //RM->Hit.x = pad.x();
+  //RM->Hit.y = pad.y();
+  //RM->Hit.z = newHit->GetPos().z()/mm;
+  //RM->Hit.rho = sqrt(ibn::sq(RM->Hit.y) + ibn::sq(RM->Hit.y));
+  ////RM->Hit.phi = (RM->Hit.y >= 0 ? 1 : -1 )* acos(RM->Hit.x/RM->Hit.rho);
+  //RM->Hit.phi = newHit->GetPos().phi();
+
+  ////ROOTManager::Instance()->tree->SetBranchAddress("hit",newHit->fTrackID);
+  //ROOTManager::Instance()->tree->Fill();
 
   //newHit->Print();
 

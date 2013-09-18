@@ -97,7 +97,7 @@ int main(int argc,char** argv)
   po::options_description opt_desc("Allowed options");
   opt_desc.add_options()
     ("psm_width", po::value<double>(&Cfg.psm_width)->default_value(0.56), "Presampler width, cm")
-    ("gem_width", po::value<double>(&Cfg.gem_width)->default_value(0.03), "GEM width, cm")
+    ("gem_width", po::value<double>(&Cfg.gem_width)->default_value(0.3), "GEM width, cm")
     ("psm_gem_length", po::value<double>(&Cfg.psm_gem_length)->default_value(1.0), "Distance between presampler and GEM, in cm")
     ("help", "Print this help")
     ;

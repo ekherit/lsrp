@@ -116,12 +116,13 @@ void DetectorConstruction::DefineMaterials()
 
   // Air defined using NIST Manager
   nistManager->FindOrBuildMaterial("G4_AIR", fromIsotopes);
+  fChamberMaterial = nistManager->FindOrBuildMaterial("G4_Ar", fromIsotopes);
   
   // Lead defined using NIST Manager
   fPresamplerMaterial  = nistManager->FindOrBuildMaterial("G4_Pb", fromIsotopes);
-  //fPresamplerMaterial  = nistManager->FindOrBuildMaterial("G4_AIR", fromIsotopes);
+  nistManager->FindOrBuildMaterial("G4_Cu", fromIsotopes);
+  nistManager->FindOrBuildMaterial("G4_KAPTON", fromIsotopes);
 
-  // Argon gas defined using NIST Manager
   fChamberMaterial = nistManager->FindOrBuildMaterial("G4_Ar", fromIsotopes);
 
   // Print materials
@@ -152,7 +153,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   // World
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size);
   G4Material* air  = G4Material::GetMaterial("G4_AIR");
-  G4Material* Al  = G4Material::GetMaterial("G4_Al");
+  //G4Material* Al  = G4Material::GetMaterial("G4_Al");
   G4cout << "Computed tolerance = "
     << G4GeometryTolerance::GetInstance()->GetSurfaceTolerance()/mm
     << " mm" << G4endl;

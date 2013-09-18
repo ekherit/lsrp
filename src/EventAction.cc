@@ -30,6 +30,9 @@
 
 #include "EventAction.hh"
 #include "ROOTManager.hh"
+#include "Pad.hh"
+#include "TrackerHit.hh"
+#include <ibn/math.h>
 
 #include "G4Event.hh"
 #include "G4EventManager.hh"
@@ -74,6 +77,24 @@ void EventAction::EndOfEventAction(const G4Event* event)
   G4TrajectoryContainer* trajectoryContainer = event->GetTrajectoryContainer();
   G4int n_trajectories = 0;
   if (trajectoryContainer) n_trajectories = trajectoryContainer->entries();
+
+  G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
+  auto RM = ROOTManager::Instance();
+  RM->hit.nhit = hc->GetSize();
+  for(unsigned i=0; i< hc->GetSize();i++)
+  {
+    TrackerHit * hit = (TrackerHit*)hc->GetHit(i);
+    RM->hit.trackID[i] = hit->GetTrackID();
+    RM->hit.volumeID[i] = hit->GetChamberNb();
+    RM->hit.E[i] = hit->GetEdep()/MeV;
+    Pad pad(1.0*mm, hit->GetPos().x(), hit->GetPos().y());
+    RM->hit.x[i] = pad.x();
+    RM->hit.y[i] = pad.y();
+    RM->hit.z[i] = hit->GetPos().z()/mm;
+    RM->hit.rho[i] = sqrt(ibn::sq(RM->hit.y[i]) + ibn::sq(RM->hit.y[i]));
+    RM->hit.phi[i] = hit->GetPos().phi();
+  }
+  ROOTManager::Instance()->tree->Fill();
 
   // periodic printing
 
