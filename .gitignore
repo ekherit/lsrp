@@ -1,3 +1,7 @@
 *~
 *.sw*
 *.root
+src/*Dict.cc
+src/*Dict.h
+*.pdf
+

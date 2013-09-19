@@ -18,11 +18,14 @@
 #ifndef LSRP_ROOT_MANGER_H
 #define LSRP_ROOT_MANGER_H
 
+#include <TObject.h>
 #include <TTree.h>
 #include <TNtupleD.h>
 #include <TFile.h>
 
 #include <memory>
+
+#include "RootEvent.hh"
 
 class ROOTManager
 {
@@ -78,12 +81,14 @@ class ROOTManager
       double rho[100];
       double phi[100];
     } hit;
-
+    RootEvent event;
+    
   private:
     ROOTManager(); 
     ~ROOTManager(); 
     static ROOTManager* fgInstance;
 };
+
 #endif
 
 

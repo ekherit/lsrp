@@ -32,7 +32,8 @@ ROOTManager::ROOTManager(void)
   file.reset(new TFile("tmp.root","RECREATE"));
   tree.reset(new TTree("lsrp","Laser polarimeter simulation"));
   //tree->Branch("hit",&Hit,"trackID/l:volumeID:E/D:x:y:z:rho:phi");
-  tree->Branch("hit",&hit,"nhit/l:trackID[100]/l:volumeID[100]:E[100]/D:x[100]:y[100]:z[100]:rho[100]:phi[100]");
+  //tree->Branch("hit",&hit,"nhit/l:trackID[100]/l:volumeID[100]:E[100]/D:x[100]:y[100]:z[100]:rho[100]:phi[100]");
+  tree->Branch("event",&event);
   //tree->Branch("gen",&Gen,"eventID/l:P/D:Eb:gamma:omega:chi:E:kx:ky:kz:nx:ny:nz:theta:phi:x:y:z");
   gen_tree.reset(new TTree("gen","Compton initial events"));
   gen_tree->Branch("gen", &Gen,"eventID/l:P/D:Eb:gamma:omega:chi:E:kx:ky:kz:nx:ny:nz:theta:phi:x:y:z");
@@ -41,3 +42,5 @@ ROOTManager::ROOTManager(void)
 ROOTManager::~ROOTManager()
 {
 }
+
+

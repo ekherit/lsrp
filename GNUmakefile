@@ -11,13 +11,20 @@ LDFLAGS := \
 			`root-config --libs` -lMinuit  \
 			-L/usr/lib \
 			-lboost_program_options \
+			src/RootEventDict.cc \
 
 ifndef G4INSTALL
   G4INSTALL = ../../../..
 endif
 
 .PHONY: all
-all: lib bin
+all: RootEventDict.cc lib bin 
+
+RootEventDict.cc :
+			rootcint -f src/RootEventDict.cc -c include/RootEvent.hh include/RootLinkDef.hh
+
+myclean :
+			rm -rf dict.* $(G4TMP)/$(G4SYSTEM)/lsrp
 
 include $(G4INSTALL)/config/binmake.gmk
 

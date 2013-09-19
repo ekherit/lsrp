@@ -81,6 +81,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
   G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
   auto RM = ROOTManager::Instance();
   RM->hit.nhit = hc->GetSize();
+  RM->event.E.resize(hc->GetSize());
   for(unsigned i=0; i< hc->GetSize();i++)
   {
     TrackerHit * hit = (TrackerHit*)hc->GetHit(i);
@@ -93,7 +94,12 @@ void EventAction::EndOfEventAction(const G4Event* event)
     RM->hit.z[i] = hit->GetPos().z()/mm;
     RM->hit.rho[i] = sqrt(ibn::sq(RM->hit.y[i]) + ibn::sq(RM->hit.y[i]));
     RM->hit.phi[i] = hit->GetPos().phi();
+    RM->event.E[i] = RM->hit.E[i];
+    RM->event.s.A+=RM->hit.E[i];
+    RM->event.s.B+=RM->hit.E[i]*RM->hit.E[i];
   }
+  RM->event.s.A/=hc->GetSize();
+  RM->event.s.B/=hc->GetSize();
   ROOTManager::Instance()->tree->Fill();
 
   // periodic printing
