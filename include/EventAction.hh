@@ -33,7 +33,7 @@
 
 #include "Pad.hh"
 #include "G4UserEventAction.hh"
-#include "TrackerHit.hh"
+#include "GEMHit.hh"
 
 
 #include "globals.hh"

@@ -25,84 +25,97 @@
 //
 // $Id$
 //
-/// \file TrackerSD.cc
-/// \brief Implementation of the TrackerSD class
+/// \file GEMHit.cc
+/// \brief Implementation of the GEMHit class
 
-#include <ibn/math.h>
-#include "TrackerSD.hh"
-#include "ROOTManager.hh"
-#include "G4HCofThisEvent.hh"
-#include "G4Step.hh"
-#include "G4ThreeVector.hh"
-#include "G4SDManager.hh"
-#include "G4ios.hh"
+#include "GEMHit.hh"
+
+#include "G4UnitsTable.hh"
+#include "G4VVisManager.hh"
+#include "G4Circle.hh"
+#include "G4Colour.hh"
+#include "G4VisAttributes.hh"
+
+#include <iomanip>
 
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-TrackerSD::TrackerSD(const G4String& name,
-                         const G4String& hitsCollectionName) 
- : G4VSensitiveDetector(name),
-   fHitsCollection(NULL)
-{
-  collectionName.insert(hitsCollectionName);
-}
+G4Allocator<GEMHit> GEMHitAllocator;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-TrackerSD::~TrackerSD() 
+GEMHit::GEMHit()
+ : G4VHit(),
+   fTrackID(-1),
+   fChamberNb(-1),
+   fEdep(0.),
+   fPos(G4ThreeVector()),
+   fPad()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void TrackerSD::Initialize(G4HCofThisEvent* hce)
+GEMHit::~GEMHit() {}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+GEMHit::GEMHit(const GEMHit& right)
+  : G4VHit()
 {
-  // Create hits collection
-
-  fHitsCollection = new TrackerHitsCollection(SensitiveDetectorName, collectionName[0]); 
-
-  // Add this collection in hce
-
-  G4int hcID 
-    = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
-  hce->AddHitsCollection( hcID, fHitsCollection ); 
+  fTrackID   = right.fTrackID;
+  fChamberNb = right.fChamberNb;
+  fEdep      = right.fEdep;
+  fPos       = right.fPos;
+  fPad       = right.fPad;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4bool TrackerSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
-{  
-  // energy deposit
-  G4double edep = aStep->GetTotalEnergyDeposit();
-  G4double charge = edep/(85.7*eV);
+const GEMHit& GEMHit::operator=(const GEMHit& right)
+{
+  fTrackID   = right.fTrackID;
+  fChamberNb = right.fChamberNb;
+  fEdep      = right.fEdep;
+  fPos       = right.fPos;
+  fPad       = right.fPad;
 
-  if (edep==0.) return false;
-
-  TrackerHit* newHit = new TrackerHit();
-
-  newHit->SetTrackID  (aStep->GetTrack()->GetTrackID());
-  newHit->SetChamberNb(aStep->GetPreStepPoint()->GetTouchableHandle()
-                                               ->GetCopyNumber());
-  newHit->SetEdep(edep);
-  newHit->SetPos (aStep->GetPostStepPoint()->GetPosition());
-  newHit->SetMomentum(aStep->GetTrack()->GetVertexMomentumDirection());
-  newHit->FindPad();
-  newHit->SetCharge(charge);
-  fHitsCollection->insert( newHit );
-  //newHit->Print();
-  return true;
+  return *this;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void TrackerSD::EndOfEvent(G4HCofThisEvent*)
+G4int GEMHit::operator==(const GEMHit& right) const
 {
-  if ( verboseLevel>1 ) { 
-     G4int nofHits = fHitsCollection->entries();
-     G4cout << "\n-------->Hits Collection: in this event they are " << nofHits 
-            << " hits in the tracker chambers: " << G4endl;
-     for ( G4int i=0; i<nofHits; i++ ) (*fHitsCollection)[i]->Print();
+  return ( this == &right ) ? 1 : 0;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void GEMHit::Draw()
+{
+  G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
+  if(pVVisManager)
+  {
+    G4Circle circle(fPos);
+    circle.SetScreenSize(4.);
+    circle.SetFillStyle(G4Circle::filled);
+    G4Colour colour(1.,0.,0.);
+    G4VisAttributes attribs(colour);
+    circle.SetVisAttributes(attribs);
+    pVVisManager->Draw(circle);
   }
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void GEMHit::Print()
+{
+  G4cout
+     << "  trackID: " << fTrackID << " chamberNb: " << fChamberNb
+     << "Edep: "
+     << std::setw(7) << G4BestUnit(fEdep,"Energy")
+     << " Position: "
+     << std::setw(7) << G4BestUnit( fPos,"Length")
+     << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

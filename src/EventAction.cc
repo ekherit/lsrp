@@ -31,7 +31,7 @@
 #include "EventAction.hh"
 #include "ROOTManager.hh"
 #include "Pad.hh"
-#include "TrackerHit.hh"
+#include "GEMHit.hh"
 #include <ibn/math.h>
 
 #include "G4Event.hh"
@@ -89,7 +89,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
   RM->event.hit.resize(hc->GetSize());
   for(unsigned i=0; i< hc->GetSize();i++)
   {
-    TrackerHit * hit = (TrackerHit*)hc->GetHit(i);
+    GEMHit * hit = (GEMHit*)hc->GetHit(i);
     RM->event.hit[i].trackID = hit->GetTrackID();
     RM->event.hit[i].volumeID = hit->GetChamberNb();
     RM->event.hit[i].E = hit->GetEdep()/MeV;

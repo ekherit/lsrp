@@ -25,15 +25,15 @@
 //
 // $Id$
 //
-/// \file TrackerSD.hh
-/// \brief Definition of the TrackerSD class
+/// \file GEMSensitiveDetector.hh
+/// \brief Definition of the GEMSensitiveDetector class
 
-#ifndef TrackerSD_h
-#define TrackerSD_h 1
+#ifndef GEMSensitiveDetector_h
+#define GEMSensitiveDetector_h 1
 
 #include "G4VSensitiveDetector.hh"
 
-#include "TrackerHit.hh"
+#include "GEMHit.hh"
 
 #include <vector>
 
@@ -49,12 +49,12 @@ class G4HCofThisEvent;
 /// The values are accounted in hits in ProcessHits() function which is called
 /// by Geant4 kernel at each step.
 
-class TrackerSD : public G4VSensitiveDetector
+class GEMSensitiveDetector : public G4VSensitiveDetector
 {
   public:
-    TrackerSD(const G4String& name, 
+    GEMSensitiveDetector(const G4String& name, 
                 const G4String& hitsCollectionName);
-    virtual ~TrackerSD();
+    virtual ~GEMSensitiveDetector();
   
     // methods from base class
     virtual void   Initialize(G4HCofThisEvent* hitCollection);
@@ -62,7 +62,7 @@ class TrackerSD : public G4VSensitiveDetector
     virtual void   EndOfEvent(G4HCofThisEvent* hitCollection);
 
   private:
-    TrackerHitsCollection* fHitsCollection;
+    GEMHitsCollection* fHitsCollection;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

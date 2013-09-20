@@ -33,7 +33,7 @@
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"
 #include "MagneticField.hh"
-#include "TrackerSD.hh"
+#include "GEMSensitiveDetector.hh"
 
 #include "G4Material.hh"
 #include "G4NistManager.hh"
@@ -232,10 +232,10 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   // Sensitive detectors
 
   G4String trackerChamberSDname = "slrp/TrackerChamberSD";
-  TrackerSD* aTrackerSD = new TrackerSD(trackerChamberSDname, "TrackerHitsCollection");
-  G4SDManager::GetSDMpointer()->AddNewDetector( aTrackerSD );
-  fLogicGem->SetSensitiveDetector( aTrackerSD );
-  //fLogicPresampler->SetSensitiveDetector(aTrackerSD);
+  GEMSensitiveDetector* aGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
+  G4SDManager::GetSDMpointer()->AddNewDetector( aGEMSensitiveDetector );
+  fLogicGem->SetSensitiveDetector( aGEMSensitiveDetector );
+  //fLogicPresampler->SetSensitiveDetector(aGEMSensitiveDetector);
   fLogicGem->SetVisAttributes(chamberVisAtt);
   //BGO 145 22
 
@@ -279,7 +279,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   //    fLogicChamber[copyNo] =
   //             new G4LogicalVolume(chamberS,fChamberMaterial,"Chamber",0,0,0);
 
-  //    fLogicChamber[copyNo]->SetSensitiveDetector( aTrackerSD );
+  //    fLogicChamber[copyNo]->SetSensitiveDetector( aGEMSensitiveDetector );
   //    fLogicChamber[copyNo]->SetVisAttributes(chamberVisAtt);
 
   //    new G4PVPlacement(0,                            // no rotation

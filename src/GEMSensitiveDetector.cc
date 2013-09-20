@@ -25,97 +25,84 @@
 //
 // $Id$
 //
-/// \file TrackerHit.cc
-/// \brief Implementation of the TrackerHit class
+/// \file GEMSensitiveDetector.cc
+/// \brief Implementation of the GEMSensitiveDetector class
 
-#include "TrackerHit.hh"
+#include <ibn/math.h>
+#include "GEMSensitiveDetector.hh"
+#include "ROOTManager.hh"
+#include "G4HCofThisEvent.hh"
+#include "G4Step.hh"
+#include "G4ThreeVector.hh"
+#include "G4SDManager.hh"
+#include "G4ios.hh"
 
-#include "G4UnitsTable.hh"
-#include "G4VVisManager.hh"
-#include "G4Circle.hh"
-#include "G4Colour.hh"
-#include "G4VisAttributes.hh"
-
-#include <iomanip>
-
-
-G4Allocator<TrackerHit> TrackerHitAllocator;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-TrackerHit::TrackerHit()
- : G4VHit(),
-   fTrackID(-1),
-   fChamberNb(-1),
-   fEdep(0.),
-   fPos(G4ThreeVector()),
-   fPad()
+GEMSensitiveDetector::GEMSensitiveDetector(const G4String& name,
+                         const G4String& hitsCollectionName) 
+ : G4VSensitiveDetector(name),
+   fHitsCollection(NULL)
+{
+  collectionName.insert(hitsCollectionName);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+GEMSensitiveDetector::~GEMSensitiveDetector() 
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-TrackerHit::~TrackerHit() {}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-TrackerHit::TrackerHit(const TrackerHit& right)
-  : G4VHit()
+void GEMSensitiveDetector::Initialize(G4HCofThisEvent* hce)
 {
-  fTrackID   = right.fTrackID;
-  fChamberNb = right.fChamberNb;
-  fEdep      = right.fEdep;
-  fPos       = right.fPos;
-  fPad       = right.fPad;
+  // Create hits collection
+
+  fHitsCollection = new GEMHitsCollection(SensitiveDetectorName, collectionName[0]); 
+
+  // Add this collection in hce
+
+  G4int hcID 
+    = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
+  hce->AddHitsCollection( hcID, fHitsCollection ); 
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-const TrackerHit& TrackerHit::operator=(const TrackerHit& right)
-{
-  fTrackID   = right.fTrackID;
-  fChamberNb = right.fChamberNb;
-  fEdep      = right.fEdep;
-  fPos       = right.fPos;
-  fPad       = right.fPad;
+G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
+{  
+  // energy deposit
+  G4double edep = aStep->GetTotalEnergyDeposit();
+  G4double charge = edep/(85.7*eV);
 
-  return *this;
+  if (edep==0.) return false;
+
+  GEMHit* newHit = new GEMHit();
+
+  newHit->SetTrackID  (aStep->GetTrack()->GetTrackID());
+  newHit->SetChamberNb(aStep->GetPreStepPoint()->GetTouchableHandle()
+                                               ->GetCopyNumber());
+  newHit->SetEdep(edep);
+  newHit->SetPos (aStep->GetPostStepPoint()->GetPosition());
+  newHit->SetMomentum(aStep->GetTrack()->GetVertexMomentumDirection());
+  newHit->FindPad();
+  newHit->SetCharge(charge);
+  fHitsCollection->insert( newHit );
+  //newHit->Print();
+  return true;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4int TrackerHit::operator==(const TrackerHit& right) const
+void GEMSensitiveDetector::EndOfEvent(G4HCofThisEvent*)
 {
-  return ( this == &right ) ? 1 : 0;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void TrackerHit::Draw()
-{
-  G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
-  if(pVVisManager)
-  {
-    G4Circle circle(fPos);
-    circle.SetScreenSize(4.);
-    circle.SetFillStyle(G4Circle::filled);
-    G4Colour colour(1.,0.,0.);
-    G4VisAttributes attribs(colour);
-    circle.SetVisAttributes(attribs);
-    pVVisManager->Draw(circle);
+  if ( verboseLevel>1 ) { 
+     G4int nofHits = fHitsCollection->entries();
+     G4cout << "\n-------->Hits Collection: in this event they are " << nofHits 
+            << " hits in the tracker chambers: " << G4endl;
+     for ( G4int i=0; i<nofHits; i++ ) (*fHitsCollection)[i]->Print();
   }
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void TrackerHit::Print()
-{
-  G4cout
-     << "  trackID: " << fTrackID << " chamberNb: " << fChamberNb
-     << "Edep: "
-     << std::setw(7) << G4BestUnit(fEdep,"Energy")
-     << " Position: "
-     << std::setw(7) << G4BestUnit( fPos,"Length")
-     << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

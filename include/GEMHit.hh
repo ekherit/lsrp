@@ -25,11 +25,11 @@
 //
 // $Id$
 //
-/// \file TrackerHit.hh
-/// \brief Definition of the TrackerHit class
+/// \file GEMHit.hh
+/// \brief Definition of the GEMHit class
 
-#ifndef TrackerHit_h
-#define TrackerHit_h 1
+#ifndef GEMHit_h
+#define GEMHit_h 1
 
 #include "Config.h"
 #include "G4VHit.hh"
@@ -44,16 +44,16 @@
 /// and position of charged particles in a selected volume:
 /// - fTrackID, fChamberNB, fEdep, fPos
 
-class TrackerHit : public G4VHit
+class GEMHit : public G4VHit
 {
   public:
-    TrackerHit();
-    TrackerHit(const TrackerHit&);
-    virtual ~TrackerHit();
+    GEMHit();
+    GEMHit(const GEMHit&);
+    virtual ~GEMHit();
 
     // operators
-    const TrackerHit& operator=(const TrackerHit&);
-    G4int operator==(const TrackerHit&) const;
+    const GEMHit& operator=(const GEMHit&);
+    G4int operator==(const GEMHit&) const;
 
     inline void* operator new(size_t);
     inline void  operator delete(void*);
@@ -95,24 +95,24 @@ class TrackerHit : public G4VHit
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-typedef G4THitsCollection<TrackerHit> TrackerHitsCollection;
+typedef G4THitsCollection<GEMHit> GEMHitsCollection;
 
-extern G4Allocator<TrackerHit> TrackerHitAllocator;
+extern G4Allocator<GEMHit> GEMHitAllocator;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-inline void* TrackerHit::operator new(size_t)
+inline void* GEMHit::operator new(size_t)
 {
   void *hit;
-  hit = (void *) TrackerHitAllocator.MallocSingle();
+  hit = (void *) GEMHitAllocator.MallocSingle();
   return hit;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-inline void TrackerHit::operator delete(void *hit)
+inline void GEMHit::operator delete(void *hit)
 {
-  TrackerHitAllocator.FreeSingle((TrackerHit*) hit);
+  GEMHitAllocator.FreeSingle((GEMHit*) hit);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
