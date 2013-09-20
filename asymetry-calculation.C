@@ -42,3 +42,14 @@ void calc(void)
   lsrp->Fit("asym","hit.phi", "P>0");
 }
 
+void calc2(const char * file)
+{
+  TFile f(file);
+  TTree * hit = f.Get("lsrp");
+  Long64_t nup = hit->GetEntries("pad.yhit.y>0 && volumeID==1&& P>0") +  hit->GetEntries("hit.y<0 && volumeID==1&& P<0");
+  Long64_t ndown = hit->GetEntries("hit.y<0 && volumeID==1 && P>0") +  hit->GetEntries("hit.y>0 && volumeID==1 && P<0");
+  cout << "  final assymetry: " << get_eps(nup, ndown) << " +- " << get_eps_error(nup, ndown) << " (" << fabs(get_eps_error(nup,ndown)/get_eps(nup,ndown))*100<< "%)" <<endl;
+  TF1 * sinf = new TF1("asym","[0]+[1]*sin(x)",-TMath::Pi(), +TMath::Pi());
+  lsrp->Fit("asym","hit.phi", "P>0");
+}
+

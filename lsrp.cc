@@ -99,10 +99,13 @@ int main(int argc,char** argv)
     ("psm_width", po::value<double>(&Cfg.psm_width)->default_value(0.56), "Presampler width, cm")
     ("gem_width", po::value<double>(&Cfg.gem_width)->default_value(0.3), "GEM width, cm")
     ("psm_gem_length", po::value<double>(&Cfg.psm_gem_length)->default_value(1.0), "Distance between presampler and GEM, in cm")
+    ("pad_size", po::value<double>(&Cfg.pad_size)->default_value(1), "hexagonal pad size, mm")
+    ("photon_number", po::value<unsigned>(&Cfg.photon_number)->default_value(1), "Number of photons per pulse")
+    ("output", po::value<std::string>(&Cfg.output_file)->default_value("tmp.root"), "Output file name")
     ("help", "Print this help")
     ;
   po::positional_options_description pos;
-  //pos.add("input",-1);
+  //pos.add("output",-1);
   po::variables_map opt; //options container
   try
   {
@@ -119,6 +122,8 @@ int main(int argc,char** argv)
     cout << "psm_width=" <<  Cfg.psm_width << endl;
     cout << "gem_width=" <<  Cfg.gem_width << endl;
     cout << "psm_gem_length=" <<  Cfg.psm_gem_length << endl;
+    cout << "pad_size=" <<  Cfg.pad_size << endl;
+    cout << "photon_number=" <<  Cfg.photon_number << endl;
   } 
   catch (boost::program_options::unknown_option & o)
   {

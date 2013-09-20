@@ -40,13 +40,15 @@
 #include "G4Trajectory.hh"
 #include "G4ios.hh"
 
+#include <algorithm>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 EventAction::EventAction()
 : G4UserEventAction(),
   fPrintModulo(1000)
-{}
+{
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -57,6 +59,7 @@ EventAction::~EventAction()
 
 void EventAction::BeginOfEventAction(const G4Event* event)
 {  
+  fPads.clear();
   G4int eventID = event->GetEventID();
   if ( eventID % fPrintModulo == 0) { 
     G4cout << "\n---> Begin of event: " << eventID << G4endl;
@@ -80,27 +83,59 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
   G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
   auto RM = ROOTManager::Instance();
-  RM->hit.nhit = hc->GetSize();
-  RM->event.E.resize(hc->GetSize());
+  //RM->hit.nhit = hc->GetSize();
+  RM->event.nphot=Cfg.photon_number;
+  RM->event.nhit = hc->GetSize();
+  RM->event.hit.resize(hc->GetSize());
   for(unsigned i=0; i< hc->GetSize();i++)
   {
     TrackerHit * hit = (TrackerHit*)hc->GetHit(i);
-    RM->hit.trackID[i] = hit->GetTrackID();
-    RM->hit.volumeID[i] = hit->GetChamberNb();
-    RM->hit.E[i] = hit->GetEdep()/MeV;
-    Pad pad(1.0*mm, hit->GetPos().x(), hit->GetPos().y());
-    RM->hit.x[i] = pad.x();
-    RM->hit.y[i] = pad.y();
-    RM->hit.z[i] = hit->GetPos().z()/mm;
-    RM->hit.rho[i] = sqrt(ibn::sq(RM->hit.y[i]) + ibn::sq(RM->hit.y[i]));
-    RM->hit.phi[i] = hit->GetPos().phi();
-    RM->event.E[i] = RM->hit.E[i];
-    RM->event.s.A+=RM->hit.E[i];
-    RM->event.s.B+=RM->hit.E[i]*RM->hit.E[i];
+    RM->event.hit[i].trackID = hit->GetTrackID();
+    RM->event.hit[i].volumeID = hit->GetChamberNb();
+    RM->event.hit[i].E = hit->GetEdep()/MeV;
+    RM->event.hit[i].x = hit->GetPos().x()/mm;
+    RM->event.hit[i].y = hit->GetPos().y()/mm;
+    RM->event.hit[i].z = hit->GetPos().z()/mm;
+    RM->event.hit[i].rho = sqrt(ibn::sq(RM->event.hit[i].y) + ibn::sq(RM->event.hit[i].y));
+    RM->event.hit[i].phi = hit->GetPos().phi();
+    const Pad  & pad = hit->GetPad();
+    auto p = std::find(std::begin(fPads),std::end(fPads), pad);
+    if(p==fPads.end()) 
+    {
+      fPads.push_back(pad);
+      fPads.back().nhit=1;
+      fPads.back().xhit=hit->GetPos().x();
+      fPads.back().yhit=hit->GetPos().y();
+    }
+    else
+    {
+      p->charge+=hit->GetCharge();
+      p->nhit++;
+    }
   }
-  RM->event.s.A/=hc->GetSize();
-  RM->event.s.B/=hc->GetSize();
-  ROOTManager::Instance()->tree->Fill();
+  fPads.sort();
+  //amplification of the charge
+  RM->event.npad = fPads.size();
+  RM->event.pad.resize(fPads.size());
+  int i=0;
+  for(auto & p : fPads) 
+  {
+    double K0 = 1e4;
+    double dK0 = K0*0.3;
+    double K = G4RandGauss::shoot(K0,dK0);
+    //p.second*=K/coulomb;
+    RM->event.pad[i].x = p.x();
+    RM->event.pad[i].y = p.y();
+    RM->event.pad[i].nx = p.fnx;
+    RM->event.pad[i].ny = p.fny;
+    RM->event.pad[i].q = p.charge*K/coulomb;
+    RM->event.pad[i].nhit = p.nhit;
+    RM->event.pad[i].xhit = p.xhit;
+    RM->event.pad[i].yhit = p.yhit;
+    i++;
+  }
+  RM->tree->Fill();
+  RM->event.clear();
 
   // periodic printing
 

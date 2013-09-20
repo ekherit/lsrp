@@ -31,9 +31,14 @@
 #ifndef EventAction_h
 #define EventAction_h 1
 
+#include "Pad.hh"
 #include "G4UserEventAction.hh"
+#include "TrackerHit.hh"
+
 
 #include "globals.hh"
+#include <map>
+#include <list>
 
 /// Event action class
 
@@ -48,13 +53,17 @@ class EventAction : public G4UserEventAction
 
     // Set methods
     void SetPrintModulo(G4int value);
+    //std::map<Pad, double> fPadCharge;
+    //std::map<Pad, unsigned> fPadHit;
+    std::list<Pad> fPads;
   private:
     G4int  fPrintModulo;
 };
 
 // inline functions
 
-inline void EventAction::SetPrintModulo(G4int value) {
+inline void EventAction::SetPrintModulo(G4int value)
+{
   fPrintModulo = value;
 } 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

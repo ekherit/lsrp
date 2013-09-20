@@ -18,11 +18,15 @@
 #ifndef IBN_LSRP_CONFIG_H
 #define IBN_LSRP_CONFIG_H
 
+#include <string>
 struct Config_t
 {
   double psm_width; //presampler width in cm
   double psm_gem_length; //distance between presampler and gem
   double gem_width; //gem width
+  double pad_size;  //size of signe pad in mm
+  unsigned photon_number; //number of photons in one pulse
+  std::string output_file; //output file name
 };
 
 extern  Config_t Cfg;

@@ -59,8 +59,7 @@ void TrackerSD::Initialize(G4HCofThisEvent* hce)
 {
   // Create hits collection
 
-  fHitsCollection 
-    = new TrackerHitsCollection(SensitiveDetectorName, collectionName[0]); 
+  fHitsCollection = new TrackerHitsCollection(SensitiveDetectorName, collectionName[0]); 
 
   // Add this collection in hce
 
@@ -71,11 +70,11 @@ void TrackerSD::Initialize(G4HCofThisEvent* hce)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4bool TrackerSD::ProcessHits(G4Step* aStep, 
-                                     G4TouchableHistory*)
+G4bool TrackerSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {  
   // energy deposit
   G4double edep = aStep->GetTotalEnergyDeposit();
+  G4double charge = edep/(85.7*eV);
 
   if (edep==0.) return false;
 
@@ -87,26 +86,10 @@ G4bool TrackerSD::ProcessHits(G4Step* aStep,
   newHit->SetEdep(edep);
   newHit->SetPos (aStep->GetPostStepPoint()->GetPosition());
   newHit->SetMomentum(aStep->GetTrack()->GetVertexMomentumDirection());
+  newHit->FindPad();
+  newHit->SetCharge(charge);
   fHitsCollection->insert( newHit );
-
-  //auto RM = ROOTManager::Instance();
-  //RM->Hit.trackID = newHit->GetTrackID();
-  //RM->Hit.volumeID = newHit->GetChamberNb();
-  //RM->Hit.E = newHit->GetEdep()/MeV;
-
-  //Pad pad(1.0*mm, newHit->GetPos().x(), newHit->GetPos().y());
-  //RM->Hit.x = pad.x();
-  //RM->Hit.y = pad.y();
-  //RM->Hit.z = newHit->GetPos().z()/mm;
-  //RM->Hit.rho = sqrt(ibn::sq(RM->Hit.y) + ibn::sq(RM->Hit.y));
-  ////RM->Hit.phi = (RM->Hit.y >= 0 ? 1 : -1 )* acos(RM->Hit.x/RM->Hit.rho);
-  //RM->Hit.phi = newHit->GetPos().phi();
-
-  ////ROOTManager::Instance()->tree->SetBranchAddress("hit",newHit->fTrackID);
-  //ROOTManager::Instance()->tree->Fill();
-
   //newHit->Print();
-
   return true;
 }
 

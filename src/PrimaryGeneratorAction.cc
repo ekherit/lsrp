@@ -31,6 +31,7 @@
 #include "PrimaryGeneratorAction.hh"
 #include "ROOTManager.hh"
 #include "DetectorConstruction.hh"
+#include "Config.h"
 
 #include "G4LogicalVolumeStore.hh"
 #include "G4LogicalVolume.hh"
@@ -65,7 +66,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
 
   const G4double Hz = 1.0/s;
   const G4double kHz = 1e3/s;
-  const G4double MHz = 1e6/s;
+//  const G4double MHz = 1e6/s;
   const G4double GHz = 1e9/s;
   const G4double mA = 1e-3; //A
 
@@ -155,66 +156,44 @@ void variate_agnle(ibn::phys::compton & C, double dx , double dy)
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   // This function is called at the begining of event
-
-  for(int i=0;i<10;i++)
+  //drop polarization
+  double Pg = (G4UniformRand()-0.5) > 0 ? 1 : -1; //variate photon polarization
+  fCompton->SetPhotonPolarization(Pg);
+  for(unsigned i=0;i<Cfg.photon_number;i++)
   {
-    //Simulate Compton Backscattering
-    double Pg = (G4UniformRand()-0.5) > 0 ? 1 : -1; //variate photon polarization
-    fCompton->SetPhotonPolarization(Pg);
     //generate compton backscattering
     fCompton->generate([](double xmin, double xmax) { return (xmax-xmin)*G4UniformRand()+xmin; },fThetaMax);
     double dx = 1e-4*fCompton->Ee/1850.0;
     double kz_kx = 0.2;
     variate_agnle(*fCompton,dx,dx*kz_kx); 
-    //no angular distribution
-    //fCompton->kx=0;
-    //fCompton->ky=0;
-    //fCompton->kz=fCompton->E;
-
-    fParticleGun->SetParticleEnergy(fCompton->E*MeV);
-    //fill internal class members
-    auto & G = ROOTManager::Instance()->Gen;
-    G.eventID = anEvent->GetEventID();
-    G.P = fCompton->Pg*fCompton->Pe;
-    G.Eb = fCompton->Ee;
-    G.gamma = fCompton->gamma;
-    G.omega = fCompton->omega;
-    G.chi = fCompton->chi;
-    G.E = fCompton->E;
-    G.kx = fCompton->kx;
-    G.ky = fCompton->ky;
-    G.kz = fCompton->kz;
-    G.nx = fCompton->kx/fCompton->E;
-    G.ny = fCompton->ky/fCompton->E;
-    G.nz = fCompton->kz/fCompton->E;
-    G.theta = fCompton->theta;
-    G.phi = fCompton->phi;
 
     //calculate position
-    G.x = G.kx/G.kz*fFlightLength/mm;
-    G.y = G.ky/G.kz*fFlightLength/mm;
-    //G4cout << "detector construction instance: " << DetectorConstruction::Instance() << endl;
-    G.z = DetectorConstruction::Instance()->presampler_front_position/mm;
+    G4double x  = fCompton->kx/fCompton->kz*fFlightLength;
+    G4double y = fCompton->ky/fCompton->kz*fFlightLength;
+    G4double z = DetectorConstruction::Instance()->presampler_front_position;
+
+    G4ThreeVector k(fCompton->kx, fCompton->ky, fCompton->kz);
+    
+
+    //Configurate the particle gun
+    fParticleGun->SetParticleEnergy(fCompton->E*MeV);
 
     //set position
-    fParticleGun->SetParticlePosition(G4ThreeVector(G.x*mm, G.y*mm, G.z*mm));
+    fParticleGun->SetParticlePosition(G4ThreeVector(x, y, z));
 
     //set direction
-    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(G.nx,G.ny,G.nz));
+    fParticleGun->SetParticleMomentumDirection(k);
 
-
-
-    //set branch for tree
-    ROOTManager::Instance()->gen_tree->Fill();
-    //fParticleGun->SetParticleDefinition(fGamma);
+    //generate primary vertex
     fParticleGun->GeneratePrimaryVertex(anEvent);
 
-    //fParticleGun->SetParticleDefinition(fElectron);
-    //fParticleGun->SetParticleEnergy(10*GeV);
-    //fParticleGun->SetParticlePosition(G4ThreeVector(5*cm, 5*cm, G.z*mm));
-    //fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0,0,0));
-    //fParticleGun->GeneratePrimaryVertex(anEvent);
-    //ROOTManager::Instance()->gen_tree->Fill();
+    // Fill generator event
+    GeneratorEvent gevent= makeGeneratorEvent(*fCompton);
+    gevent.x = x/mm;
+    gevent.y = y/mm;
+    gevent.z = z/mm;
+
+    ROOTManager::Instance()->event.gen.push_back(gevent);
   }
 }
 

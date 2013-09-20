@@ -48,7 +48,8 @@ TrackerHit::TrackerHit()
    fTrackID(-1),
    fChamberNb(-1),
    fEdep(0.),
-   fPos(G4ThreeVector())
+   fPos(G4ThreeVector()),
+   fPad()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -64,6 +65,7 @@ TrackerHit::TrackerHit(const TrackerHit& right)
   fChamberNb = right.fChamberNb;
   fEdep      = right.fEdep;
   fPos       = right.fPos;
+  fPad       = right.fPad;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -74,6 +76,7 @@ const TrackerHit& TrackerHit::operator=(const TrackerHit& right)
   fChamberNb = right.fChamberNb;
   fEdep      = right.fEdep;
   fPos       = right.fPos;
+  fPad       = right.fPad;
 
   return *this;
 }

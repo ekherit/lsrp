@@ -31,10 +31,12 @@
 #ifndef TrackerHit_h
 #define TrackerHit_h 1
 
+#include "Config.h"
 #include "G4VHit.hh"
 #include "G4THitsCollection.hh"
 #include "G4Allocator.hh"
 #include "G4ThreeVector.hh"
+#include "Pad.hh"
 
 /// Tracker hit class
 ///
@@ -66,13 +68,17 @@ class TrackerHit : public G4VHit
     void SetEdep     (G4double de)      { fEdep = de; };
     void SetPos      (G4ThreeVector xyz){ fPos = xyz; };
     void SetMomentum (const G4ThreeVector & k ) { fMomentum = k;}
+    void SetCharge   (G4double charge)  { fCharge = charge;}
+    void FindPad(void) { fPad = Pad(Cfg.pad_size*mm, fPos.x(), fPos.y());}
 
     // Get methods
     G4int GetTrackID() const     { return fTrackID; };
     G4int GetChamberNb() const   { return fChamberNb; };
     G4double GetEdep() const     { return fEdep; };
+    G4double GetCharge() const   { return fCharge;};
     G4ThreeVector GetPos() const { return fPos; };
     G4ThreeVector GetMomentum() const { return fMomentum; };
+    const Pad & GetPad(void) const { return fPad; };
 
 
   private:
@@ -82,6 +88,9 @@ class TrackerHit : public G4VHit
       G4double      fEdep;
       G4ThreeVector fPos;
       G4ThreeVector fMomentum; 
+      G4double      fCharge;
+      Pad           fPad;
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
