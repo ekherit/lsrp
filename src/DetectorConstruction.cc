@@ -197,15 +197,19 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 
 
   // Tracker = gem
+  /* temporary comment try to use GEMDetector
   G4Tubs* gem_solid = new G4Tubs("gem",0,gem_radius,gem_width/2,0.*deg, 360.*deg);
   fLogicGem = new G4LogicalVolume(gem_solid,   fChamberMaterial, "Gem",0,0,0);  
+                    */
+  GEM.reset(new GEMDetector);
+  fLogicGem = GEM->GetLogicalVolume();
   new G4PVPlacement(0,               // no rotation
                     gem_position, // at (x,y,z)
                     fLogicGem,       // its logical volume
                     "Tracker",       // its name
                     worldLV,         // its mother  volume
                     false,           // no boolean operations
-                    1,               // copy number
+                    0,               // copy number
                     fCheckOverlaps); // checking overlaps 
 
   // Visualization attributes

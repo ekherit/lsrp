@@ -43,8 +43,8 @@ class G4UserLimits;
 
 class DetectorMessenger;
 class MagneticField;
-class GEMDetector;
 
+#include "GEMDetector.hh"
 /// Detector construction class to define materials and geometry.
 ///
 /// In addition a transverse uniform magnetic field is defined in
@@ -81,7 +81,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     // data members
     G4int fNbOfChambers;
 
-    //std::unique_ptr<GEMDetector> GEM;
+    std::unique_ptr<GEMDetector> GEM;
 
     G4LogicalVolume*   fLogicPresampler;
     G4LogicalVolume*   fLogicGem;
