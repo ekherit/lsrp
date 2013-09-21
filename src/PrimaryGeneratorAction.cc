@@ -77,9 +77,6 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   //const double hc = 197.326968e-15; // MeV*m;
   double photon_energy = 2*M_PI*ibn::phys::hc/lambda*MeV; //MeV, should be 2.48e-6 MeV
   fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy,1,1));
-  time_t seed = time(0);
-  G4cout << "Set seed" << seed << endl;
-  CLHEP::HepRandom::setTheSeed(seed);
   double y = 50*mm; //mm
   double theta_max = y/fFlightLength;
   double cos_rf = fCompton->cos_rf(cos(theta_max));

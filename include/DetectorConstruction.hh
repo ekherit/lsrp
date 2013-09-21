@@ -34,6 +34,8 @@
 #include "globals.hh"
 #include "G4VUserDetectorConstruction.hh"
 
+#include <memory>
+
 class G4VPhysicalVolume;
 class G4LogicalVolume;
 class G4Material;
@@ -41,6 +43,7 @@ class G4UserLimits;
 
 class DetectorMessenger;
 class MagneticField;
+class GEMDetector;
 
 /// Detector construction class to define materials and geometry.
 ///
@@ -77,6 +80,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
   
     // data members
     G4int fNbOfChambers;
+
+    //std::unique_ptr<GEMDetector> GEM;
 
     G4LogicalVolume*   fLogicPresampler;
     G4LogicalVolume*   fLogicGem;

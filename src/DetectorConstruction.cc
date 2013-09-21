@@ -183,7 +183,6 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
      fCheckOverlaps
     ); // checking overlaps 
 
-
   // Presampler
   G4Tubs* psm_solid = new G4Tubs("presampler",0.,psm_radius,psm_width/2,0.*deg,360.*deg);
   fLogicPresampler = new G4LogicalVolume(psm_solid, fPresamplerMaterial,"Presampler",0,0,0);
@@ -196,17 +195,6 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
       0,               // copy number
       fCheckOverlaps); // checking overlaps 
 
-
-  //G4Tubs* corpus_solid = new G4Tubs("corpus",0.,gem_radius, 0.5*mm,0.*deg,360.*deg);
-  //G4LogicalVolume * corpus_logic = new G4LogicalVolume(corpus_solid, Al,"Corpus",0,0,0);
-  //new G4PVPlacement(0,               // no rotation
-  //    gem_position-G4ThreeVector(0,0,gem_width/2+0.5*mm),  // at (x,y,z)
-  //    corpus_logic,    // its logical volume
-  //    "Corpus",        // its name
-  //    worldLV,         // its mother volume
-  //    false,           // no boolean operations
-  //    0,               // copy number
-  //    fCheckOverlaps); // checking overlaps 
 
   // Tracker = gem
   G4Tubs* gem_solid = new G4Tubs("gem",0,gem_radius,gem_width/2,0.*deg, 360.*deg);
@@ -230,90 +218,15 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   fLogicGem    ->SetVisAttributes(boxVisAtt);
 
   // Sensitive detectors
-
   G4String trackerChamberSDname = "slrp/TrackerChamberSD";
   GEMSensitiveDetector* aGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
   G4SDManager::GetSDMpointer()->AddNewDetector( aGEMSensitiveDetector );
   fLogicGem->SetSensitiveDetector( aGEMSensitiveDetector );
   //fLogicPresampler->SetSensitiveDetector(aGEMSensitiveDetector);
-  fLogicGem->SetVisAttributes(chamberVisAtt);
+  //fLogicGem->SetVisAttributes(chamberVisAtt);
+
   //BGO 145 22
-
-  //G4double maxStep = 0.5*gem_width;
-  //fStepLimit = new G4UserLimits(maxStep);
-  //fLogicGem->SetUserLimits(fStepLimit);
-
-  //G4double maxStep2 = 0.5*psm_width;
-  //fStepLimit = new G4UserLimits(maxStep2);
-  //fLogicPresampler->SetUserLimits(fStepLimit);
-
-  // Tracker segments
-
-  //G4cout << "There are " << fNbOfChambers << " chambers in the tracker region. "
-  //       << "\nThe chambers are " << chamberWidth/cm << " cm of "
-  //       << fChamberMaterial->GetName() << "\nThe distance between chamber is "
-  //       << chamberSpacing/cm << " cm" << G4endl;
-  
-  //G4double firstPosition = -trackerSize + chamberSpacing;
-  //G4double firstLength   = trackerLength/10;
-  //G4double lastLength    = trackerLength;
-
-  //G4double halfWidth = 0.5*chamberWidth;
-  //G4double rmaxFirst = 0.5 * firstLength;
-
-  //G4double rmaxIncr = 0.0;
-  //if( fNbOfChambers > 0 ){
-  //  rmaxIncr =  0.5 * (lastLength-firstLength)/(fNbOfChambers-1);
-  //  if (chamberSpacing  < chamberWidth) {
-  //     G4Exception("DetectorConstruction::DefineVolumes()",
-  //                 "InvalidSetup", FatalException,
-  //                 "Width>Spacing");
-  //  }
-  //}
-
-  //for (G4int copyNo=0; copyNo<fNbOfChambers; copyNo++)
-  //{
-  //    G4Tubs* chamberS
-  //      = new G4Tubs("chamber", 0, rmax, halfWidth, 0.*deg, 360.*deg);
-
-  //    fLogicChamber[copyNo] =
-  //             new G4LogicalVolume(chamberS,fChamberMaterial,"Chamber",0,0,0);
-
-  //    fLogicChamber[copyNo]->SetSensitiveDetector( aGEMSensitiveDetector );
-  //    fLogicChamber[copyNo]->SetVisAttributes(chamberVisAtt);
-
-  //    new G4PVPlacement(0,                            // no rotation
-  //                      G4ThreeVector(0,0,Zposition), // at (x,y,z)
-  //                      fLogicChamber[copyNo],        // its logical volume
-  //                      "Chamber",                    // its name
-  //                      trackerLV,                    // its mother  volume
-  //                      false,                        // no boolean operations
-  //                      copyNo,                       // copy number
-  //                      fCheckOverlaps);              // checking overlaps 
-
-  //}
-
-  // Example of User Limits
-  //
-  // Below is an example of how to set tracking constraints in a given
-  // logical volume
-  //
-  // Sets a max step length in the tracker region, with G4StepLimiter
-
-  //G4double maxStep = 0.5*chamberWidth;
-  //fStepLimit = new G4UserLimits(maxStep);
-  //trackerLV->SetUserLimits(fStepLimit);
- 
-  /// Set additional contraints on the track, with G4UserSpecialCuts
-  ///
-  /// G4double maxLength = 2*trackerLength, maxTime = 0.1*ns, minEkin = 10*MeV;
-  /// trackerLV->SetUserLimits(new G4UserLimits(maxStep,
-  ///                                           maxLength,
-  ///                                           maxTime,
-  ///                                           minEkin));
-
   // Always return the physical world
-
   return worldPV;
 }
 

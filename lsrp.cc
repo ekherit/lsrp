@@ -142,6 +142,8 @@ int main(int argc,char** argv)
 
   // Choose the Random engine
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
+  //set seed
+  CLHEP::HepRandom::setTheSeed(time(0));
   
   // Construct the default run manager
   

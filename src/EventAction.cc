@@ -82,8 +82,11 @@ void EventAction::EndOfEventAction(const G4Event* event)
   if (trajectoryContainer) n_trajectories = trajectoryContainer->entries();
 
   G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
+
   auto RM = ROOTManager::Instance();
-  //RM->hit.nhit = hc->GetSize();
+  RM->event.eventID = eventID;
+  RM->event.Eb = RM->event.gen[0].Eb;
+  RM->event.P = RM->event.gen[0].P;
   RM->event.nphot=Cfg.photon_number;
   RM->event.nhit = hc->GetSize();
   RM->event.hit.resize(hc->GetSize());
