@@ -70,6 +70,7 @@ class HitEvent : public TObject
   public:
   HitEvent(void);
   Long64_t trackID;
+  Long64_t pid;
   Long64_t volumeID;
   Double_t E;
   Double_t x;

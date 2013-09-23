@@ -31,6 +31,7 @@
 #include <ibn/math.h>
 #include "GEMSensitiveDetector.hh"
 #include "ROOTManager.hh"
+
 #include "G4HCofThisEvent.hh"
 #include "G4Step.hh"
 #include "G4ThreeVector.hh"
@@ -80,14 +81,19 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
   GEMHit* newHit = new GEMHit();
 
-  newHit->SetTrackID  (aStep->GetTrack()->GetTrackID());
-  newHit->SetChamberNb(aStep->GetPreStepPoint()->GetTouchableHandle()
-                                               ->GetCopyNumber());
+  auto track = aStep->GetTrack();
+  newHit->SetTrackID  (track->GetTrackID());
+  newHit->SetParticleID(track->GetParticleDefinition()->GetPDGEncoding());
+  newHit->SetVolumeID(aStep->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber());
   newHit->SetEdep(edep);
   newHit->SetPos (aStep->GetPostStepPoint()->GetPosition());
-  newHit->SetMomentum(aStep->GetTrack()->GetVertexMomentumDirection());
+  newHit->SetMomentum(track->GetVertexMomentumDirection());
   newHit->FindPad();
-  newHit->SetCharge(charge);
+  //calculate amplified charge
+  double K0 = Cfg.gem_amplification; //maximum amplification coeff
+  double Nc = Cfg.gem_cascade_number; //number amplif cascades
+  double K =  pow(K0, (Nc-newHit->GetVolumeID())/Nc);
+  newHit->SetCharge(charge*K);
   fHitsCollection->insert( newHit );
   //newHit->Print();
   return true;

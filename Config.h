@@ -26,6 +26,8 @@ struct Config_t
   double gem_width; //gem width
   double pad_size;  //size of signe pad in mm
   unsigned photon_number; //number of photons in one pulse
+  double gem_amplification; 
+  unsigned gem_cascade_number;
   std::string output_file; //output file name
 };
 

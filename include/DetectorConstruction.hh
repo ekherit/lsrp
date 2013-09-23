@@ -79,14 +79,14 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* DefineVolumes();
   
     // data members
-    G4int fNbOfChambers;
+    //G4int fNbOfChambers;
 
     std::unique_ptr<GEMDetector> GEM;
 
     G4LogicalVolume*   fLogicPresampler;
-    G4LogicalVolume*   fLogicGem;
+    //G4LogicalVolume*   fLogicGem;
     //G4LogicalVolume*   fLogicTarget;     // pointer to the logical Target
-    G4LogicalVolume**  fLogicChamber;    // pointer to the logical Chamber
+    //G4LogicalVolume**  fLogicChamber;    // pointer to the logical Chamber
 
     //G4Material*        fTargetMaterial;  // pointer to the target  material
     G4Material*        fPresamplerMaterial;  // pointer to the target  material
@@ -99,6 +99,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps 
     static DetectorConstruction * fgInstance;
+
+    G4double fPresamplerWidth;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

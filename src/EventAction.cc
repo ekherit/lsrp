@@ -33,6 +33,7 @@
 #include "Pad.hh"
 #include "GEMHit.hh"
 #include <ibn/math.h>
+#include "Config.h"
 
 #include "G4Event.hh"
 #include "G4EventManager.hh"
@@ -94,7 +95,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
   {
     GEMHit * hit = (GEMHit*)hc->GetHit(i);
     RM->event.hit[i].trackID = hit->GetTrackID();
-    RM->event.hit[i].volumeID = hit->GetChamberNb();
+    RM->event.hit[i].pid = hit->GetParticleID();
+    RM->event.hit[i].volumeID = hit->GetVolumeID();
     RM->event.hit[i].E = hit->GetEdep()/MeV;
     RM->event.hit[i].x = hit->GetPos().x()/mm;
     RM->event.hit[i].y = hit->GetPos().y()/mm;
@@ -106,14 +108,12 @@ void EventAction::EndOfEventAction(const G4Event* event)
     if(p==fPads.end()) 
     {
       fPads.push_back(pad);
-      fPads.back().nhit=1;
-      fPads.back().xhit=hit->GetPos().x();
-      fPads.back().yhit=hit->GetPos().y();
+      //fPads.back().charge=hit->GetCharge();
     }
     else
     {
-      p->charge+=hit->GetCharge();
       p->nhit++;
+      p->charge+= hit->GetCharge();
     }
   }
   fPads.sort();
@@ -123,15 +123,16 @@ void EventAction::EndOfEventAction(const G4Event* event)
   int i=0;
   for(auto & p : fPads) 
   {
-    double K0 = 1e4;
-    double dK0 = K0*0.3;
-    double K = G4RandGauss::shoot(K0,dK0);
-    //p.second*=K/coulomb;
     RM->event.pad[i].x = p.x();
     RM->event.pad[i].y = p.y();
     RM->event.pad[i].nx = p.fnx;
     RM->event.pad[i].ny = p.fny;
-    RM->event.pad[i].q = p.charge*K/coulomb;
+    double q=0;
+    while(q <=0) 
+    {
+      q = p.charge*(1+0.3*G4RandGauss::shoot());
+    }
+    RM->event.pad[i].q = q/coulomb*1e15; //fC or femtocoulomb 
     RM->event.pad[i].nhit = p.nhit;
     RM->event.pad[i].xhit = p.xhit;
     RM->event.pad[i].yhit = p.yhit;

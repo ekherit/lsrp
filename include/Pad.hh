@@ -50,7 +50,9 @@ class Pad
     fnx=0;
     fny=0;
     charge=0;
-    nhit=0;
+    nhit=1; //Already have 1 hit
+    xhit=0;
+    yhit=0;
   }
 
 

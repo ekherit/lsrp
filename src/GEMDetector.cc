@@ -18,7 +18,10 @@
 
 #include "GEMDetector.hh"
 #include "G4Tubs.hh"
+#include "G4UserLimits.hh"
+#include "Config.h"
 
+#include <boost/lexical_cast.hpp>
 GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double kapton_width, G4double cuprum_width)
 {
   fCuprumWidth=cuprum_width;
@@ -41,10 +44,43 @@ GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double 
         CuprumLV,
         "Cuprum", //the name
         LV.get(), //mother logical volume
+        false, //no boolen operations
         i, //copy number
         true); //check overlaps
   }
 }
+
+
+G4Material * EpoxyMaterial(void)
+{
+  G4String name = "Epoxy";
+  G4Material* material = G4Material::GetMaterial(name, false);
+  if(material) return material;
+  material = new G4Material(name, 1.3*g/cm3,3);
+  G4NistManager* nist = G4NistManager::Instance();
+  G4Element* H = nist->FindOrBuildElement("H");
+  G4Element* C = nist->FindOrBuildElement("C");
+  G4Element* O = nist->FindOrBuildElement("O");
+  material->AddElement(H, 44);
+  material->AddElement(C, 15);
+  material->AddElement(O, 7);
+  return material;
+}
+
+G4Material * StefMaterial(void)
+{
+  G4String name = "Stef";
+  G4Material* material = G4Material::GetMaterial(name, false);
+  if(material) return material;
+  material = new G4Material(name, 1.7*g/cm3,2);
+  G4NistManager* nist = G4NistManager::Instance();
+  G4Material * SiO2 = nist->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+  material->AddMaterial(SiO2, 85.3*perCent);
+  material->AddMaterial(EpoxyMaterial(), 14.7*perCent);
+  return material;
+}
+
+
 
 GEMDetector::GEMDetector(void)
 {
@@ -54,33 +90,66 @@ GEMDetector::GEMDetector(void)
   fRadius = std::max(fSizeX, fSizeY)/2.0;
   fStefWidth=1.5*mm;
   fDriftLength = 3*mm;
-  fCascadeNumber=3;
-  fKaptonWidth = 50e-6*m;
-  fCuprumWidth = 5e-6*m;
+  fCascadeNumber=Cfg.gem_cascade_number; //should be 3
+  fKaptonWidth = 50*um;
+  fCuprumWidth = 5*um;
   fCascadeWidth = fKaptonWidth+fCuprumWidth*2;
   fTransferLength = 1.5*mm;
   fInductionLength = 2.0*mm;
+  fPadWidth = 15.*um;
   fGEMWidth = fStefWidth*2 + fDriftLength 
     + fCascadeNumber*fCascadeWidth +(fCascadeNumber-1)*fTransferLength
-    + fInductionLength;
+    + fInductionLength + fPadWidth*2;
+
+  //G4cout << "GEM width is " << fGEMWidth/mm << " mm" << G4endl;
   G4Tubs * solid_volume = new G4Tubs("GEM",0,fRadius, fGEMWidth/2.,0.*deg,360.*deg);
   Ar = G4NistManager::Instance()->FindOrBuildMaterial("G4_Ar");
   LV.reset(new G4LogicalVolume(solid_volume, Ar,"GEM"));
 
   //describe corpus which is made from stef
   G4Tubs * StefSV = new G4Tubs("STEF",0.,fRadius,fStefWidth/2.,0.*deg,360.*deg);
-  stef = G4NistManager::Instance()->FindOrBuildMaterial("G4_Al");
-  G4LogicalVolume * stefLV = new G4LogicalVolume(StefSV, stef,"Stef");
-  for(int i=0;i<2;i++)
-  {
-    new G4PVPlacement(0, //no rotation
-        G4ThreeVector(0,0,(2*i-1)*(fGEMWidth-fStefWidth)/2.0), //position
-        stefLV,
-        "Stef", //the name
-        LV.get(), //mother logical volume
-        i, //copy number
-        true); //check overlaps
-  }
+  G4LogicalVolume * stefLV = new G4LogicalVolume(StefSV, StefMaterial(),"Stef");
+  fStefVolume = stefLV;
+  //place front stef
+  new G4PVPlacement(0, //no rotation
+      G4ThreeVector(0,0,-fGEMWidth/2.0+fStefWidth/2.0), //position
+      stefLV,
+      "Stef", //the name
+      LV.get(), //mother logical volume
+      false, //no boolen operations
+      0, //copy number
+      true); //check overlaps
+  //place back stef
+  new G4PVPlacement(0, //no rotation
+      G4ThreeVector(0,0,+fGEMWidth/2.0-fPadWidth-fStefWidth/2.0), //position
+      stefLV,
+      "Stef", //the name
+      LV.get(), //mother logical volume
+      false, //no boolen operations
+      1, //copy number
+      true); //check overlaps
+
+  //create pad and back electrondes
+  G4Tubs * PadSV = new G4Tubs("Pads",0.,fRadius,fPadWidth/2.,0.*deg,360.*deg);
+  G4Material * Cu = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
+  G4LogicalVolume * padLV = new G4LogicalVolume(PadSV, Cu,"Pad");
+  new G4PVPlacement(0, //no rotation
+      G4ThreeVector(0,0,fGEMWidth/2.0-fPadWidth-fStefWidth-fPadWidth/2.0), //position
+      padLV,
+      "Pad", //the name
+      LV.get(), //mother logical volume
+      false, //no boolen operations
+      0, //copy number
+      true); //check overlaps
+  new G4PVPlacement(0, //no rotation
+      G4ThreeVector(0,0,fGEMWidth/2.0-fPadWidth/2.0), //position
+      padLV,
+      "Pad", //the name
+      LV.get(), //mother logical volume
+      false, //no boolen operations
+      1, //copy number
+      true); //check overlaps
+
   //describe drift region
   G4Tubs * DriftSV = new G4Tubs("Drift",0.,fRadius,fDriftLength/2.0,0.*deg,360.*deg);
   fDriftVolume.reset(new G4LogicalVolume(DriftSV, Ar,"DriftVolume"));
@@ -89,6 +158,7 @@ GEMDetector::GEMDetector(void)
       fDriftVolume.get(),
       "DriftVolume", //the name
       LV.get(), //mother logical volume
+      false, //no boolen operations
       0, //copy number
       true); //check overlaps
 
@@ -99,27 +169,47 @@ GEMDetector::GEMDetector(void)
     G4double z0 = -fGEMWidth/2.0+fStefWidth+fDriftLength;
     new G4PVPlacement(0, //no rotation
         G4ThreeVector(0,0,z0 + fCascadeWidth/2. + i*(fCascadeWidth+fTransferLength)), //position
-        fDriftVolume.get(),
+        fAmplCascade->GetLogicalVolume(),
         "AmplificationCascadeVolume", //the name
         LV.get(), //mother logical volume
+        false, //no boolen operations
         i, //copy number
         true); //check overlaps
   }
 
   //describe TransfereVolume
   G4Tubs * TransferSV = new G4Tubs("Transfere",0.,fRadius,fTransferLength/2.0,0.*deg,360.*deg);
+  fTransferVolume.reset(new G4LogicalVolume(TransferSV, Ar,"TransfereVolume"));
   for(int i=0;i<fCascadeNumber-1;i++)
   {
-    G4LogicalVolume * lv = new G4LogicalVolume(TransferSV, Ar,"TransfereVolume");
-    fTransferVolume.push_back(std::unique_ptr<G4LogicalVolume>(lv));
     G4double z0 = -fGEMWidth/2.0+fStefWidth+fDriftLength+fCascadeWidth;
+    std::string name = "TransfereVolume"+boost::lexical_cast<std::string>(i+1);
     new G4PVPlacement(0, //no rotation
         G4ThreeVector(0,0,z0 + fTransferLength/2. + i*(fCascadeWidth + fTransferLength)), //position
-        lv,
-        "TransfereVolume", //the name
+        fTransferVolume.get(),
+        name.c_str(),
+        //"TransfereVolume"+boost::lexyc, //the name
         LV.get(), //mother logical volume
-        i, //copy number
+        false, //no boolen operations
+        i+1, //copy number //zero is for DriftVolume
         true); //check overlaps
   }
-  //Induction volume I can not to discribe becase it is inside mother GEM volume Ar.
+  fDriftVolume->SetUserLimits(new G4UserLimits(fDriftLength));
+  fTransferVolume->SetUserLimits(new G4UserLimits(fTransferLength));
+  PrintGeometry();
 }
+
+void GEMDetector::PrintGeometry(void)
+{
+  G4cout << "GEM total size (X*Y*Z): " << fSizeX/mm << "x" << fSizeY/mm << "x" << fGEMWidth/mm << " mm*mm*mm" << G4endl;
+  G4cout << "StefWidth: " << fStefWidth/mm << " mm " << G4endl;
+  G4cout << "DriftLength: " << fDriftLength/mm << " mm " << G4endl;
+  G4cout << "TransferLength: " << fTransferLength/mm << " mm " << G4endl;
+  G4cout << "InductionLength: " << fInductionLength/mm << " mm " << G4endl;
+  G4cout << "PadWidth: " << fPadWidth/um << " mkm " << G4endl;
+  G4cout << "CuprumWidth: " << fCuprumWidth/um << " mkm " << G4endl;
+  G4cout << "KaptonWidth: " << fKaptonWidth/um << " mkm " << G4endl;
+  G4cout << "Numbero of amplification cascades: " << fCascadeNumber << G4endl;
+}
+
+

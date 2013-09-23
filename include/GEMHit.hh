@@ -64,16 +64,18 @@ class GEMHit : public G4VHit
 
     // Set methods
     void SetTrackID  (G4int track)      { fTrackID = track; };
-    void SetChamberNb(G4int chamb)      { fChamberNb = chamb; };
+    void SetParticleID  (G4int pid)      { fParticleID = pid; };
+    void SetVolumeID (G4int volume)      { fVolumeID = volume; };
     void SetEdep     (G4double de)      { fEdep = de; };
     void SetPos      (G4ThreeVector xyz){ fPos = xyz; };
     void SetMomentum (const G4ThreeVector & k ) { fMomentum = k;}
-    void SetCharge   (G4double charge)  { fCharge = charge;}
-    void FindPad(void) { fPad = Pad(Cfg.pad_size*mm, fPos.x(), fPos.y());}
+    void SetCharge   (G4double charge)  { fCharge = charge; fPad.charge=fCharge; }
+    void FindPad(void) { fPad = Pad(Cfg.pad_size*mm, fPos.x(), fPos.y()); fPad.charge=fCharge;}
 
     // Get methods
     G4int GetTrackID() const     { return fTrackID; };
-    G4int GetChamberNb() const   { return fChamberNb; };
+    G4int GetParticleID() const     { return fParticleID; };
+    G4int GetVolumeID() const   { return fVolumeID; };
     G4double GetEdep() const     { return fEdep; };
     G4double GetCharge() const   { return fCharge;};
     G4ThreeVector GetPos() const { return fPos; };
@@ -84,7 +86,8 @@ class GEMHit : public G4VHit
   private:
 
       G4int         fTrackID;
-      G4int         fChamberNb;
+      G4int         fParticleID;
+      G4int         fVolumeID;
       G4double      fEdep;
       G4ThreeVector fPos;
       G4ThreeVector fMomentum; 

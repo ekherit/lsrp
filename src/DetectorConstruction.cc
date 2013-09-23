@@ -68,9 +68,9 @@ DetectorConstruction* DetectorConstruction::Instance(void)
  
 DetectorConstruction::DetectorConstruction()
 : 
-  fNbOfChambers(0),
+  //fNbOfChambers(0),
   fLogicPresampler(nullptr),
-  fLogicChamber(NULL), 
+  //fLogicChamber(NULL), 
   fPresamplerMaterial(NULL), fChamberMaterial(NULL), 
   fStepLimit(NULL),
  fCheckOverlaps(true)
@@ -78,8 +78,8 @@ DetectorConstruction::DetectorConstruction()
   fMessenger = new DetectorMessenger(this);
   fMagField  = new MagneticField();
 
-  fNbOfChambers = 1;
-  fLogicChamber = new G4LogicalVolume*[fNbOfChambers];
+  //fNbOfChambers = 1;
+  //fLogicChamber = new G4LogicalVolume*[fNbOfChambers];
   fgInstance = this;
 }
 
@@ -87,7 +87,7 @@ DetectorConstruction::DetectorConstruction()
  
 DetectorConstruction::~DetectorConstruction()
 {
-  delete [] fLogicChamber; 
+  //delete [] fLogicChamber; 
   delete fMagField;
   delete fStepLimit;
   delete fMessenger;
@@ -134,24 +134,24 @@ void DetectorConstruction::DefineMaterials()
 
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
-
-  //my sizes
-  G4double psm_width  = Cfg.psm_width*cm; //width of the Pb presampler
+  fPresamplerWidth = Cfg.psm_width*mm; //presampler width
   G4double psm_radius =  20*cm; //Radius of the presampler
-  G4double gem_radius = 20*cm;
-  G4double gem_width = Cfg.gem_width*cm;
-  //G4double gem_width = 1*cm;
-  //G4double psm_gem_length=Cfg.psm_gem_length*cm; //distance between presampler and gem
-  G4double psm_gem_length=1*cm; //distance between presampler and gem
-  G4double world_width=(psm_width/2.0+gem_width+psm_gem_length)*2.1;
+  //G4double gem_radius = 20*cm;
+  //G4double gem_width = Cfg.gem_width*mm;
+  //G4double psm_width  = Cfg.psm_width*cm; //width of the Pb presampler
+  G4double psm_gem_length=Cfg.psm_gem_length*mm; //distance between presampler and gem
   G4double world_size=2*psm_radius*1.2;
+  G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size);
 
-  G4ThreeVector psm_position = G4ThreeVector(0,0,0);
-  presampler_front_position = psm_position.z() - psm_width/2;
-  G4ThreeVector gem_position = G4ThreeVector(0,0,psm_width/2.0+gem_width/2.0+psm_gem_length) + psm_position;
+  GEM.reset(new GEMDetector);
+
+  //G4double world_width = (fPresamplerWidth+GEM->GetWidth()+psm_gem_length)*1.2;
+
+  presampler_front_position = 0;
+  G4ThreeVector psm_position = G4ThreeVector(0,0,+fPresamplerWidth/2.0+presampler_front_position);
+  G4ThreeVector gem_position = G4ThreeVector(0,0,presampler_front_position+fPresamplerWidth+psm_gem_length+GEM->GetWidth()/2.0);
 
   // World
-  G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size);
   G4Material* air  = G4Material::GetMaterial("G4_AIR");
   //G4Material* Al  = G4Material::GetMaterial("G4_Al");
   G4cout << "Computed tolerance = "
@@ -159,17 +159,11 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     << " mm" << G4endl;
 
   G4Box* worldS = new G4Box("world",                                    //its name
-      world_size/2,world_size/2,world_width/2); //its size
+      world_size/2,world_size/2,world_size/2); //its size
 
   G4LogicalVolume* worldLV = 
-    new G4LogicalVolume
-    (
-     worldS,   //its solid
-     air,      //its material
-     "World"
-    ); //its name
-
-  //  Must place the World Physical volume unrotated at (0,0,0).
+    new G4LogicalVolume ( worldS,air,"World"); 
+  //Must place the World Physical volume unrotated at (0,0,0).
   G4VPhysicalVolume* worldPV = 
     new G4PVPlacement
     (
@@ -184,7 +178,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     ); // checking overlaps 
 
   // Presampler
-  G4Tubs* psm_solid = new G4Tubs("presampler",0.,psm_radius,psm_width/2,0.*deg,360.*deg);
+  G4Tubs* psm_solid = new G4Tubs("presampler",0.,psm_radius,fPresamplerWidth/2,0.*deg,360.*deg);
   fLogicPresampler = new G4LogicalVolume(psm_solid, fPresamplerMaterial,"Presampler",0,0,0);
   new G4PVPlacement(0,               // no rotation
       psm_position,  // at (x,y,z)
@@ -201,12 +195,10 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   G4Tubs* gem_solid = new G4Tubs("gem",0,gem_radius,gem_width/2,0.*deg, 360.*deg);
   fLogicGem = new G4LogicalVolume(gem_solid,   fChamberMaterial, "Gem",0,0,0);  
                     */
-  GEM.reset(new GEMDetector);
-  fLogicGem = GEM->GetLogicalVolume();
   new G4PVPlacement(0,               // no rotation
                     gem_position, // at (x,y,z)
-                    fLogicGem,       // its logical volume
-                    "Tracker",       // its name
+                    GEM->GetLogicalVolume(),       // its logical volume
+                    "GEM",       // its name
                     worldLV,         // its mother  volume
                     false,           // no boolean operations
                     0,               // copy number
@@ -219,15 +211,15 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 
   worldLV      ->SetVisAttributes(boxVisAtt);
   fLogicPresampler ->SetVisAttributes(boxVisAtt);
-  fLogicGem    ->SetVisAttributes(boxVisAtt);
+  GEM->GetLogicalVolume()    ->SetVisAttributes(boxVisAtt);
 
   // Sensitive detectors
-  G4String trackerChamberSDname = "slrp/TrackerChamberSD";
+  G4String trackerChamberSDname = "slrp/GEMSD";
   GEMSensitiveDetector* aGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
   G4SDManager::GetSDMpointer()->AddNewDetector( aGEMSensitiveDetector );
-  fLogicGem->SetSensitiveDetector( aGEMSensitiveDetector );
-  //fLogicPresampler->SetSensitiveDetector(aGEMSensitiveDetector);
-  //fLogicGem->SetVisAttributes(chamberVisAtt);
+  GEM->GetDriftVolume()->SetSensitiveDetector(aGEMSensitiveDetector);
+  GEM->GetTransferVolume()->SetSensitiveDetector(aGEMSensitiveDetector);
+  //GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
 
   //BGO 145 22
   // Always return the physical world
@@ -236,50 +228,31 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
  
-void DetectorConstruction::SetTargetMaterial(G4String materialName)
+void DetectorConstruction::SetTargetMaterial(G4String )
 {
-  G4NistManager* nistManager = G4NistManager::Instance();
-  G4bool fromIsotopes = false;
 
-  G4Material* pttoMaterial = 
-              nistManager->FindOrBuildMaterial(materialName, fromIsotopes);
+  //G4NistManager* nistManager = G4NistManager::Instance();
+  //G4bool fromIsotopes = false;
 
-  if (fPresamplerMaterial != pttoMaterial) {
-     if ( pttoMaterial ) {
-        fPresamplerMaterial = pttoMaterial;
-        if (fLogicPresampler) fLogicPresampler->SetMaterial(fPresamplerMaterial);
-        G4cout << "\n----> The target is made of " << materialName << G4endl;
-     } else {
-        G4cout << "\n-->  WARNING from SetTargetMaterial : "
-               << materialName << " not found" << G4endl;
-     }
-  }
+  //G4Material* pttoMaterial = 
+  //            nistManager->FindOrBuildMaterial(materialName, fromIsotopes);
+
+  //if (fPresamplerMaterial != pttoMaterial) {
+  //   if ( pttoMaterial ) {
+  //      fPresamplerMaterial = pttoMaterial;
+  //      if (fLogicPresampler) fLogicPresampler->SetMaterial(fPresamplerMaterial);
+  //      G4cout << "\n----> The target is made of " << materialName << G4endl;
+  //   } else {
+  //      G4cout << "\n-->  WARNING from SetTargetMaterial : "
+  //             << materialName << " not found" << G4endl;
+  //   }
+  //}
 }
  
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::SetChamberMaterial(G4String materialName)
+void DetectorConstruction::SetChamberMaterial(G4String)
 {
-  G4NistManager* nistManager = G4NistManager::Instance();
-  G4bool fromIsotopes = false;
-
-  G4Material* pttoMaterial =
-    nistManager->FindOrBuildMaterial(materialName, fromIsotopes);
-
-  if (fChamberMaterial != pttoMaterial)
-  {
-    if ( pttoMaterial )
-    {
-      fChamberMaterial = pttoMaterial;
-      if (fLogicGem) fLogicGem-> SetMaterial(fChamberMaterial);
-    }
-    G4cout << "\n----> The chambers are made of " << materialName << G4endl;
-  } 
-  else 
-  {
-    G4cout << "\n-->  WARNING from SetChamberMaterial : "
-      << materialName << " not found" << G4endl;
-  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

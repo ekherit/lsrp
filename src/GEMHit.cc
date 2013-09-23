@@ -46,9 +46,12 @@ G4Allocator<GEMHit> GEMHitAllocator;
 GEMHit::GEMHit()
  : G4VHit(),
    fTrackID(-1),
-   fChamberNb(-1),
+   fParticleID(0),
+   fVolumeID(-1),
    fEdep(0.),
    fPos(G4ThreeVector()),
+   fMomentum(G4ThreeVector()),
+   fCharge(0),
    fPad()
 {}
 
@@ -62,10 +65,13 @@ GEMHit::GEMHit(const GEMHit& right)
   : G4VHit()
 {
   fTrackID   = right.fTrackID;
-  fChamberNb = right.fChamberNb;
+  fParticleID       = right.fParticleID;
+  fVolumeID = right.fVolumeID;
   fEdep      = right.fEdep;
   fPos       = right.fPos;
   fPad       = right.fPad;
+  fCharge    = right.fCharge;
+  fMomentum       = right.fMomentum;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -73,11 +79,13 @@ GEMHit::GEMHit(const GEMHit& right)
 const GEMHit& GEMHit::operator=(const GEMHit& right)
 {
   fTrackID   = right.fTrackID;
-  fChamberNb = right.fChamberNb;
+  fParticleID = right.fParticleID;
+  fVolumeID = right.fVolumeID;
   fEdep      = right.fEdep;
   fPos       = right.fPos;
   fPad       = right.fPad;
-
+  fCharge       = right.fCharge;
+  fMomentum       = right.fMomentum;
   return *this;
 }
 
@@ -110,7 +118,7 @@ void GEMHit::Draw()
 void GEMHit::Print()
 {
   G4cout
-     << "  trackID: " << fTrackID << " chamberNb: " << fChamberNb
+     << "  trackID: " << fTrackID << " volumeID: " << fVolumeID
      << "Edep: "
      << std::setw(7) << G4BestUnit(fEdep,"Energy")
      << " Position: "

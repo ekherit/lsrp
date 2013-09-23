@@ -59,13 +59,18 @@ class GEMDetector
     G4double GetCuprumWidth(void) const { return fCuprumWidth; }
   };
   std::unique_ptr<AmplificationCascade> fAmplCascade;
-  std::vector<std::unique_ptr<G4LogicalVolume>> fTransferVolume;
+  std::unique_ptr<G4LogicalVolume> fTransferVolume;
   G4Material * Ar;
   G4Material * stef;
   public:
     GEMDetector(void);
-    G4LogicalVolume * GetLogicalVolume(void) {return LV.get();}
     G4double GetWidth(void) { return fGEMWidth; }
+    G4LogicalVolume * GetLogicalVolume(void) {return LV.get();}
+    G4LogicalVolume * GetDriftVolume(void) { return fDriftVolume.get(); }
+    G4LogicalVolume * GetTransferVolume(void) { return fTransferVolume.get(); }
+    void PrintGeometry(void);
+    G4int GetCascadeNumber(void) const { return fCascadeNumber; }
+    G4LogicalVolume * fStefVolume;
 };
 
 #endif
