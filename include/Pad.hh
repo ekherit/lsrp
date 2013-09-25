@@ -19,6 +19,7 @@
 #define IBN_LSRP_PAD_H
 //describes hexagonal pad
 #include <cmath>
+#include <list>
 class Pad
 {
   double fa; // pad size
@@ -31,6 +32,7 @@ class Pad
   double x(void)const  { return fx;}
   double y(void) const { return fy;}
   double size(void) const {return fa;}
+  std::list<unsigned> tracks; //original track ids
   Pad(double a=1)
   {
     Init(a);
@@ -104,6 +106,11 @@ class Pad
 inline bool operator==(const Pad & p1, const Pad & p2) 
 {
   return p1.fnx == p2.fnx && p1.fny==p2.fny;
+}
+
+inline bool operator!=(const Pad & p1, const Pad & p2) 
+{
+  return p1.fnx != p2.fnx || p1.fny!=p2.fny;
 }
 
 inline bool operator<(const Pad & p1, const Pad & p2) 

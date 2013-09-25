@@ -53,8 +53,6 @@ class EventAction : public G4UserEventAction
 
     // Set methods
     void SetPrintModulo(G4int value);
-    //std::map<Pad, double> fPadCharge;
-    //std::map<Pad, unsigned> fPadHit;
     std::list<Pad> fPads;
   private:
     G4int  fPrintModulo;

@@ -27,7 +27,7 @@ GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double 
   fCuprumWidth=cuprum_width;
   fKaptonWidth=kapton_width;
   fWidth=kapton_width+2.0*cuprum_width;
-  fRadius=size;
+  fRadius=size/2.0;
   kapton = G4NistManager::Instance()->FindOrBuildMaterial("G4_KAPTON");
   Cu     = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
   G4Tubs * KaptonSV = new G4Tubs("Kapton",0,fRadius, fWidth/2.,0.*deg,360.*deg);
@@ -118,7 +118,7 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       0, //copy number
-      true); //check overlaps
+      fCheckOverlaps); //check overlaps
   //place back stef
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,+fGEMWidth/2.0-fPadWidth-fStefWidth/2.0), //position
@@ -127,20 +127,21 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       1, //copy number
-      true); //check overlaps
+      fCheckOverlaps); //check overlaps
 
   //create pad and back electrondes
   G4Tubs * PadSV = new G4Tubs("Pads",0.,fRadius,fPadWidth/2.,0.*deg,360.*deg);
   G4Material * Cu = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
   G4LogicalVolume * padLV = new G4LogicalVolume(PadSV, Cu,"Pad");
+  fPadZposition = fGEMWidth/2.0-fPadWidth-fStefWidth-fPadWidth/2.0;
   new G4PVPlacement(0, //no rotation
-      G4ThreeVector(0,0,fGEMWidth/2.0-fPadWidth-fStefWidth-fPadWidth/2.0), //position
+      G4ThreeVector(0,0,fPadZposition), //position
       padLV,
       "Pad", //the name
       LV.get(), //mother logical volume
       false, //no boolen operations
       0, //copy number
-      true); //check overlaps
+      fCheckOverlaps); //check overlaps
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,fGEMWidth/2.0-fPadWidth/2.0), //position
       padLV,
@@ -148,7 +149,7 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       1, //copy number
-      true); //check overlaps
+      fCheckOverlaps); //check overlaps
 
   //describe drift region
   G4Tubs * DriftSV = new G4Tubs("Drift",0.,fRadius,fDriftLength/2.0,0.*deg,360.*deg);
@@ -160,7 +161,7 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       0, //copy number
-      true); //check overlaps
+      fCheckOverlaps); //check overlaps
 
   //Describe amplification cascade
   fAmplCascade.reset(new AmplificationCascade(2*fRadius, fKaptonWidth, fCuprumWidth));
@@ -174,7 +175,7 @@ GEMDetector::GEMDetector(void)
         LV.get(), //mother logical volume
         false, //no boolen operations
         i, //copy number
-        true); //check overlaps
+        fCheckOverlaps); //check overlaps
   }
 
   //describe TransfereVolume
@@ -192,10 +193,10 @@ GEMDetector::GEMDetector(void)
         LV.get(), //mother logical volume
         false, //no boolen operations
         i+1, //copy number //zero is for DriftVolume
-        true); //check overlaps
+        fCheckOverlaps); //check overlaps
   }
-  fDriftVolume->SetUserLimits(new G4UserLimits(fDriftLength));
-  fTransferVolume->SetUserLimits(new G4UserLimits(fTransferLength));
+  //fDriftVolume->SetUserLimits(new G4UserLimits(fDriftLength/10.));
+  //fTransferVolume->SetUserLimits(new G4UserLimits(fTransferLength/10.));
   PrintGeometry();
 }
 

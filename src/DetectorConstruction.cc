@@ -68,9 +68,7 @@ DetectorConstruction* DetectorConstruction::Instance(void)
  
 DetectorConstruction::DetectorConstruction()
 : 
-  //fNbOfChambers(0),
   fLogicPresampler(nullptr),
-  //fLogicChamber(NULL), 
   fPresamplerMaterial(NULL), fChamberMaterial(NULL), 
   fStepLimit(NULL),
  fCheckOverlaps(true)
@@ -186,15 +184,10 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
       "Presampler",        // its name
       worldLV,         // its mother volume
       false,           // no boolean operations
-      0,               // copy number
+      10,               // copy number
       fCheckOverlaps); // checking overlaps 
 
 
-  // Tracker = gem
-  /* temporary comment try to use GEMDetector
-  G4Tubs* gem_solid = new G4Tubs("gem",0,gem_radius,gem_width/2,0.*deg, 360.*deg);
-  fLogicGem = new G4LogicalVolume(gem_solid,   fChamberMaterial, "Gem",0,0,0);  
-                    */
   new G4PVPlacement(0,               // no rotation
                     gem_position, // at (x,y,z)
                     GEM->GetLogicalVolume(),       // its logical volume
@@ -204,6 +197,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
                     0,               // copy number
                     fCheckOverlaps); // checking overlaps 
 
+  fPadZPosition = GEM->GetPadZ() + gem_position.z();
   // Visualization attributes
 
   G4VisAttributes* boxVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));
@@ -216,9 +210,12 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   // Sensitive detectors
   G4String trackerChamberSDname = "slrp/GEMSD";
   GEMSensitiveDetector* aGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
+  aGEMSensitiveDetector->SetPadZ(fPadZPosition);
   G4SDManager::GetSDMpointer()->AddNewDetector( aGEMSensitiveDetector );
   GEM->GetDriftVolume()->SetSensitiveDetector(aGEMSensitiveDetector);
   GEM->GetTransferVolume()->SetSensitiveDetector(aGEMSensitiveDetector);
+  //fLogicPresampler->SetSensitiveDetector(aGEMSensitiveDetector);
+  //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
   //GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
 
   //BGO 145 22
@@ -259,6 +256,7 @@ void DetectorConstruction::SetChamberMaterial(G4String)
  
 void DetectorConstruction::SetMagField(G4double fieldValue)
 {
+  G4cout << "Set Magnetic field: " << fieldValue/tesla << " T" << G4endl;
   fMagField->SetMagFieldValue(fieldValue);
 }
 

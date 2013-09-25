@@ -38,6 +38,8 @@
 #include "G4ThreeVector.hh"
 #include "Pad.hh"
 
+#include <list>
+
 /// Tracker hit class
 ///
 /// It defines data members to store the trackID, chamberNb, energy deposit,
@@ -64,6 +66,7 @@ class GEMHit : public G4VHit
 
     // Set methods
     void SetTrackID  (G4int track)      { fTrackID = track; };
+    void SetOriginalTrackID  (G4int track)      { fOriginalTrackID = track; };
     void SetParticleID  (G4int pid)      { fParticleID = pid; };
     void SetVolumeID (G4int volume)      { fVolumeID = volume; };
     void SetEdep     (G4double de)      { fEdep = de; };
@@ -71,9 +74,11 @@ class GEMHit : public G4VHit
     void SetMomentum (const G4ThreeVector & k ) { fMomentum = k;}
     void SetCharge   (G4double charge)  { fCharge = charge; fPad.charge=fCharge; }
     void FindPad(void) { fPad = Pad(Cfg.pad_size*mm, fPos.x(), fPos.y()); fPad.charge=fCharge;}
+    void SetPads(const std::list<Pad> & pads ) { fPads = pads;}
 
     // Get methods
     G4int GetTrackID() const     { return fTrackID; };
+    G4int GetOriginalTrackID() const     { return fOriginalTrackID; };
     G4int GetParticleID() const     { return fParticleID; };
     G4int GetVolumeID() const   { return fVolumeID; };
     G4double GetEdep() const     { return fEdep; };
@@ -81,11 +86,14 @@ class GEMHit : public G4VHit
     G4ThreeVector GetPos() const { return fPos; };
     G4ThreeVector GetMomentum() const { return fMomentum; };
     const Pad & GetPad(void) const { return fPad; };
+    const std::list<Pad> & GetPads(void) const { return fPads; };
+
 
 
   private:
 
       G4int         fTrackID;
+      G4int         fOriginalTrackID;
       G4int         fParticleID;
       G4int         fVolumeID;
       G4double      fEdep;
@@ -93,7 +101,7 @@ class GEMHit : public G4VHit
       G4ThreeVector fMomentum; 
       G4double      fCharge;
       Pad           fPad;
-
+      std::list<Pad> fPads; // list of pads
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

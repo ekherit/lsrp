@@ -60,9 +60,12 @@ class GEMSensitiveDetector : public G4VSensitiveDetector
     virtual void   Initialize(G4HCofThisEvent* hitCollection);
     virtual G4bool ProcessHits(G4Step* step, G4TouchableHistory* history);
     virtual void   EndOfEvent(G4HCofThisEvent* hitCollection);
+    void SetPadZ(G4double z) { fPadZPosition = z; }
+    G4double GetAmplification(int volume);
 
   private:
     GEMHitsCollection* fHitsCollection;
+    G4double fPadZPosition;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

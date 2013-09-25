@@ -41,6 +41,7 @@
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4Electron.hh"
 
 #include "Randomize.hh"
 #include <ibn/integral.h>
@@ -58,11 +59,10 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   // default particle kinematic
 
   fGamma = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
-  fElectron  = G4ParticleTable::GetParticleTable()->FindParticle("electron");
+  //fElectron  = G4ParticleTable::GetParticleTable()->FindParticle("electron");
+  fElectron = G4Electron::Definition();
+  std::cout << fGamma << " " << fElectron << std::endl;
 
-  fParticleGun->SetParticleDefinition(fGamma);
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-  fParticleGun->SetParticleEnergy(6.0*MeV);
 
   const G4double Hz = 1.0/s;
   const G4double kHz = 1e3/s;
@@ -152,6 +152,25 @@ void variate_agnle(ibn::phys::compton & C, double dx , double dy)
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
+  switch(Cfg.test_beam)
+  {
+    case 1:
+      fParticleGun->SetParticleDefinition(fElectron);
+      fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
+      fParticleGun->SetParticleEnergy(400*MeV);
+      fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, Cfg.psm_width*mm+Cfg.psm_gem_length*mm));
+      fParticleGun->GeneratePrimaryVertex(anEvent);
+      {
+        GeneratorEvent gevent;;
+        gevent.x = 0;
+        gevent.y = 0;
+        gevent.z = 0;
+        gevent.E = 400;
+        ROOTManager::Instance()->event.gen.push_back(gevent);
+      }
+      return;
+  }
+  fParticleGun->SetParticleDefinition(fGamma);
   // This function is called at the begining of event
   //drop polarization
   double Pg = (G4UniformRand()-0.5) > 0 ? 1 : -1; //variate photon polarization

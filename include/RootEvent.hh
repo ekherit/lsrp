@@ -37,6 +37,22 @@
 
 using namespace ibn::phys;
 
+class PadEvent : public TObject
+{
+  public:
+  PadEvent(void);
+  Long64_t nx;
+  Long64_t ny;
+  Double_t x; //mm
+  Double_t y; //mm
+  Double_t q;  //collected charge coulomb
+  Long64_t nhit; //number of hit for this pad
+  Long64_t nphot; //number of different photons in this pad
+  Double_t xhit; //mm
+  Double_t yhit; //mm
+  ClassDef(PadEvent, 1); //The class title
+};
+
 class GeneratorEvent : public TObject
 {
   public:
@@ -60,16 +76,19 @@ class GeneratorEvent : public TObject
   double x; //position
   double y;
   double z; 
+  std::vector<PadEvent*> pad;
   ClassDef(GeneratorEvent, 1); //The class title
 };
 
 GeneratorEvent makeGeneratorEvent(const compton & );
+
 
 class HitEvent : public TObject 
 {
   public:
   HitEvent(void);
   Long64_t trackID;
+  Long64_t OrigTrackID;
   Long64_t pid;
   Long64_t volumeID;
   Double_t E;
@@ -82,20 +101,6 @@ class HitEvent : public TObject
   ClassDef(HitEvent, 1); //The class title
 };
 
-class PadEvent : public TObject
-{
-  public:
-  PadEvent(void);
-  Long64_t nx;
-  Long64_t ny;
-  Double_t x; //mm
-  Double_t y; //mm
-  Double_t q;  //collected charge coulomb
-  Long64_t nhit; //number of hit for this pad
-  Double_t xhit; //mm
-  Double_t yhit; //mm
-  ClassDef(PadEvent, 1); //The class title
-};
 
 class RootEvent : public TObject
 {

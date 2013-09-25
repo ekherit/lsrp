@@ -46,6 +46,7 @@ G4Allocator<GEMHit> GEMHitAllocator;
 GEMHit::GEMHit()
  : G4VHit(),
    fTrackID(-1),
+   fOriginalTrackID(-1),
    fParticleID(0),
    fVolumeID(-1),
    fEdep(0.),
@@ -65,6 +66,7 @@ GEMHit::GEMHit(const GEMHit& right)
   : G4VHit()
 {
   fTrackID   = right.fTrackID;
+  fOriginalTrackID = right.fOriginalTrackID;
   fParticleID       = right.fParticleID;
   fVolumeID = right.fVolumeID;
   fEdep      = right.fEdep;
@@ -72,6 +74,7 @@ GEMHit::GEMHit(const GEMHit& right)
   fPad       = right.fPad;
   fCharge    = right.fCharge;
   fMomentum       = right.fMomentum;
+  fPads      = right.fPads;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -86,6 +89,7 @@ const GEMHit& GEMHit::operator=(const GEMHit& right)
   fPad       = right.fPad;
   fCharge       = right.fCharge;
   fMomentum       = right.fMomentum;
+  fPads      = right.fPads;
   return *this;
 }
 

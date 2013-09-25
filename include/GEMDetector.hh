@@ -40,6 +40,7 @@ class GEMDetector
   G4double fInductionLength; //induction length
   G4double fPadWidth;   //Pad width 15 mkm
   G4double fGEMWidth;
+  G4double fPadZposition; // z position of the pad
   std::unique_ptr<G4LogicalVolume> LV;
   std::unique_ptr<G4LogicalVolume> fDriftVolume;
   class AmplificationCascade  //amplification cascade
@@ -61,7 +62,6 @@ class GEMDetector
   std::unique_ptr<AmplificationCascade> fAmplCascade;
   std::unique_ptr<G4LogicalVolume> fTransferVolume;
   G4Material * Ar;
-  G4Material * stef;
   public:
     GEMDetector(void);
     G4double GetWidth(void) { return fGEMWidth; }
@@ -71,6 +71,8 @@ class GEMDetector
     void PrintGeometry(void);
     G4int GetCascadeNumber(void) const { return fCascadeNumber; }
     G4LogicalVolume * fStefVolume;
+    G4double GetPadZ(void) const {return fPadZposition;}
+    bool fCheckOverlaps=true;
 };
 
 #endif

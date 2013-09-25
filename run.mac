@@ -7,4 +7,5 @@
 #/hits/verbose 0
 /tracking/verbose 0
 /hits/verbose 0
-/run/beamOn 100
+#/slrp/det/setField 100 tesla
+/run/beamOn 10000

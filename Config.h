@@ -29,6 +29,8 @@ struct Config_t
   double gem_amplification; 
   unsigned gem_cascade_number;
   std::string output_file; //output file name
+  unsigned test_beam;
+  unsigned drift_spread;
 };
 
 extern  Config_t Cfg;

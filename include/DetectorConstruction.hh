@@ -72,23 +72,16 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     static DetectorConstruction * Instance();
 
     G4double presampler_front_position;
+    G4double GetPadZ(void) const { return fPadZPosition; }
 
   private:
     // methods
     void DefineMaterials();
     G4VPhysicalVolume* DefineVolumes();
-  
-    // data members
-    //G4int fNbOfChambers;
 
     std::unique_ptr<GEMDetector> GEM;
 
     G4LogicalVolume*   fLogicPresampler;
-    //G4LogicalVolume*   fLogicGem;
-    //G4LogicalVolume*   fLogicTarget;     // pointer to the logical Target
-    //G4LogicalVolume**  fLogicChamber;    // pointer to the logical Chamber
-
-    //G4Material*        fTargetMaterial;  // pointer to the target  material
     G4Material*        fPresamplerMaterial;  // pointer to the target  material
     G4Material*        fChamberMaterial; // pointer to the chamber material
 
@@ -101,6 +94,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     static DetectorConstruction * fgInstance;
 
     G4double fPresamplerWidth;
+    G4double fPadZPosition; //Z position of pad plate
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

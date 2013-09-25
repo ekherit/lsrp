@@ -33,6 +33,7 @@
 #include "PrimaryGeneratorAction.hh"
 #include "RunAction.hh"
 #include "EventAction.hh"
+#include "TrackingAction.hh"
 
 #include "G4StepLimiterBuilder.hh"
 
@@ -104,6 +105,8 @@ int main(int argc,char** argv)
     ("gem_cascade_number", po::value<unsigned>(&Cfg.gem_cascade_number)->default_value(3), "Number of amplificiation cascades")
     ("photon_number", po::value<unsigned>(&Cfg.photon_number)->default_value(1), "Number of photons per pulse")
     ("output", po::value<std::string>(&Cfg.output_file)->default_value("tmp.root"), "Output file name")
+    ("test_beam", po::value<unsigned>(&Cfg.test_beam)->default_value(0), "Test electron beam")
+    ("drift_spread", po::value<unsigned>(&Cfg.drift_spread)->default_value(1), "Drift spread on")
     ("help", "Print this help")
     ;
   po::positional_options_description pos;
@@ -165,7 +168,9 @@ int main(int argc,char** argv)
   runManager->SetUserAction(new PrimaryGeneratorAction());
   runManager->SetUserAction(new RunAction());
   runManager->SetUserAction(new EventAction());
+  runManager->SetUserAction(new TrackingAction());
   
+
   // Initialize G4 kernel
 
   runManager->Initialize();

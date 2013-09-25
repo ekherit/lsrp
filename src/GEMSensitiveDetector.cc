@@ -31,7 +31,9 @@
 #include <ibn/math.h>
 #include "GEMSensitiveDetector.hh"
 #include "ROOTManager.hh"
+#include "TrackInformation.hh"
 
+#include "Randomize.hh"
 #include "G4HCofThisEvent.hh"
 #include "G4Step.hh"
 #include "G4ThreeVector.hh"
@@ -69,35 +71,102 @@ void GEMSensitiveDetector::Initialize(G4HCofThisEvent* hce)
   hce->AddHitsCollection( hcID, fHitsCollection ); 
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+std::list<Pad> GetHitPadList(G4ThreeVector hit_pos, double total_charge, double spot_size, unsigned N=2500)
+{
+  std::list<Pad> Pads;
+  for(unsigned i=0;i<N;i++)
+  {
+    G4double x = G4RandGauss::shoot(hit_pos.x(), spot_size);
+    G4double y = G4RandGauss::shoot(hit_pos.y(), spot_size);
+    Pad pad(Cfg.pad_size, x,y);
+    //std::cout << hit_pos.x() << "," << hit_pos.y() << " ->     " << x << "," << y << " spot_size=" << spot_size/mm << " mm";
+    //std::cout << "     " << pad.x() << "," << pad.y() << std::endl;
+    auto p = std::find(std::begin(Pads),std::end(Pads), pad);
+    if(p==Pads.end()) 
+    {
+      Pads.push_back(pad);
+    }
+    else
+    {
+      p->nhit++;
+    }
+  }
+  //calculate charge fraction
+  for(auto & p : Pads) 
+  {
+    p.charge = double(p.nhit)/double(N)*total_charge;
+    p.nhit=1;
+  }
+  return Pads;
+}
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {  
   // energy deposit
   G4double edep = aStep->GetTotalEnergyDeposit();
   G4double charge = edep/(85.7*eV);
+  G4ThreeVector r = aStep->GetPostStepPoint()->GetPosition(); //hit position 
 
   if (edep==0.) return false;
 
   GEMHit* newHit = new GEMHit();
 
   auto track = aStep->GetTrack();
+  TrackInformation* info = (TrackInformation*)(track->GetUserInformation());
+  //G4cout << " Original Track ID " << info->GetOriginalTrackID() << G4endl;
+
   newHit->SetTrackID  (track->GetTrackID());
+  newHit->SetOriginalTrackID (info->GetOriginalTrackID());
   newHit->SetParticleID(track->GetParticleDefinition()->GetPDGEncoding());
   newHit->SetVolumeID(aStep->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber());
   newHit->SetEdep(edep);
-  newHit->SetPos (aStep->GetPostStepPoint()->GetPosition());
+  newHit->SetPos(r);
   newHit->SetMomentum(track->GetVertexMomentumDirection());
   newHit->FindPad();
-  //calculate amplified charge
-  double K0 = Cfg.gem_amplification; //maximum amplification coeff
-  double Nc = Cfg.gem_cascade_number; //number amplif cascades
-  double K =  pow(K0, (Nc-newHit->GetVolumeID())/Nc);
-  newHit->SetCharge(charge*K);
+  newHit->SetCharge(charge*GetAmplification(newHit->GetVolumeID()));
+  std::list<Pad> pad_list;
+  if(Cfg.drift_spread)
+  {
+    // calculate drift length
+    G4double  drift_length = fPadZPosition - r.z();
+    G4double  drift_speed = 15*um/mm;
+    G4double  spot_size = drift_speed*drift_length;
+    pad_list = GetHitPadList(r, newHit->GetCharge(), spot_size/2.);
+  }
+  else 
+  {
+    pad_list.push_back(newHit->GetPad());
+  }
+  //Fill information about original photon
+  for(auto & p : pad_list)
+  {
+    p.tracks.clear();
+    p.tracks.push_back(info->GetOriginalTrackID());
+    //no there is only one id in each pad.
+  }
+  newHit->SetPads(pad_list);
+  //std::cout << "initial pad: " << newHit->GetPad().x() << "," << newHit->GetPad().y() << std::endl;
+  //for(auto & p : newHit->GetPads())
+  //{
+  //  std::cout << "               " << p.x() << "," << p.y() << " frac: " << setprecision(3) << p.charge/newHit->GetPad().charge*100 << std::endl;
+  //}
+
   fHitsCollection->insert( newHit );
   //newHit->Print();
   return true;
 }
+
+G4double GEMSensitiveDetector::GetAmplification(int volume_id)
+{
+  double K0 = Cfg.gem_amplification; //maximum amplification coeff
+  double Nc = Cfg.gem_cascade_number; //number amplif cascades
+  double K =  pow(K0, (Nc-volume_id)/Nc);
+  return K;
+}
+
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
