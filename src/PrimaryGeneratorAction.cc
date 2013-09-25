@@ -169,6 +169,21 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         ROOTManager::Instance()->event.gen.push_back(gevent);
       }
       return;
+    case 2:
+      fParticleGun->SetParticleDefinition(fGamma);
+      fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
+      fParticleGun->SetParticleEnergy(400*MeV);
+      fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, 0));
+      fParticleGun->GeneratePrimaryVertex(anEvent);
+      {
+        GeneratorEvent gevent;;
+        gevent.x = 0;
+        gevent.y = 0;
+        gevent.z = 0;
+        gevent.E = 400;
+        ROOTManager::Instance()->event.gen.push_back(gevent);
+      }
+      return;
   }
   fParticleGun->SetParticleDefinition(fGamma);
   // This function is called at the begining of event
