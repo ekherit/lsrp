@@ -75,7 +75,6 @@ class GeneratorEvent : public TObject
   double y;
   double z; 
   std::vector<PadEvent> pad;
-  //std::vector<TRef> pad;
   ClassDef(GeneratorEvent, 1); //The class title
 };
 
@@ -97,7 +96,6 @@ class HitEvent : public TObject
   Double_t rho;
   Double_t phi;
   Double_t q;  //collected charge
-  //GeneratorEvent * gen;
   ClassDef(HitEvent, 1); //The class title
 };
 
@@ -121,6 +119,7 @@ class RootEvent : public TObject
     Eb=-1;
     nphot=-1;
     nhit=-1;
+    npad=-1;
     hit.clear();
     pad.clear();
     gen.clear();

@@ -71,13 +71,13 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   const G4double mA = 1e-3; //A
 
   fFlightLength = 50000*mm;
-  fThetaMax = 20.0*cm/fFlightLength;
+  fThetaMax = Cfg.psm_size/2.0/fFlightLength;
   fBeamEnergy = 5*GeV;
   double lambda = 0.5e-6; //in meters
   //const double hc = 197.326968e-15; // MeV*m;
   double photon_energy = 2*M_PI*ibn::phys::hc/lambda*MeV; //MeV, should be 2.48e-6 MeV
   fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy,1,1));
-  double y = 50*mm; //mm
+  double y = Cfg.psm_size/2.0*mm; //mm
   double theta_max = y/fFlightLength;
   double cos_rf = fCompton->cos_rf(cos(theta_max));
   double xmax = fCompton->xcos(cos_rf);
@@ -111,10 +111,12 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   G4cout << "sigma = " << sigma/(m*m) << " m^2" << " (" << sigma/(1e-24*cm*cm) << " b)"<<G4endl;
   G4double nu = sigma*(ibn::phys::c*m/s)*Ne*ngamma;
   G4cout << "Rate: " << nu/GHz << " GHz" << G4endl;
-  G4cout << "number of scattered photons: " << nu*puls_time << " per pulse" << G4endl;
+  G4double Ncbs = nu*puls_time/2.0;
+  G4cout << "number of scattered photons: " <<  Ncbs<< " per pulse" << G4endl; //двойка из-за встречного движения пучка
   G4double  laser_frequency = 5*kHz;
   G4cout << "Laser frequency: " << laser_frequency/kHz << " kHz" << G4endl;
-  G4cout << "Photon rate to detector: " << laser_frequency*nu*puls_time/kHz <<" kHz" <<  G4endl;
+  G4double rate = Ncbs*laser_frequency;
+  G4cout << "Photon rate to detector: " << rate/kHz <<" kHz" <<  G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

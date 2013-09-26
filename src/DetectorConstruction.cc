@@ -133,10 +133,7 @@ void DetectorConstruction::DefineMaterials()
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
   fPresamplerWidth = Cfg.psm_width*mm; //presampler width
-  G4double psm_radius =  20*cm; //Radius of the presampler
-  //G4double gem_radius = 20*cm;
-  //G4double gem_width = Cfg.gem_width*mm;
-  //G4double psm_width  = Cfg.psm_width*cm; //width of the Pb presampler
+  G4double psm_radius =  Cfg.psm_size*mm/2.0; //Radius of the presampler
   G4double psm_gem_length=Cfg.psm_gem_length*mm; //distance between presampler and gem
   G4double world_size=2*psm_radius*1.2;
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size);

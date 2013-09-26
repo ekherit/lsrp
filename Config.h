@@ -21,13 +21,16 @@
 #include <string>
 struct Config_t
 {
+  unsigned photon_number; //number of photons in one pulse
+  //geometry
   double psm_width; //presampler width in cm
+  double psm_size;  //size of the presampler
   double psm_gem_length; //distance between presampler and gem
   double gem_width; //gem width
+  double gem_size; //size of the gem in mm
+  double gem_amplification;  //1e4
   double pad_size;  //size of signe pad in mm
-  unsigned photon_number; //number of photons in one pulse
-  double gem_amplification; 
-  unsigned gem_cascade_number;
+  unsigned gem_cascade_number; //number of amplification cascades 3
   std::string output_file; //output file name
   unsigned test_beam;
   unsigned drift_spread;

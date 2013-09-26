@@ -114,7 +114,6 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
   auto track = aStep->GetTrack();
   TrackInformation* info = (TrackInformation*)(track->GetUserInformation());
-  //G4cout << " Original Track ID " << info->GetOriginalTrackID() << G4endl;
 
   newHit->SetTrackID  (track->GetTrackID());
   newHit->SetOriginalTrackID (info->GetOriginalTrackID());

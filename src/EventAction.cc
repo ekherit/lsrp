@@ -95,8 +95,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
   {
     GEMHit * hit = (GEMHit*)hc->GetHit(i);
     RM->event.hit[i].trackID = hit->GetTrackID();
-    //RM->event.hit[i].gen = 0;
-    //RM->event.hit[i].gen = &(RM->event.gen[0]);
     RM->event.hit[i].OrigTrackID = hit->GetOriginalTrackID();
     RM->event.hit[i].pid = hit->GetParticleID();
     RM->event.hit[i].volumeID = hit->GetVolumeID();
@@ -106,6 +104,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
     RM->event.hit[i].z = hit->GetPos().z()/mm;
     RM->event.hit[i].rho = sqrt(ibn::sq(RM->event.hit[i].y) + ibn::sq(RM->event.hit[i].y));
     RM->event.hit[i].phi = hit->GetPos().phi();
+    RM->event.hit[i].q = hit->GetCharge()/coulomb*1e15;
     for(auto & pad : hit->GetPads())
     {
       auto p = std::find(std::begin(fPads),std::end(fPads), pad);
@@ -148,15 +147,18 @@ void EventAction::EndOfEventAction(const G4Event* event)
     epad.q = epad.q/coulomb*1e15; //fC or femtocoulomb 
     epad.nhit = p.nhit;
     epad.nphot = p.tracks.size();
-    for(auto & track : p.tracks)
+    for(auto & track : p.tracks) 
     {
-      //RM->event.gen[track-1].pad.push_back(&(RM->event.pad[i]));
+      if(track>Cfg.photon_number)
+      {
+        G4cout << "Original track more then photon number: " << track << " > " << Cfg.photon_number << G4endl;
+        continue;
+      }
       RM->event.gen[track-1].pad.push_back(epad);
     }
     i++;
   }
   RM->tree->Fill();
-  RM->event.clear();
 
   // periodic printing
 
@@ -167,8 +169,9 @@ void EventAction::EndOfEventAction(const G4Event* event)
              << " trajectories stored in this event." << G4endl;
     }
     G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
-    G4cout << "    "  << hc->GetSize() << " hits stored in this event" << G4endl;
+    G4cout << "    "  << hc->GetSize() << " " << RM->event.npad << " hits and pads stored in this event" << G4endl;
   }
+  RM->event.clear();
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

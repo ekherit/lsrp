@@ -85,8 +85,8 @@ G4Material * StefMaterial(void)
 GEMDetector::GEMDetector(void)
 {
   //describe main size
-  fSizeX = 20*cm;
-  fSizeY = 20*cm;
+  fSizeX = Cfg.gem_size*mm;
+  fSizeY = Cfg.gem_size*mm;
   fRadius = std::max(fSizeX, fSizeY)/2.0;
   fStefWidth=1.5*mm;
   fDriftLength = 3*mm;
@@ -101,7 +101,6 @@ GEMDetector::GEMDetector(void)
     + fCascadeNumber*fCascadeWidth +(fCascadeNumber-1)*fTransferLength
     + fInductionLength + fPadWidth*2;
 
-  //G4cout << "GEM width is " << fGEMWidth/mm << " mm" << G4endl;
   G4Tubs * solid_volume = new G4Tubs("GEM",0,fRadius, fGEMWidth/2.,0.*deg,360.*deg);
   Ar = G4NistManager::Instance()->FindOrBuildMaterial("G4_Ar");
   LV.reset(new G4LogicalVolume(solid_volume, Ar,"GEM"));
