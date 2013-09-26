@@ -43,6 +43,7 @@ class G4UserLimits;
 
 class DetectorMessenger;
 class MagneticField;
+class GEMSensitiveDetector;
 
 #include "GEMDetector.hh"
 /// Detector construction class to define materials and geometry.
@@ -80,6 +81,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* DefineVolumes();
 
     std::unique_ptr<GEMDetector> GEM;
+    //std::unique_ptr<GEMSensitiveDetector> fGEMSensitiveDetector;
+    GEMSensitiveDetector * fGEMSensitiveDetector;
 
     G4LogicalVolume*   fLogicPresampler;
     G4Material*        fPresamplerMaterial;  // pointer to the target  material
@@ -95,6 +98,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     G4double fPresamplerWidth;
     G4double fPadZPosition; //Z position of pad plate
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

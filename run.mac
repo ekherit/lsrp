@@ -8,4 +8,8 @@
 /tracking/verbose 0
 /hits/verbose 0
 #/slrp/det/setField 100 tesla
-/run/beamOn 200
+/lsrp/RootFile tmp2.root
+/run/beamOn 10
+
+/lsrp/RootFile tmp3.root
+/run/beamOn 5

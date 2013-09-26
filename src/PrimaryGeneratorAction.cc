@@ -70,16 +70,17 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   const G4double GHz = 1e9/s;
   const G4double mA = 1e-3; //A
 
-  fFlightLength = 50000*mm;
-  fThetaMax = Cfg.psm_size/2.0/fFlightLength;
+  fFlightLength = Cfg.photon_flight_length*mm;
+  //Ymax should be smaller than detector size in order to supress outside world volume hit
+  G4double Ymax = 0.5*(Cfg.psm_size*mm/2.);
+  fThetaMax = Ymax/fFlightLength;
+  G4cout << "fThetaMax = " << fThetaMax << G4endl;
   fBeamEnergy = 5*GeV;
   double lambda = 0.5e-6; //in meters
   //const double hc = 197.326968e-15; // MeV*m;
   double photon_energy = 2*M_PI*ibn::phys::hc/lambda*MeV; //MeV, should be 2.48e-6 MeV
   fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy,1,1));
-  double y = Cfg.psm_size/2.0*mm; //mm
-  double theta_max = y/fFlightLength;
-  double cos_rf = fCompton->cos_rf(cos(theta_max));
+  double cos_rf = fCompton->cos_rf(cos(fThetaMax));
   double xmax = fCompton->xcos(cos_rf);
   double xmin = 1./(1.0+2.0*fCompton->chi);
   double Integral  = ibn::dgaus(*fCompton,xmin,xmax,1e-10);
@@ -102,8 +103,8 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   G4double ngamma = Ngamma/(puls_length*ibn::sq(puls_size));
   G4cout << "number of initial photons: " << Ngamma << G4endl;
   G4cout << "density of photon beam: " << ngamma*mm*mm*mm << " 1/mm^3" << G4endl;
-  G4cout << "Ymax = " << fFlightLength*theta_max/cm << " cm" << G4endl;
-  G4cout << "theta_max = " << theta_max << G4endl;
+  G4cout << "Ymax = " << fFlightLength*fThetaMax/cm << " cm" << G4endl;
+  G4cout << "fThetaMax = " << fThetaMax << G4endl;
   G4cout << "xmin = " << xmin << endl;
   G4cout << "xmax = " << xmax << endl;
   G4cout << "Integral = " << Integral << endl;

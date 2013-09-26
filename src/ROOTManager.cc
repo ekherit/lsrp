@@ -29,13 +29,25 @@ ROOTManager* ROOTManager::Instance(void)
 
 ROOTManager::ROOTManager(void)
 {
-  file.reset(new TFile(Cfg.output_file.c_str(),"RECREATE"));
-  tree.reset(new TTree("lsrp","Laser polarimeter simulation"));
-  tree->Branch("event",&event);
+  SetRootFile(Cfg.output_file.c_str());
 }
 
 ROOTManager::~ROOTManager()
 {
 }
 
+void ROOTManager::SetRootFile(const char * root_file_name)
+{
+  Cfg.output_file = root_file_name;
+  if(tree) tree->Write(); //save tree
+  //tree will be deleted while destroing TFile
+  file.reset(new TFile(Cfg.output_file.c_str(),"RECREATE"));
+  InitTree();
+}
+
+void ROOTManager::InitTree(void)
+{
+  tree = new TTree("lsrp","Laser polarimeter simulation");
+  tree->Branch("event",&event);
+}
 

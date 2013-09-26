@@ -32,58 +32,13 @@ class ROOTManager
   public:
     static ROOTManager* Instance(void);
     std::unique_ptr<TFile> file;
-    std::unique_ptr<TTree> tree;
-    //std::unique_ptr<TTree> gen_tree;
-    //struct generator_t
-    //{
-    //  Long64_t eventID; //event id
-    //  double P; //polarization of gamma quant
-    //  double Eb; //electron beam energy
-    //  double gamma; //gamma factor
-    //  double omega; //photon energy in r.f. of electron
-    //  double chi; //hardness of photon
-    //  double E; //energy of gamma quant, MeV
-    //  double kx; // x momentum, MeV
-    //  double ky; //
-    //  double kz; //
-    //  double nx;
-    //  double ny;
-    //  double nz;
-    //  double theta; 
-    //  double phi;
-    //  double x; //position
-    //  double y;
-    //  double z; 
-    //} Gen;
-
-    //struct hit_t
-    //{
-    //  Long64_t trackID;
-    //  Long64_t volumeID;
-    //  double   E;
-    //  double x;
-    //  double y;
-    //  double z;
-    //  double rho;
-    //  double phi;
-    //} Hit;
-
-    //struct Hit_t
-    //{
-    //  Long64_t nhit; //number of hits
-    //  Long64_t trackID[100];
-    //  Long64_t volumeID[100];
-    //  Double_t E[100];
-    //  double x[100];
-    //  double y[100];
-    //  double z[100];
-    //  double rho[100];
-    //  double phi[100];
-    //} hit;
+    //std::unique_ptr<TTree> tree;
+    TTree* tree=0;
     RootEvent event;
-    
+    void SetRootFile(const char * file="");
   private:
-    ROOTManager(); 
+    ROOTManager(void); 
+    void InitTree(void);
     ~ROOTManager(); 
     static ROOTManager* fgInstance;
 };

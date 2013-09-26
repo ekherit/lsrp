@@ -206,11 +206,11 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 
   // Sensitive detectors
   G4String trackerChamberSDname = "slrp/GEMSD";
-  GEMSensitiveDetector* aGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
-  aGEMSensitiveDetector->SetPadZ(fPadZPosition);
-  G4SDManager::GetSDMpointer()->AddNewDetector( aGEMSensitiveDetector );
-  GEM->GetDriftVolume()->SetSensitiveDetector(aGEMSensitiveDetector);
-  GEM->GetTransferVolume()->SetSensitiveDetector(aGEMSensitiveDetector);
+  fGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
+  fGEMSensitiveDetector->SetPadZ(fPadZPosition);
+  G4SDManager::GetSDMpointer()->AddNewDetector(fGEMSensitiveDetector);
+  GEM->GetDriftVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
+  GEM->GetTransferVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
   //fLogicPresampler->SetSensitiveDetector(aGEMSensitiveDetector);
   //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
   //GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);

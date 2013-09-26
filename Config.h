@@ -22,6 +22,7 @@
 struct Config_t
 {
   unsigned photon_number; //number of photons in one pulse
+  double photon_flight_length; //Photon flight length in mm
   //geometry
   double psm_width; //presampler width in cm
   double psm_size;  //size of the presampler
@@ -34,6 +35,7 @@ struct Config_t
   std::string output_file; //output file name
   unsigned test_beam;
   unsigned drift_spread;
+  unsigned long seed;
 };
 
 extern  Config_t Cfg;
