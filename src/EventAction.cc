@@ -95,6 +95,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
   {
     GEMHit * hit = (GEMHit*)hc->GetHit(i);
     RM->event.hit[i].trackID = hit->GetTrackID();
+    //RM->event.hit[i].gen = 0;
+    //RM->event.hit[i].gen = &(RM->event.gen[0]);
     RM->event.hit[i].OrigTrackID = hit->GetOriginalTrackID();
     RM->event.hit[i].pid = hit->GetParticleID();
     RM->event.hit[i].volumeID = hit->GetVolumeID();
@@ -104,7 +106,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
     RM->event.hit[i].z = hit->GetPos().z()/mm;
     RM->event.hit[i].rho = sqrt(ibn::sq(RM->event.hit[i].y) + ibn::sq(RM->event.hit[i].y));
     RM->event.hit[i].phi = hit->GetPos().phi();
-    //const Pad  & pad = hit->GetPad(); //only for one pad
     for(auto & pad : hit->GetPads())
     {
       auto p = std::find(std::begin(fPads),std::end(fPads), pad);
@@ -127,34 +128,30 @@ void EventAction::EndOfEventAction(const G4Event* event)
   int i=0;
   for(auto & p : fPads) 
   {
+    PadEvent & epad=RM->event.pad[i];
     p.tracks.sort();
     p.tracks.unique();
-    RM->event.pad[i].x = p.x();
-    RM->event.pad[i].y = p.y();
-    RM->event.pad[i].nx = p.fnx;
-    RM->event.pad[i].ny = p.fny;
-    double q=0;
-    while(q <=0) 
+    epad.X = p.x();
+    epad.Y = p.y();
+    epad.nx = p.fnx;
+    epad.ny = p.fny;
+    epad.xhit = p.xhit;
+    epad.yhit = p.yhit;
+    //spread hit position over pad
+    do {
+      epad.x = p.x() + p.size()*(G4UniformRand()-0.5);
+      epad.y = p.y() + p.size()*(G4UniformRand()-0.5)*sqrt(3.0)/2.0;
+    } while (Pad(p.size(), epad.x, epad.y)!= p);
+    //variate amplification
+    do { epad.q = p.charge*(1+0.3*G4RandGauss::shoot()); } while(epad.q <=0);
+    //scale charge
+    epad.q = epad.q/coulomb*1e15; //fC or femtocoulomb 
+    epad.nhit = p.nhit;
+    epad.nphot = p.tracks.size();
+    for(auto & track : p.tracks)
     {
-      q = p.charge*(1+0.3*G4RandGauss::shoot());
-    }
-    RM->event.pad[i].q = q/coulomb*1e15; //fC or femtocoulomb 
-    RM->event.pad[i].nhit = p.nhit;
-    RM->event.pad[i].nphot=p.tracks.size();
-    double x,y;
-    do 
-    {
-      x = p.x() + p.size()*(G4UniformRand()-0.5);
-      y = p.y() + p.size()*(G4UniformRand()-0.5)*sqrt(3.0)/2.0;
-    } while (Pad(p.size(), x,y)!= p);
-    
-    //RM->event.pad[i].xhit = p.xhit;
-    //RM->event.pad[i].yhit = p.yhit;
-    RM->event.pad[i].xhit = x;
-    RM->event.pad[i].yhit = y;
-    for(auto & track_id : p.tracks)
-    {
-      RM->event.gen[track_id-1].pad.push_back(&(RM->event.pad[i]));
+      //RM->event.gen[track-1].pad.push_back(&(RM->event.pad[i]));
+      RM->event.gen[track-1].pad.push_back(epad);
     }
     i++;
   }

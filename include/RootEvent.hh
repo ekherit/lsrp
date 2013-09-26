@@ -21,19 +21,13 @@
 
 #include <TObject.h>
 #include <TVector3.h>
+#include <TRef.h>
 //#include "G4ThreeVector.hh"
 #include "Pad.hh"
 
 #include <vector>
 
 #include <ibn/phys/compton.h>
-//namespace ibn 
-//{ 
-//  namespace phys 
-//  {
-//    class compton;
-//  }
-//}
 
 using namespace ibn::phys;
 
@@ -41,15 +35,19 @@ class PadEvent : public TObject
 {
   public:
   PadEvent(void);
-  Long64_t nx;
+  Double_t X; //mm //center of the pad
+  Double_t Y; //mm
+  Double_t xhit;//mm
+  Double_t yhit;//mm
+  Double_t x; //random place at pad
+  Double_t y; 
+  Double_t r; //sqrt(x^2+y^2)
+  Double_t R; //sqrt(X^2+Y^2)
+  Long64_t nx; //index of the pad
   Long64_t ny;
-  Double_t x; //mm
-  Double_t y; //mm
   Double_t q;  //collected charge coulomb
   Long64_t nhit; //number of hit for this pad
   Long64_t nphot; //number of different photons in this pad
-  Double_t xhit; //mm
-  Double_t yhit; //mm
   ClassDef(PadEvent, 1); //The class title
 };
 
@@ -76,7 +74,8 @@ class GeneratorEvent : public TObject
   double x; //position
   double y;
   double z; 
-  std::vector<PadEvent*> pad;
+  std::vector<PadEvent> pad;
+  //std::vector<TRef> pad;
   ClassDef(GeneratorEvent, 1); //The class title
 };
 
@@ -98,6 +97,7 @@ class HitEvent : public TObject
   Double_t rho;
   Double_t phi;
   Double_t q;  //collected charge
+  //GeneratorEvent * gen;
   ClassDef(HitEvent, 1); //The class title
 };
 
