@@ -94,13 +94,37 @@ inline void CalculateAsymmetry(TTree *t, const char * channel, TCut cut, const c
   TCut up = (channel+string(">0")).c_str();
   TCut down = (channel+string("<0")).c_str();
   t->Draw(channel, ((Pup && up) || (Pdown && down)) && cut,"goff");
-  Long64_t uu = t->GetSelectedRows();
+  double uu = t->GetSelectedRows();
   t->Draw(channel, ((Pup && down) || (Pdown && up)) && cut,"goff");
-  Long64_t ud = t->GetSelectedRows();
-  cout << "uu = " << uu << endl;
-  cout << "ud = " << ud << endl;
-  cout << "uu-ud = " << double(uu)-double(ud) << endl;
-  cout << "Assymetry: " << double(uu-ud)/double(uu) << endl;
+  double ud = t->GetSelectedRows();
+  cout << "uu = " << Long64_t(uu) << endl;
+  cout << "ud = " << Long64_t(ud) << endl;
+  double eps =(uu-ud)/uu;
+  double error = sqrt(1./uu+1./ud)*ud/uu;
+  cout << "uu-ud = " << int(uu-ud) << endl;
+  //cout << "Assymetry: " <<  eps << " +- " << error << endl;
+  cout << "Asymmetry: " <<  eps << " +- " << error << " ("<< error/eps*100.0 << "%)"<< endl;
+}
+
+inline double sq(double x) { return x*x;}
+
+inline void CalculateAsymmetry2(TTree *t, const char * channel, TCut cut, const char * gopt="")
+{
+  TCut Pup="P>0";
+  TCut Pdown = "P<0";
+  TCut up = (channel+string(">0")).c_str();
+  TCut down = (channel+string("<0")).c_str();
+  t->Draw(channel, ((Pup && up) || (Pdown && down)) && cut,"goff");
+  double uu = t->GetSelectedRows();
+  t->Draw(channel, ((Pup && down) || (Pdown && up)) && cut,"goff");
+  double ud = t->GetSelectedRows();
+  cout << "uu = " << Long64_t(uu) << endl;
+  cout << "ud = " << Long64_t(ud) << endl;
+  double eps = (uu-ud)/(uu+ud);
+  double error = 2.0*uu*ud/sq(uu+ud)*sqrt(1./uu+1./ud);
+  cout << "uu-ud = " << int(uu-ud)<< endl;
+  cout << "uu+ud = " << Long64_t(uu+ud) << endl;
+  cout << "Asymmetry: " <<  eps << " +- " << error << " ("<< error/eps*100.0 << "%)"<< endl;
 }
 
 void drift_comparison(const char * fn1, const char *fn2)
@@ -150,5 +174,16 @@ void utils(void)
   TTree * t = (TTree*)f->Get("lsrp");
   //DrawAsymmetry(t,"pad.yhit","abs(pad.yhit)<20");
   DrawAsymmetry(t,"gen.y","abs(gen.y)<20");
+}
+
+
+
+void DrawOccupancy(TTree *t, TCut cut=="")
+{
+  t->SetLineWidth(2);
+  t->Draw("pad.nphot:sqrt(pad.x**2+pad.y**2)>>hocup",cut, "prof");
+  double occupancy=hocup->GetBinContent(1);
+  double error=hocup->GetBinError(1);
+  cout << "Occupancy = " << occupancy  << " +- " << error << endl;
 }
 

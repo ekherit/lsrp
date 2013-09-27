@@ -132,6 +132,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
     p.tracks.unique();
     epad.X = p.x();
     epad.Y = p.y();
+    epad.R = sqrt(ibn::sq(epad.X)+ibn::sq(epad.Y));
     epad.nx = p.fnx;
     epad.ny = p.fny;
     epad.xhit = p.xhit;
@@ -141,6 +142,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
       epad.x = p.x() + p.size()*(G4UniformRand()-0.5);
       epad.y = p.y() + p.size()*(G4UniformRand()-0.5)*sqrt(3.0)/2.0;
     } while (Pad(p.size(), epad.x, epad.y)!= p);
+    //epad.r = sqrt(ibn::sq(epad.x)+sq(ibn::epad.y));
+    epad.r = ibn::rho(epad.x,epad.y);
     //variate amplification
     do { epad.q = p.charge*(1+0.3*G4RandGauss::shoot()); } while(epad.q <=0);
     //scale charge

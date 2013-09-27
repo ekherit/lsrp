@@ -30,7 +30,6 @@
 
 #include "ROOTManager.hh"
 #include "Messenger.hh"
-#include "DetectorConstruction.hh"
 
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithAString.hh"
@@ -41,9 +40,8 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-Messenger::Messenger(G4RunManager * theRunManager)
- : G4UImessenger(),
-   fRunManager(theRunManager)
+Messenger::Messenger(void)
+ : G4UImessenger()
 {
   fDirectory.reset(new G4UIdirectory("/lsrp/"));
   fDirectory->SetGuidance("UI commands specific to this example.");
@@ -60,6 +58,13 @@ Messenger::Messenger(G4RunManager * theRunManager)
   fRootFileCmd->SetGuidance("Select output ROOT file");
   fRootFileCmd->SetParameterName("choice",false);
   fRootFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  //fPresamplerWidthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PresamplerWidth",this));
+  //fPresamplerWidthCmd->SetGuidance("Width of the presampler");
+  //fPresamplerWidthCmd->SetParameterName("PresamplerWidth",false);
+  //fPresamplerWidthCmd->SetUnitCategory("Length");
+  //fPresamplerWidthCmd->AvailableForStates(G4State_Idle);
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -84,5 +89,4 @@ void Messenger::SetNewValue(G4UIcommand* command,G4String newValue)
     G4cout << "Set RootFile: " <<  Cfg.output_file << G4cout;
   }
 }
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -38,10 +38,10 @@ class Pad
     Init(a);
   }
 
-  Pad(double a, double x, double y)
+  Pad(double a, double X, double Y)
   {
     Init(a);
-    FindIndex(x,y);
+    FindIndex(X,Y);
   }
   
   void Init(double a=1)

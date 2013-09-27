@@ -36,38 +36,31 @@
 
 #include <memory>
 
-class DetectorConstruction;
+//class DetectorConstruction;
+//class PrimaryGeneratorAction;
+//class RunAction;
+//class EventAction;
+//class TrackingAction;
+
 class G4UIdirectory;
 class G4UIcmdWithAString;
 class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWithAnInteger;
 
-class G4RunManager;
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-/// Messenger class that defines commands for DetectorConstruction.
-///
-/// It implements commands:
-/// - //det/setTargetMaterial name
-/// - //det/setChamberMaterial name
-/// - //det/setField value unit
-/// - //det/stepMax value unit
-
-
 class Messenger: public G4UImessenger
 {
   public:
-    Messenger(G4RunManager *);
+    Messenger(void);
     virtual ~Messenger();
     
     virtual void SetNewValue(G4UIcommand*, G4String);
     
   private:
-    G4RunManager*            fRunManager;
-    std::unique_ptr<G4UIdirectory>  fDirectory;
+    std::unique_ptr<G4UIdirectory>    fDirectory;
     std::unique_ptr<G4UIcmdWithAnInteger> fPhotonNumberCmd;
     std::unique_ptr<G4UIcmdWithAString>   fRootFileCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPresamplerWidthCmd;
+    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeCmd;
     //G4UIdirectory*           fDetDirectory;
 };
 

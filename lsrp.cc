@@ -160,31 +160,25 @@ int main(int argc,char** argv)
   
   // Construct the default run manager
   
+  Messenger * messenger = new Messenger();
+
   G4RunManager * runManager = new G4RunManager;
-  Messenger * messenger = new Messenger(runManager);
-
-
-  // Set mandatory initialization classes
 
   runManager->SetUserInitialization(new DetectorConstruction());
 
   G4VModularPhysicsList* physicsList = new FTFP_BERT;
-  //G4VModularPhysicsList * physicsList  = new QGSP_BERT_HP;
   physicsList->RegisterPhysics(new G4StepLimiterBuilder());
   runManager->SetUserInitialization(physicsList);
     
-
   // Set user action classes
-
   runManager->SetUserAction(new PrimaryGeneratorAction());
   runManager->SetUserAction(new RunAction());
   runManager->SetUserAction(new EventAction());
   runManager->SetUserAction(new TrackingAction());
   
-
   // Initialize G4 kernel
-
   runManager->Initialize();
+
   
 #ifdef G4VIS_USE
   // Initialize visualization

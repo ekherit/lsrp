@@ -46,6 +46,7 @@
 #include "Randomize.hh"
 #include <ibn/integral.h>
 #include <ibn/phys/constant.h>
+extern GeneratorEvent makeGeneratorEvent(const ibn::phys::compton &c);
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

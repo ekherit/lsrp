@@ -22,14 +22,10 @@
 #include <TObject.h>
 #include <TVector3.h>
 #include <TRef.h>
-//#include "G4ThreeVector.hh"
 #include "Pad.hh"
 
 #include <vector>
 
-#include <ibn/phys/compton.h>
-
-using namespace ibn::phys;
 
 class PadEvent : public TObject
 {
@@ -55,7 +51,6 @@ class GeneratorEvent : public TObject
 {
   public:
   GeneratorEvent(void);
-  //GeneratorEvent(const compton & );
   virtual ~GeneratorEvent(void){}
   double P; //polarization of gamma quant
   double Eb; //electron beam energy
@@ -78,7 +73,6 @@ class GeneratorEvent : public TObject
   ClassDef(GeneratorEvent, 1); //The class title
 };
 
-GeneratorEvent makeGeneratorEvent(const compton & );
 
 
 class HitEvent : public TObject 
