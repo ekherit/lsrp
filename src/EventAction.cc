@@ -165,14 +165,26 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
   // periodic printing
 
-  if ( eventID < 100 || eventID % 100 == 0) {
+  static long geometry_print_index=0;
+  if ( eventID < 100 || eventID % 100 == 0)
+  {
     G4cout << ">>> Event: " << eventID  << G4endl;
-    if ( trajectoryContainer ) {
-      G4cout << "    " << n_trajectories
-             << " trajectories stored in this event." << G4endl;
+    if ( trajectoryContainer )
+    {
+      G4cout << "    " << n_trajectories << " trajectories stored in this event." << G4endl;
     }
     G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
-    G4cout << "    "  << hc->GetSize() << " " << RM->event.npad << " hits and pads stored in this event" << G4endl;
+    G4cout << RM->event.nphot << " photons, "  
+      << hc->GetSize() << " hits and " 
+      << RM->event.npad << " pads stored in this event.";
+    if(geometry_print_index % 10 ==0)
+    {
+      G4cout << " ( dPb=" << Cfg.psm_width/mm << " mm" 
+             << ", l="  << Cfg.psm_gem_length/mm<< " mm"
+             << ", pad size=" << Cfg.pad_size/mm << " mm )" ;
+    }
+    geometry_print_index++;
+    G4cout<< G4endl;
   }
   RM->event.clear();
 }  
