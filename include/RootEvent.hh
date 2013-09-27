@@ -31,19 +31,19 @@ class PadEvent : public TObject
 {
   public:
   PadEvent(void);
-  Double_t X; //mm //center of the pad
-  Double_t Y; //mm
-  Double_t xhit;//mm
-  Double_t yhit;//mm
-  Double_t x; //random place at pad
-  Double_t y; 
-  Double_t r; //sqrt(x^2+y^2)
-  Double_t R; //sqrt(X^2+Y^2)
-  Long64_t nx; //index of the pad
-  Long64_t ny;
-  Double_t q;  //collected charge coulomb
-  Long64_t nhit; //number of hit for this pad
-  Long64_t nphot; //number of different photons in this pad
+  Double_t X=-99999; //mm //center of the pad
+  Double_t Y=-99999; //mm
+  Double_t xhit=-99999;//mm
+  Double_t yhit=-99999;//mm
+  Double_t x=-99999; //random place at pad
+  Double_t y=-99999; 
+  Double_t r=-99999; //sqrt(x^2+y^2)
+  Double_t R=-99999; //sqrt(X^2+Y^2)
+  Long64_t nx=-99999; //index of the pad
+  Long64_t ny=-99999;
+  Double_t q=-99999;  //collected charge coulomb
+  Long64_t nhit=-99999; //number of different hit for this pad
+  Long64_t nphot=-99999; //number of different photons in this pad
   ClassDef(PadEvent, 1); //The class title
 };
 
@@ -52,23 +52,24 @@ class GeneratorEvent : public TObject
   public:
   GeneratorEvent(void);
   virtual ~GeneratorEvent(void){}
-  double P; //polarization of gamma quant
-  double Eb; //electron beam energy
-  double gamma; //gamma factor
-  double omega; //photon energy in r.f. of electron
-  double chi; //hardness of photon
-  double E; //energy of gamma quant, MeV
-  double kx; // x momentum, MeV
-  double ky; //
-  double kz; //
-  double nx;
-  double ny;
-  double nz;
-  double theta; 
-  double phi;
-  double x; //position
-  double y;
-  double z; 
+  double P=-99999; //polarization of gamma quant
+  double Eb=-99999; //electron beam energy
+  double gamma=-99999; //gamma factor
+  double omega=-99999; //photon energy in r.f. of electron
+  double chi=-99999; //hardness of photon
+  double E=-99999; //energy of gamma quant, MeV
+  double kx=-99999; // x momentum, MeV
+  double ky=-99999; //
+  double kz=-99999; //
+  double nx=-99999;
+  double ny=-99999;
+  double nz=-99999;
+  double theta=-99999; 
+  double phi=-99999;
+  double x=-99999; //position,mm
+  double y=-99999;
+  double z=-99999; 
+  unsigned npad;
   std::vector<PadEvent> pad;
   ClassDef(GeneratorEvent, 1); //The class title
 };
@@ -79,41 +80,53 @@ class HitEvent : public TObject
 {
   public:
   HitEvent(void);
-  Long64_t trackID;
-  Long64_t OrigTrackID;
-  Long64_t pid;
-  Long64_t volumeID;
-  Double_t E;
-  Double_t x;
-  Double_t y;
-  Double_t z;
-  Double_t rho;
-  Double_t phi;
-  Double_t q;  //collected charge
+  Long64_t trackID=-99999;
+  Long64_t OrigTrackID=-99999;
+  Long64_t pid=0;
+  Long64_t volumeID=-99999;
+  Double_t E=-99999; //deposit energy, MeV
+  Double_t x=-99999; //position, mm
+  Double_t y=-99999;
+  Double_t z=-99999;
+  Double_t rho=-99999;
+  Double_t phi=-99999;
+  Double_t q=-99999;  //collected charge
   ClassDef(HitEvent, 1); //The class title
 };
-
 
 class RootEvent : public TObject
 {
   public:
   RootEvent(void);
   virtual ~RootEvent(void){}
-  Long64_t eventID; //event id
-  Double_t P; //polarization of gamma quant
-  Double_t Eb; //electron beam energy
-  Long64_t nphot; //number of photons
-  Long64_t nhit;
-  Long64_t npad;
+  //geometry information
+  Double_t d=-99999; //presampler  width, mm
+  Double_t l=-99999; //distance from presampler to GEM,mm
+  Double_t ps=-99999; //pad size, mm
+  Long64_t run=-99999; //run id
+  Long64_t eventID=-99999; //event id
+  //beam information
+  Double_t P=0; //polarization of gamma quant
+  Double_t Eb=-99999; //electron beam energy
+  Long64_t nphot=-99999; //number of photons
+  //detector information
+  Long64_t nhit=-99999;
+  Long64_t npad=-99999;
   std::vector<HitEvent> hit;
   std::vector<PadEvent> pad;
   std::vector<GeneratorEvent> gen;
   void clear(void)
   {
-    Eb=-1;
-    nphot=-1;
-    nhit=-1;
-    npad=-1;
+    d=-99999;
+    l=-99999;
+    ps=-99999;
+    run=-99999;
+    eventID=-99999;
+    P=0;
+    Eb=-99999;
+    nphot=-99999;
+    nhit=-99999;
+    npad=-99999;
     hit.clear();
     pad.clear();
     gen.clear();

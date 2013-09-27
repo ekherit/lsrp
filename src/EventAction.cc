@@ -85,6 +85,10 @@ void EventAction::EndOfEventAction(const G4Event* event)
   G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
 
   auto RM = ROOTManager::Instance();
+  RM->event.d=Cfg.psm_width;
+  RM->event.l=Cfg.psm_gem_length;
+  RM->event.ps=Cfg.pad_size;
+  RM->event.run=Cfg.run;
   RM->event.eventID = eventID;
   RM->event.Eb = RM->event.gen[0].Eb;
   RM->event.P = RM->event.gen[0].P;
@@ -142,7 +146,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
       epad.x = p.x() + p.size()*(G4UniformRand()-0.5);
       epad.y = p.y() + p.size()*(G4UniformRand()-0.5)*sqrt(3.0)/2.0;
     } while (Pad(p.size(), epad.x, epad.y)!= p);
-    //epad.r = sqrt(ibn::sq(epad.x)+sq(ibn::epad.y));
     epad.r = ibn::rho(epad.x,epad.y);
     //variate amplification
     do { epad.q = p.charge*(1+0.3*G4RandGauss::shoot()); } while(epad.q <=0);
@@ -158,6 +161,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
         continue;
       }
       RM->event.gen[track-1].pad.push_back(epad);
+      RM->event.gen[track-1].npad++;
     }
     i++;
   }

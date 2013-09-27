@@ -36,6 +36,7 @@ struct Config_t
   unsigned test_beam;
   unsigned drift_spread;
   unsigned long seed;
+  unsigned long run;
 };
 
 extern  Config_t Cfg;

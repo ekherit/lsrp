@@ -227,6 +227,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     gevent.x = x/mm;
     gevent.y = y/mm;
     gevent.z = z/mm;
+    gevent.npad=0;
 
     ROOTManager::Instance()->event.gen.push_back(gevent);
   }

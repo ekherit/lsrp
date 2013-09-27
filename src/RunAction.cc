@@ -30,6 +30,7 @@
 
 #include "RunAction.hh"
 #include "ROOTManager.hh"
+#include "Config.h"
 
 #include "G4Run.hh"
 #include "G4RunManager.hh"
@@ -52,6 +53,7 @@ RunAction::~RunAction()
 void RunAction::BeginOfRunAction(const G4Run* aRun)
 { 
   G4cout << "### Run " << aRun->GetRunID() << " start." << G4endl;
+  Cfg.run = aRun->GetRunID();
 
   //inform the runManager to save random number seed
 
