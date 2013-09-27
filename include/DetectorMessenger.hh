@@ -69,6 +69,7 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithADoubleAndUnit* fSetFieldCmd;
     G4UIcmdWithADoubleAndUnit* fStepMaxCmd;
     G4UIcmdWithADoubleAndUnit* fPresamplerWidthCmd;
+    G4UIcmdWithADoubleAndUnit* fPsmGemLengthCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

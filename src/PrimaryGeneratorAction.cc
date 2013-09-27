@@ -203,9 +203,9 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     variate_agnle(*fCompton,dx,dx*kz_kx); 
 
     //calculate position
-    G4double x  = fCompton->kx/fCompton->kz*fFlightLength;
-    G4double y = fCompton->ky/fCompton->kz*fFlightLength;
-    G4double z = DetectorConstruction::Instance()->presampler_front_position;
+    G4double z = DetectorConstruction::Instance()->GetFrontZ();
+    G4double x  = fCompton->kx/fCompton->kz*(fFlightLength+z);
+    G4double y = fCompton->ky/fCompton->kz*(fFlightLength+z);
 
     G4ThreeVector k(fCompton->kx, fCompton->ky, fCompton->kz);
     

@@ -69,11 +69,14 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetMaxStep (G4double );
     void SetCheckOverlaps(G4bool );
     void SetPresamplerWidth(G4double);
+    void SetPsmGemLength(G4double);
+    void SetPresamplerGeometry(G4double width,G4double distance);
 
     static DetectorConstruction * Instance();
 
-    G4double presampler_front_position;
+    //G4double presampler_front_position;
     G4double GetPadZ(void) const { return fPadZPosition; }
+    G4double GetFrontZ(void) const { return -fPresamplerWidth-fPsmGemLength; }
 
   private:
     // methods
@@ -81,10 +84,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* DefineVolumes();
 
     std::unique_ptr<GEMDetector> GEM;
+    G4VPhysicalVolume * fGem;
     //std::unique_ptr<GEMSensitiveDetector> fGEMSensitiveDetector;
     GEMSensitiveDetector * fGEMSensitiveDetector;
 
-    G4LogicalVolume*   fLogicPresampler;
+    G4LogicalVolume* worldLV;
+    G4LogicalVolume*    fLogicPresampler;
+    G4VPhysicalVolume*  fPresampler;
     G4Material*        fPresamplerMaterial;  // pointer to the target  material
     G4Material*        fChamberMaterial; // pointer to the chamber material
 
@@ -97,6 +103,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     static DetectorConstruction * fgInstance;
 
     G4double fPresamplerWidth;
+    G4double fPsmGemLength;
     G4double fPadZPosition; //Z position of pad plate
 
 };

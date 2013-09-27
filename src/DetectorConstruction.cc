@@ -133,22 +133,21 @@ void DetectorConstruction::DefineMaterials()
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
   fPresamplerWidth = Cfg.psm_width*mm; //presampler width
+  G4double fPsmGemLength=Cfg.psm_gem_length*mm; //distance between presampler and gem
   G4double psm_radius =  Cfg.psm_size*mm/2.0; //Radius of the presampler
-  G4double psm_gem_length=Cfg.psm_gem_length*mm; //distance between presampler and gem
   G4double world_size=2*psm_radius*1.2;
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size);
 
   GEM.reset(new GEMDetector);
 
-  //G4double world_width = (fPresamplerWidth+GEM->GetWidth()+psm_gem_length)*1.2;
-
-  presampler_front_position = 0;
-  G4ThreeVector psm_position = G4ThreeVector(0,0,+fPresamplerWidth/2.0+presampler_front_position);
-  G4ThreeVector gem_position = G4ThreeVector(0,0,presampler_front_position+fPresamplerWidth+psm_gem_length+GEM->GetWidth()/2.0);
+  //G4ThreeVector psm_position = G4ThreeVector(0,0,+fPresamplerWidth/2.0+presampler_front_position);
+  //G4ThreeVector gem_position = G4ThreeVector(0,0,presampler_front_position+fPresamplerWidth+psm_gem_length+GEM->GetWidth()/2.0);
+  G4ThreeVector psm_position = G4ThreeVector(0,0,-fPsmGemLength-fPresamplerWidth/2.0);
+  G4ThreeVector gem_position = G4ThreeVector(0,0,GEM->GetWidth()/2.0);
+  //presampler_front_position=-psm_gem_length-fPresamplerWidth;
 
   // World
   G4Material* air  = G4Material::GetMaterial("G4_AIR");
-  //G4Material* Al  = G4Material::GetMaterial("G4_Al");
   G4cout << "Computed tolerance = "
     << G4GeometryTolerance::GetInstance()->GetSurfaceTolerance()/mm
     << " mm" << G4endl;
@@ -156,7 +155,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   G4Box* worldS = new G4Box("world",                                    //its name
       world_size/2,world_size/2,world_size/2); //its size
 
-  G4LogicalVolume* worldLV = 
+  worldLV = 
     new G4LogicalVolume ( worldS,air,"World"); 
   //Must place the World Physical volume unrotated at (0,0,0).
   G4VPhysicalVolume* worldPV = 
@@ -175,7 +174,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   // Presampler
   G4Tubs* psm_solid = new G4Tubs("presampler",0.,psm_radius,fPresamplerWidth/2,0.*deg,360.*deg);
   fLogicPresampler = new G4LogicalVolume(psm_solid, fPresamplerMaterial,"Presampler",0,0,0);
-  new G4PVPlacement(0,               // no rotation
+  fPresampler = new G4PVPlacement(0,               // no rotation
       psm_position,  // at (x,y,z)
       fLogicPresampler,    // its logical volume
       "Presampler",        // its name
@@ -185,7 +184,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
       fCheckOverlaps); // checking overlaps 
 
 
-  new G4PVPlacement(0,               // no rotation
+  fGem = new G4PVPlacement(0,               // no rotation
                     gem_position, // at (x,y,z)
                     GEM->GetLogicalVolume(),       // its logical volume
                     "GEM",       // its name
@@ -213,7 +212,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   GEM->GetTransferVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
   //fLogicPresampler->SetSensitiveDetector(aGEMSensitiveDetector);
   //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
-  //GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
+  GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
 
   //BGO 145 22
   // Always return the physical world
@@ -272,17 +271,35 @@ void DetectorConstruction::SetCheckOverlaps(G4bool checkOverlaps)
 }  
 
 
-void DetectorConstruction::SetPresamplerWidth(G4double )
-{
- // Open geometry for the physical volume to be modified ...
- //G4GeometryManager::OpenGeometry();
- //
- //// Modify dimension of the solid ...
- ////
- //physCalor->GetLogicalVolume()->GetSolid()->SetXHalfLength(12.5*cm);
- //
- //// Close geometry for the portion modified ...
- ////
- //G4GeometryManager::CloseGeometry(physCalor);
 
+void DetectorConstruction::SetPresamplerWidth(G4double width)
+{
+  SetPresamplerGeometry(width, fPsmGemLength);
+}
+
+void DetectorConstruction::SetPsmGemLength(G4double length)
+{
+  SetPresamplerGeometry(fPresamplerWidth, length);
+}
+
+void DetectorConstruction::SetPresamplerGeometry(G4double width, G4double distance_to_gem)
+{
+  G4Tubs * solid = (G4Tubs*)fLogicPresampler->GetSolid();
+  Cfg.psm_width=width/mm;
+  Cfg.psm_gem_length=distance_to_gem/mm;
+  fPresamplerWidth=width; //configure new width
+  fPsmGemLength=distance_to_gem; //configure new distance from presampler to gem
+  G4ThreeVector position(0,0,-fPresamplerWidth/2.0-fPsmGemLength); //set new position
+  G4cout << "Set psm width = " << Cfg.psm_width << " mm" << G4endl;
+  G4cout << "Set psm_gem length = " << Cfg.psm_gem_length << " mm" << G4endl;
+
+  //open geometry for modification
+  G4GeometryManager * geometry=G4GeometryManager::GetInstance();
+  geometry->OpenGeometry(fPresampler);
+  //set new width
+  solid->SetZHalfLength(fPresamplerWidth/2.0);
+  //set new position
+  fPresampler->SetTranslation(position);
+  //close geometry
+  geometry->CloseGeometry(fPresampler);
 }

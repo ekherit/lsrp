@@ -70,11 +70,17 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fStepMaxCmd->SetUnitCategory("Length");
   fStepMaxCmd->AvailableForStates(G4State_Idle);
 
-  fPresamplerWidthCmd = new G4UIcmdWithADoubleAndUnit("/slrp/det/presamplerWidth",this);
+  fPresamplerWidthCmd = new G4UIcmdWithADoubleAndUnit("/slrp/PresamplerWidth",this);
   fPresamplerWidthCmd->SetGuidance("Define a width of the presampler");
   fPresamplerWidthCmd->SetParameterName("presamplerWidth",false);
   fPresamplerWidthCmd->SetUnitCategory("Length");
   fPresamplerWidthCmd->AvailableForStates(G4State_Idle);
+
+  fPsmGemLengthCmd = new G4UIcmdWithADoubleAndUnit("/slrp/PsmGemLength",this);
+  fPsmGemLengthCmd->SetGuidance("Define distance betwee presampler and gem");
+  fPsmGemLengthCmd->SetParameterName("PsmGemLength",false);
+  fPsmGemLengthCmd->SetUnitCategory("Length");
+  fPsmGemLengthCmd->AvailableForStates(G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -87,6 +93,8 @@ DetectorMessenger::~DetectorMessenger()
   delete fStepMaxCmd;
   delete fDirectory;
   delete fDetDirectory;
+  delete fPresamplerWidthCmd;
+  delete fPsmGemLengthCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -108,12 +116,14 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
     fDetectorConstruction
       ->SetMaxStep(fStepMaxCmd->GetNewDoubleValue(newValue));
   }   
-  if( command == fPresamplerWidthCmd )
+  if( command == fPresamplerWidthCmd)
   {
-    fDetectorConstruction
-      ->SetPresamplerWidth(fStepMaxCmd->GetNewDoubleValue(newValue));
+    fDetectorConstruction->SetPresamplerWidth(fPresamplerWidthCmd->GetNewDoubleValue(newValue));
   }   
-
+  if( command == fPsmGemLengthCmd)
+  {
+    fDetectorConstruction->SetPsmGemLength(fPsmGemLengthCmd->GetNewDoubleValue(newValue));
+  }   
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
