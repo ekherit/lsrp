@@ -63,9 +63,6 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     virtual G4VPhysicalVolume* Construct();
 
     // Set methods
-    void SetMagField(G4double );
-    void SetTargetMaterial (G4String );
-    void SetChamberMaterial(G4String );
     void SetMaxStep (G4double );
     void SetCheckOverlaps(G4bool );
     void SetPresamplerWidth(G4double);
@@ -89,10 +86,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     GEMSensitiveDetector * fGEMSensitiveDetector;
 
     G4LogicalVolume* worldLV;
+
     G4LogicalVolume*    fLogicPresampler;
-    G4VPhysicalVolume*  fPresampler;
-    G4Material*        fPresamplerMaterial;  // pointer to the target  material
-    G4Material*        fChamberMaterial; // pointer to the chamber material
+    G4VPhysicalVolume*  fPresampler; //physical volume of the presampler
+    G4Material*         fPresamplerMaterial;  // pointer to the target  material
 
     G4UserLimits* fStepLimit;            // pointer to user step limits
 

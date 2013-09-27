@@ -31,6 +31,8 @@
 #ifndef DetectorMessenger_h
 #define DetectorMessenger_h 1
 
+#include <memory>
+
 #include "globals.hh"
 #include "G4UImessenger.hh"
 
@@ -38,6 +40,7 @@ class DetectorConstruction;
 class G4UIdirectory;
 class G4UIcmdWithAString;
 class G4UIcmdWithADoubleAndUnit;
+class G4UIcmdWithAnInteger;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -60,16 +63,13 @@ class DetectorMessenger: public G4UImessenger
   private:
     DetectorConstruction*  fDetectorConstruction;
 
-    G4UIdirectory*           fDirectory;
-    G4UIdirectory*           fDetDirectory;
-
-    G4UIcmdWithAString*      fTargMatCmd;
-    G4UIcmdWithAString*      fChamMatCmd;
-
-    G4UIcmdWithADoubleAndUnit* fSetFieldCmd;
-    G4UIcmdWithADoubleAndUnit* fStepMaxCmd;
-    G4UIcmdWithADoubleAndUnit* fPresamplerWidthCmd;
-    G4UIcmdWithADoubleAndUnit* fPsmGemLengthCmd;
+    std::unique_ptr<G4UIdirectory>    fDirectory;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fStepMaxCmd;
+    std::unique_ptr<G4UIcmdWithAnInteger> fPhotonNumberCmd;
+    std::unique_ptr<G4UIcmdWithAString>   fRootFileCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPresamplerWidthCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPsmGemLengthCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

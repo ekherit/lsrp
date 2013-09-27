@@ -69,8 +69,8 @@ DetectorConstruction* DetectorConstruction::Instance(void)
 DetectorConstruction::DetectorConstruction()
 : 
   fLogicPresampler(nullptr),
-  fPresamplerMaterial(NULL), fChamberMaterial(NULL), 
-  fStepLimit(NULL),
+  fPresamplerMaterial(nullptr), 
+  fStepLimit(nullptr),
  fCheckOverlaps(true)
 {
   fMessenger = new DetectorMessenger(this);
@@ -114,14 +114,12 @@ void DetectorConstruction::DefineMaterials()
 
   // Air defined using NIST Manager
   nistManager->FindOrBuildMaterial("G4_AIR", fromIsotopes);
-  fChamberMaterial = nistManager->FindOrBuildMaterial("G4_Ar", fromIsotopes);
   
   // Lead defined using NIST Manager
   fPresamplerMaterial  = nistManager->FindOrBuildMaterial("G4_Pb", fromIsotopes);
   nistManager->FindOrBuildMaterial("G4_Cu", fromIsotopes);
   nistManager->FindOrBuildMaterial("G4_KAPTON", fromIsotopes);
 
-  fChamberMaterial = nistManager->FindOrBuildMaterial("G4_Ar", fromIsotopes);
 
   // Print materials
   G4cout << *(G4Material::GetMaterialTable()) << G4endl;
@@ -133,7 +131,7 @@ void DetectorConstruction::DefineMaterials()
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
   fPresamplerWidth = Cfg.psm_width*mm; //presampler width
-  G4double fPsmGemLength=Cfg.psm_gem_length*mm; //distance between presampler and gem
+  fPsmGemLength=Cfg.psm_gem_length*mm; //distance between presampler and gem
   G4double psm_radius =  Cfg.psm_size*mm/2.0; //Radius of the presampler
   G4double world_size=2*psm_radius*1.2;
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size);
@@ -210,52 +208,16 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   G4SDManager::GetSDMpointer()->AddNewDetector(fGEMSensitiveDetector);
   GEM->GetDriftVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
   GEM->GetTransferVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
-  //fLogicPresampler->SetSensitiveDetector(aGEMSensitiveDetector);
+  //fLogicPresampler->SetSensitiveDetector(fGEMSensitiveDetector);
   //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
+  //GEM->SetUserLimits(new G4UserLimits(0.1*mm));
   GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
 
   //BGO 145 22
   // Always return the physical world
   return worldPV;
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
  
-void DetectorConstruction::SetTargetMaterial(G4String )
-{
-
-  //G4NistManager* nistManager = G4NistManager::Instance();
-  //G4bool fromIsotopes = false;
-
-  //G4Material* pttoMaterial = 
-  //            nistManager->FindOrBuildMaterial(materialName, fromIsotopes);
-
-  //if (fPresamplerMaterial != pttoMaterial) {
-  //   if ( pttoMaterial ) {
-  //      fPresamplerMaterial = pttoMaterial;
-  //      if (fLogicPresampler) fLogicPresampler->SetMaterial(fPresamplerMaterial);
-  //      G4cout << "\n----> The target is made of " << materialName << G4endl;
-  //   } else {
-  //      G4cout << "\n-->  WARNING from SetTargetMaterial : "
-  //             << materialName << " not found" << G4endl;
-  //   }
-  //}
-}
- 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::SetChamberMaterial(G4String)
-{
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
- 
-void DetectorConstruction::SetMagField(G4double fieldValue)
-{
-  G4cout << "Set Magnetic field: " << fieldValue/tesla << " T" << G4endl;
-  fMagField->SetMagFieldValue(fieldValue);
-}
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorConstruction::SetMaxStep(G4double maxStep)
@@ -275,11 +237,13 @@ void DetectorConstruction::SetCheckOverlaps(G4bool checkOverlaps)
 void DetectorConstruction::SetPresamplerWidth(G4double width)
 {
   SetPresamplerGeometry(width, fPsmGemLength);
+  G4cout << "Set new presampler width " << fPresamplerWidth/mm << " mm" << G4endl;
 }
 
 void DetectorConstruction::SetPsmGemLength(G4double length)
 {
   SetPresamplerGeometry(fPresamplerWidth, length);
+  G4cout << "Set new distance from presampler to GEM " << fPsmGemLength/mm << " mm" << G4endl;
 }
 
 void DetectorConstruction::SetPresamplerGeometry(G4double width, G4double distance_to_gem)
@@ -290,9 +254,6 @@ void DetectorConstruction::SetPresamplerGeometry(G4double width, G4double distan
   fPresamplerWidth=width; //configure new width
   fPsmGemLength=distance_to_gem; //configure new distance from presampler to gem
   G4ThreeVector position(0,0,-fPresamplerWidth/2.0-fPsmGemLength); //set new position
-  G4cout << "Set psm width = " << Cfg.psm_width << " mm" << G4endl;
-  G4cout << "Set psm_gem length = " << Cfg.psm_gem_length << " mm" << G4endl;
-
   //open geometry for modification
   G4GeometryManager * geometry=G4GeometryManager::GetInstance();
   geometry->OpenGeometry(fPresampler);

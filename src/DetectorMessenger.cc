@@ -28,12 +28,15 @@
 /// \file DetectorMessenger.cc
 /// \brief Implementation of the DetectorMessenger class
 
+#include "ROOTManager.hh"
 #include "DetectorMessenger.hh"
 #include "DetectorConstruction.hh"
+#include "Config.h"
 
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
+#include "G4UIcmdWithAnInteger.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -41,89 +44,85 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
  : G4UImessenger(),
    fDetectorConstruction(Det)
 {
-  fDirectory = new G4UIdirectory("/slrp/");
-  fDirectory->SetGuidance("UI commands specific to this example.");
+  fDirectory.reset(new G4UIdirectory("/lsrp/"));
+  fDirectory->SetGuidance("UI commands for Laser Polarimeter Simulation");
 
-  fDetDirectory = new G4UIdirectory("/slrp/det/");
-  fDetDirectory->SetGuidance("Detector construction control");
-
-  fTargMatCmd = new G4UIcmdWithAString("/slrp/det/setTargetMaterial",this);
-  fTargMatCmd->SetGuidance("Select Material of the Target.");
-  fTargMatCmd->SetParameterName("choice",false);
-  fTargMatCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
-
-  fChamMatCmd = new G4UIcmdWithAString("/slrp/det/setChamberMaterial",this);
-  fChamMatCmd->SetGuidance("Select Material of the Chamber.");
-  fChamMatCmd->SetParameterName("choice",false);
-  fChamMatCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
-
-  fSetFieldCmd = new G4UIcmdWithADoubleAndUnit("/slrp/det/setField",this);
-  fSetFieldCmd->SetGuidance("Define magnetic field.");
-  fSetFieldCmd->SetGuidance("Magnetic field will be in X direction.");
-  fSetFieldCmd->SetParameterName("Bx",false);
-  fSetFieldCmd->SetUnitCategory("Magnetic flux density");
-  fSetFieldCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
-
-  fStepMaxCmd = new G4UIcmdWithADoubleAndUnit("/slrp/det/stepMax",this);
+  fStepMaxCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/stepMax",this));
   fStepMaxCmd->SetGuidance("Define a step max");
   fStepMaxCmd->SetParameterName("stepMax",false);
   fStepMaxCmd->SetUnitCategory("Length");
   fStepMaxCmd->AvailableForStates(G4State_Idle);
 
-  fPresamplerWidthCmd = new G4UIcmdWithADoubleAndUnit("/slrp/PresamplerWidth",this);
+  fPhotonNumberCmd.reset(new G4UIcmdWithAnInteger("/lsrp/PhotonNumber",this));
+  fPhotonNumberCmd->SetGuidance("Set photon number per pulse");
+  fPhotonNumberCmd->SetParameterName("level",false);
+  fPhotonNumberCmd->SetDefaultValue(1);
+
+  fRootFileCmd.reset(new G4UIcmdWithAString("/lsrp/RootFile",this));
+  fRootFileCmd->SetGuidance("Select output ROOT file");
+  fRootFileCmd->SetParameterName("choice",false);
+  fRootFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+
+  fPresamplerWidthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PresamplerWidth",this));
   fPresamplerWidthCmd->SetGuidance("Define a width of the presampler");
   fPresamplerWidthCmd->SetParameterName("presamplerWidth",false);
   fPresamplerWidthCmd->SetUnitCategory("Length");
   fPresamplerWidthCmd->AvailableForStates(G4State_Idle);
 
-  fPsmGemLengthCmd = new G4UIcmdWithADoubleAndUnit("/slrp/PsmGemLength",this);
+  fPsmGemLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PsmGemLength",this));
   fPsmGemLengthCmd->SetGuidance("Define distance betwee presampler and gem");
   fPsmGemLengthCmd->SetParameterName("PsmGemLength",false);
   fPsmGemLengthCmd->SetUnitCategory("Length");
   fPsmGemLengthCmd->AvailableForStates(G4State_Idle);
+
+  fPadSizeCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PadSize",this));
+  fPadSizeCmd->SetGuidance("Size of the hexagonal pad");
+  fPadSizeCmd->SetParameterName("PadSize",false);
+  fPadSizeCmd->SetUnitCategory("Length");
+  fPadSizeCmd->AvailableForStates(G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-DetectorMessenger::~DetectorMessenger()
-{
-  delete fTargMatCmd;
-  delete fChamMatCmd;
-  delete fSetFieldCmd;
-  delete fStepMaxCmd;
-  delete fDirectory;
-  delete fDetDirectory;
-  delete fPresamplerWidthCmd;
-  delete fPsmGemLengthCmd;
-}
+DetectorMessenger::~DetectorMessenger() { }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 {
-  if( command == fTargMatCmd )
-   { fDetectorConstruction->SetTargetMaterial(newValue);}
 
-  if( command == fChamMatCmd )
-   { fDetectorConstruction->SetChamberMaterial(newValue);}
-
-  if( command == fSetFieldCmd ) {
-    fDetectorConstruction
-      ->SetMagField(fSetFieldCmd->GetNewDoubleValue(newValue));
-  }
-
-  if( command == fStepMaxCmd ) {
-    fDetectorConstruction
-      ->SetMaxStep(fStepMaxCmd->GetNewDoubleValue(newValue));
+  if( command == fStepMaxCmd.get() )
+  {
+    fDetectorConstruction->SetMaxStep(fStepMaxCmd->GetNewDoubleValue(newValue));
   }   
-  if( command == fPresamplerWidthCmd)
+
+  if( command == fPresamplerWidthCmd.get())
   {
     fDetectorConstruction->SetPresamplerWidth(fPresamplerWidthCmd->GetNewDoubleValue(newValue));
   }   
-  if( command == fPsmGemLengthCmd)
+
+  if( command == fPsmGemLengthCmd.get())
   {
     fDetectorConstruction->SetPsmGemLength(fPsmGemLengthCmd->GetNewDoubleValue(newValue));
   }   
+
+  if(command == fPhotonNumberCmd.get())
+  {
+    Cfg.photon_number = fPhotonNumberCmd->GetNewIntValue(newValue);
+    //G4cout << "Set photon number: " <<  Cfg.photon_number << G4cout;
+  }
+
+  if( command == fRootFileCmd.get() )
+  { 
+    ROOTManager::Instance()->SetRootFile(newValue);
+    //G4cout << "Set RootFile: " <<  Cfg.output_file << G4cout;
+  }
+  
+  if( command == fPadSizeCmd.get())
+  {
+    Cfg.pad_size = fPadSizeCmd->GetNewDoubleValue(newValue)/mm;
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

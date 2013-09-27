@@ -25,6 +25,8 @@
 #include "G4Tubs.hh"
 #include "G4PVPlacement.hh"
 
+class G4UserLimits;
+
 class GEMDetector 
 {
   G4double fSizeX; // GEM size X
@@ -73,6 +75,7 @@ class GEMDetector
     G4LogicalVolume * fStefVolume;
     G4double GetPadZ(void) const {return fPadZposition;}
     bool fCheckOverlaps=true;
+    void SetUserLimits(G4UserLimits * );
 };
 
 #endif

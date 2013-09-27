@@ -166,6 +166,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
   // periodic printing
 
   static long geometry_print_index=0;
+  if(eventID==0) geometry_print_index=0;
   if ( eventID < 100 || eventID % 100 == 0)
   {
     G4cout << ">>> Event: " << eventID  << G4endl;

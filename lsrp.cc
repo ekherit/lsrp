@@ -34,7 +34,6 @@
 #include "RunAction.hh"
 #include "EventAction.hh"
 #include "TrackingAction.hh"
-#include "Messenger.hh"
 
 #include "G4StepLimiterBuilder.hh"
 
@@ -160,7 +159,7 @@ int main(int argc,char** argv)
   
   // Construct the default run manager
   
-  Messenger * messenger = new Messenger();
+//  Messenger * messenger = new Messenger();
 
   G4RunManager * runManager = new G4RunManager;
 

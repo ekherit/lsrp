@@ -194,9 +194,13 @@ GEMDetector::GEMDetector(void)
         i+1, //copy number //zero is for DriftVolume
         fCheckOverlaps); //check overlaps
   }
-  //fDriftVolume->SetUserLimits(new G4UserLimits(fDriftLength/10.));
-  //fTransferVolume->SetUserLimits(new G4UserLimits(fTransferLength/10.));
   PrintGeometry();
+}
+
+void GEMDetector::SetUserLimits(G4UserLimits * user_limits)
+{
+  fDriftVolume->SetUserLimits(user_limits);
+  fTransferVolume->SetUserLimits(user_limits);
 }
 
 void GEMDetector::PrintGeometry(void)
