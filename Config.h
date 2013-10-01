@@ -31,6 +31,8 @@ struct Config_t
   double gem_size; //size of the gem in mm
   double gem_amplification;  //1e4
   double pad_size;  //size of signe pad in mm
+  double pad_xsize;  //x size of signe pad in mm
+  double pad_ysize;  //y size of signe pad in mm
   unsigned gem_cascade_number; //number of amplification cascades 3
   std::string output_file; //output file name
   unsigned test_beam;

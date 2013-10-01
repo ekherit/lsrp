@@ -83,11 +83,13 @@ void EventAction::EndOfEventAction(const G4Event* event)
   if (trajectoryContainer) n_trajectories = trajectoryContainer->entries();
 
   G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
+  std::list<int> phot_list; //list of registered photons
 
   auto RM = ROOTManager::Instance();
   RM->event.d=Cfg.psm_width;
   RM->event.l=Cfg.psm_gem_length;
-  RM->event.ps=Cfg.pad_size;
+  RM->event.psx=Cfg.pad_xsize;
+  RM->event.psy=Cfg.pad_ysize;
   RM->event.run=Cfg.run;
   RM->event.eventID = eventID;
   RM->event.Eb = RM->event.gen[0].Eb;
@@ -132,20 +134,21 @@ void EventAction::EndOfEventAction(const G4Event* event)
   for(auto & p : fPads) 
   {
     PadEvent & epad=RM->event.pad[i];
-    p.tracks.sort();
-    p.tracks.unique();
+    p.tracks.sort(); //sort initial photon track identificators
+    p.tracks.unique(); //remove doubles
+    phot_list.insert(std::end(phot_list), std::begin(p.tracks), std::end(p.tracks)); //write tracks id to global registered photon list
     epad.X = p.x();
     epad.Y = p.y();
     epad.R = sqrt(ibn::sq(epad.X)+ibn::sq(epad.Y));
-    epad.nx = p.fnx;
-    epad.ny = p.fny;
+    epad.nx = p.nx();
+    epad.ny = p.ny();
     epad.xhit = p.xhit;
     epad.yhit = p.yhit;
     //spread hit position over pad
     do {
       epad.x = p.x() + p.size()*(G4UniformRand()-0.5);
       epad.y = p.y() + p.size()*(G4UniformRand()-0.5)*sqrt(3.0)/2.0;
-    } while (Pad(p.size(), epad.x, epad.y)!= p);
+    } while (Pad(p.xsize(),p.ysize(), epad.x, epad.y)!= p);
     epad.r = ibn::rho(epad.x,epad.y);
     //variate amplification
     do { epad.q = p.charge*(1+0.3*G4RandGauss::shoot()); } while(epad.q <=0);
@@ -165,28 +168,30 @@ void EventAction::EndOfEventAction(const G4Event* event)
     }
     i++;
   }
+  phot_list.sort();
+  phot_list.unique();
+  RM->event.ndet=phot_list.size();
   RM->tree->Fill();
 
   // periodic printing
 
   static long geometry_print_index=0;
+  bool ispr1 = eventID < 100;
+  bool ispr100 = eventID < 1000 && eventID%100==0;
+  bool ispr10k = eventID%10000==0;
   if(eventID==0) geometry_print_index=0;
-  if ( eventID < 100 || eventID % 100 == 0)
+  if (ispr1 || ispr100 || ispr10k)
   {
-    G4cout << ">>> Event: " << eventID  << G4endl;
-    if ( trajectoryContainer )
-    {
-      G4cout << "    " << n_trajectories << " trajectories stored in this event." << G4endl;
-    }
     G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
-    G4cout << RM->event.nphot << " photons, "  
+    G4cout << ">>> Event: " << eventID  <<  ".  ";
+    G4cout << RM->event.ndet << " photons, "  
       << hc->GetSize() << " hits and " 
       << RM->event.npad << " pads stored in this event.";
     if(geometry_print_index % 10 ==0)
     {
-      G4cout << " ( dPb=" << Cfg.psm_width/mm << " mm" 
+      G4cout << " ( Nphot=" << RM->event.nphot << ", dPb=" << Cfg.psm_width/mm << " mm" 
              << ", l="  << Cfg.psm_gem_length/mm<< " mm"
-             << ", pad size=" << Cfg.pad_size/mm << " mm )" ;
+             << ", psx=" << Cfg.pad_xsize/mm << " mm, psy=" << Cfg.pad_ysize/mm << " mm )" ;
     }
     geometry_print_index++;
     G4cout<< G4endl;

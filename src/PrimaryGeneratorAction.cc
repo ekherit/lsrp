@@ -156,6 +156,7 @@ void variate_agnle(ibn::phys::compton & C, double dx , double dy)
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
+  int eventID=anEvent->GetEventID();
   switch(Cfg.test_beam)
   {
     case 1:
@@ -191,8 +192,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   }
   fParticleGun->SetParticleDefinition(fGamma);
   // This function is called at the begining of event
-  //drop polarization
-  double Pg = (G4UniformRand()-0.5) > 0 ? 1 : -1; //variate photon polarization
+  double Pg = 2.0*(eventID%2)-1.0; //calculate polarization
   fCompton->SetPhotonPolarization(Pg);
   for(unsigned i=0;i<Cfg.photon_number;i++)
   {

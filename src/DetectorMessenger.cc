@@ -81,6 +81,18 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fPadSizeCmd->SetParameterName("PadSize",false);
   fPadSizeCmd->SetUnitCategory("Length");
   fPadSizeCmd->AvailableForStates(G4State_Idle);
+
+  fPadSizeXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PadSizeX",this));
+  fPadSizeXCmd->SetGuidance("Size of the hexagonal pad");
+  fPadSizeXCmd->SetParameterName("PadSizeX",false);
+  fPadSizeXCmd->SetUnitCategory("Length");
+  fPadSizeXCmd->AvailableForStates(G4State_Idle);
+
+  fPadSizeYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PadSizeY",this));
+  fPadSizeYCmd->SetGuidance("Size of the hexagonal pad");
+  fPadSizeYCmd->SetParameterName("PadSizeY",false);
+  fPadSizeYCmd->SetUnitCategory("Length");
+  fPadSizeYCmd->AvailableForStates(G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -110,18 +122,26 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if(command == fPhotonNumberCmd.get())
   {
     Cfg.photon_number = fPhotonNumberCmd->GetNewIntValue(newValue);
-    //G4cout << "Set photon number: " <<  Cfg.photon_number << G4cout;
   }
 
   if( command == fRootFileCmd.get() )
   { 
     ROOTManager::Instance()->SetRootFile(newValue);
-    //G4cout << "Set RootFile: " <<  Cfg.output_file << G4cout;
   }
   
   if( command == fPadSizeCmd.get())
   {
     Cfg.pad_size = fPadSizeCmd->GetNewDoubleValue(newValue)/mm;
+    Cfg.pad_xsize = Cfg.pad_size;
+    Cfg.pad_ysize = Cfg.pad_size;
+  }
+  if( command == fPadSizeXCmd.get())
+  {
+    Cfg.pad_xsize = fPadSizeXCmd->GetNewDoubleValue(newValue)/mm;
+  }
+  if( command == fPadSizeYCmd.get())
+  {
+    Cfg.pad_ysize = fPadSizeYCmd->GetNewDoubleValue(newValue)/mm;
   }
 }
 

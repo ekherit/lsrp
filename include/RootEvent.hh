@@ -102,13 +102,15 @@ class RootEvent : public TObject
   //geometry information
   Double_t d=-99999; //presampler  width, mm
   Double_t l=-99999; //distance from presampler to GEM,mm
-  Double_t ps=-99999; //pad size, mm
+  Double_t psx=-99999; //x pad size, mm
+  Double_t psy=-99999; //y pad size, mm
   Long64_t run=-99999; //run id
   Long64_t eventID=-99999; //event id
   //beam information
   Double_t P=0; //polarization of gamma quant
   Double_t Eb=-99999; //electron beam energy
-  Long64_t nphot=-99999; //number of photons
+  Long64_t nphot=-99999; //number of generated photons
+  Long64_t ndet=-99999; //nomber of registered photons
   //detector information
   Long64_t nhit=-99999;
   Long64_t npad=-99999;
@@ -119,7 +121,8 @@ class RootEvent : public TObject
   {
     d=-99999;
     l=-99999;
-    ps=-99999;
+    psx=-99999;
+    psy=-99999;
     run=-99999;
     eventID=-99999;
     P=0;

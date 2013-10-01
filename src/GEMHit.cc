@@ -52,8 +52,8 @@ GEMHit::GEMHit()
    fEdep(0.),
    fPos(G4ThreeVector()),
    fMomentum(G4ThreeVector()),
-   fCharge(0),
-   fPad()
+   fCharge(0)
+   //fPad()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

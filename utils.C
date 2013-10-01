@@ -15,6 +15,8 @@
  *
  * =====================================================================================
  */
+//#include <iomanip>
+//#include <vector>
 
 double get_fhwm(TH1F * h)
 {
@@ -87,7 +89,7 @@ inline void DrawAsymmetry(TTree *t, const char * channel, TCut cut, const char *
   hasym->Draw(gopt);
 }
 
-inline void CalculateAsymmetry(TTree *t, const char * channel, TCut cut, const char * gopt="")
+inline void CalculateAsymmetry2(TTree *t, const char * channel, TCut cut, const char * gopt="")
 {
   TCut Pup="P>0";
   TCut Pdown = "P<0";
@@ -108,7 +110,13 @@ inline void CalculateAsymmetry(TTree *t, const char * channel, TCut cut, const c
 
 inline double sq(double x) { return x*x;}
 
-inline void CalculateAsymmetry2(TTree *t, const char * channel, TCut cut, const char * gopt="")
+struct AsymmetryResult_t
+{
+  double asymmetry;
+  double error;
+};
+
+inline  AsymmetryResult_t CalculateAsymmetry(TTree *t, const char * channel, TCut cut, const char * gopt="")
 {
   TCut Pup="P>0";
   TCut Pdown = "P<0";
@@ -125,6 +133,10 @@ inline void CalculateAsymmetry2(TTree *t, const char * channel, TCut cut, const 
   cout << "uu-ud = " << int(uu-ud)<< endl;
   cout << "uu+ud = " << Long64_t(uu+ud) << endl;
   cout << "Asymmetry: " <<  eps << " +- " << error << " ("<< error/eps*100.0 << "%)"<< endl;
+  AsymmetryResult_t ar;
+  ar.asymmetry = eps;
+  ar.error = error;
+  return ar;
 }
 
 void drift_comparison(const char * fn1, const char *fn2)
@@ -169,21 +181,103 @@ void drift_comparison(const char * fn1, const char *fn2)
 
 void utils(void)
 {
-  //drift_comparison("drift.root","nodrift.root");
-  TFile * f = new TFile("tmp.root");
-  TTree * t = (TTree*)f->Get("lsrp");
-  //DrawAsymmetry(t,"pad.yhit","abs(pad.yhit)<20");
-  DrawAsymmetry(t,"gen.y","abs(gen.y)<20");
+  ////drift_comparison("drift.root","nodrift.root");
+  //TFile * f = new TFile("tmp.root");
+  //TTree * t = (TTree*)f->Get("lsrp");
+  ////DrawAsymmetry(t,"pad.yhit","abs(pad.yhit)<20");
+  //DrawAsymmetry(t,"gen.y","abs(gen.y)<20");
 }
 
 
 
-void DrawOccupancy(TTree *t, TCut cut=="")
+TTree *  LoadTree(const char * file)
+{
+  TFile * f = new TFile(file);
+  TTree  *t =  (TTree*)f->Get("lsrp");
+  return t;
+}
+
+struct OcupancyResult_t
+{
+  double occupancy;
+  double error;
+  double mean_error;
+};
+
+OcupancyResult_t DrawOccupancy(TTree *t, TCut cut=="")
 {
   t->SetLineWidth(2);
   t->Draw("pad.nphot:sqrt(pad.x**2+pad.y**2)>>hocup",cut, "prof");
   double occupancy=hocup->GetBinContent(1);
   double error=hocup->GetBinError(1);
-  cout << "Occupancy = " << occupancy  << " +- " << error << endl;
+  double binwidth= hocup->GetBinWidth(1);
+  double bincenter=hocup->GetBinCenter(1);
+  double rmax = bincenter+binwidth/2;
+  cout << "rmax = " << rmax << endl;
+  char  buf[1024];
+  sprintf(buf,"pad.r<%f",rmax);
+  TCut bin0 = buf;
+  t->Draw("pad.nphot",cut && bin0, "goff");
+  double nbin = t->GetSelectedRows();
+  cout << "number of event in zero bin: " <<  nbin << endl;
+  cout << "Occupancy = " << occupancy  << " +- " << error*sqrt(nbin) <<  "(" << error <<")" <<  endl;
+  OcupancyResult_t result;
+  result.occupancy = occupancy;
+  result.error = error*sqrt(nbin);
+  result.mean_error = error;
+  return result;
+}
+#include <iomanip>
+void MassiveDrawOccupancy(const char * file_prefix="run")
+{
+  char filename[1024];
+  //double ocup[11]; 
+  //double err[11];
+  //double mean_error[11];
+  int N=11;
+  string * Fi = new string[N];
+  OcupancyResult_t * Oc = new OcupancyResult_t[N]
+  cout << setw(12) << "file" << setw(12) << "occupancy" << setw(12) << "spread" << setw(12) << "mean_error" << endl;
+  for(int i=0;i<N;i++)
+  {
+    sprintf(filename,"%s%d.root",file_prefix,i);
+    TTree * t = LoadTree(filename);
+    OcupancyResult_t o = DrawOccupancy(t);
+    Oc[i]=o;
+    Fi[i]=filename;
+    cout << setw(12) << filename << setw(12) << o.occupancy << setw(12) << o.error << setw(12) << o.mean_error << endl;
+  }
+
+  cout << setw(12) << "file" << setw(12) << "occupancy" << setw(12) << "spread" << setw(12) << "mean_error" << endl;
+  for(int i=0;i<N;i++)
+  {
+    cout << setw(12) << Fi[i] << setw(12) << Oc[i].occupancy << setw(12) << Oc[i].error << setw(12) << Oc[i].mean_error << endl;
+  }
+}
+
+void MassiveCalculateAsymmetry(const char * file_prefix="run")
+{
+  char filename[1024];
+  int N=11;
+  string * Fi = new string[N];
+  AsymmetryResult_t * R = new AsymmetryResult_t[N]
+  cout << setw(12) << "file" << setw(12) << "occupancy" << setw(12) << "spread"  << endl;
+  for(int i=0;i<N;i++)
+  {
+    sprintf(filename,"%s%d.root",file_prefix,i);
+    TTree * t = LoadTree(filename);
+    AsymmetryResult_t o = CalculateAsymmetry(t,"pad.y","");
+    R[i]=o;
+    Fi[i]=filename;
+    cout << setw(12) << filename << setw(12) << o.asymmetry << setw(12) << o.error
+      << setw(12) << setprecision(3) << R[i].error*100.0/R[i].asymmetry<< endl;
+  }
+
+  cout << setw(12) << "file" << setw(12) << "occupancy" << setw(12) << "spread" << setw(12) << endl;
+  for(int i=0;i<N;i++)
+  {
+    cout << setw(12) << Fi[i] << setw(12) << R[i].asymmetry << setw(12) << R[i].error 
+      << setw(12) << setprecision(3) << R[i].error*100.0/R[i].asymmetry <<endl;
+  }
 }
 

@@ -78,7 +78,7 @@ std::list<Pad> GetHitPadList(G4ThreeVector hit_pos, double total_charge, double 
   {
     G4double x = G4RandGauss::shoot(hit_pos.x(), spot_size);
     G4double y = G4RandGauss::shoot(hit_pos.y(), spot_size);
-    Pad pad(Cfg.pad_size, x,y);
+    Pad pad(Cfg.pad_xsize, Cfg.pad_ysize, x,y);
     //std::cout << hit_pos.x() << "," << hit_pos.y() << " ->     " << x << "," << y << " spot_size=" << spot_size/mm << " mm";
     //std::cout << "     " << pad.x() << "," << pad.y() << std::endl;
     auto p = std::find(std::begin(Pads),std::end(Pads), pad);
@@ -122,6 +122,7 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   newHit->SetEdep(edep);
   newHit->SetPos(r);
   newHit->SetMomentum(track->GetVertexMomentumDirection());
+  //G4cout<< "Before find pad" << G4endl;
   newHit->FindPad();
   newHit->SetCharge(charge*GetAmplification(newHit->GetVolumeID()));
   std::list<Pad> pad_list;
@@ -131,7 +132,7 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
     G4double  drift_length = fPadZPosition - r.z();
     G4double  drift_speed = 15*um/mm;
     G4double  spot_size = drift_speed*drift_length;
-    pad_list = GetHitPadList(r, newHit->GetCharge(), spot_size/2.);
+    pad_list = GetHitPadList(r, newHit->GetCharge(), spot_size);
   }
   else 
   {

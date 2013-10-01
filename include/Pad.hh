@@ -17,52 +17,106 @@
  */
 #ifndef IBN_LSRP_PAD_H
 #define IBN_LSRP_PAD_H
-//describes hexagonal pad
 #include <cmath>
 #include <list>
-class Pad
+#include <iostream>
+class BasePad
 {
-  double fa; // pad size
-  double fx,fy; //coordinate of the center of the pad
+  protected:
+  double fxsize; // pad size x
+  double fysize; // pad size y
+  double fx=0;
+  double fy=0; //coordinate of the center of the pad
+  long fnx=0; //x index of pad
+  long fny=0; //y index of pad
   public:
-  long nhit;
-  double xhit,yhit;
-  double charge;
-  long fnx, fny; //index of pads
+  BasePad(double ax, double ay) : fxsize(ax), fysize(ay)
+  {
+  }
+  BasePad(double a=1) : BasePad(a,a)
+  {
+  }
+  long nhit=1;
+  double xhit=0;
+  double yhit=0;
+  double charge=0;
   double x(void)const  { return fx;}
   double y(void) const { return fy;}
-  double size(void) const {return fa;}
+  long   nx(void) const { return fnx;}
+  long   ny(void) const { return fny;}
+  double size(void) const {return std::max(fxsize, fysize);}
+  double xsize(void) const {return fxsize;}
+  double ysize(void) const {return fysize;}
   std::list<unsigned> tracks; //original track ids
-  Pad(double a=1)
+};
+
+
+class SquarePad : public BasePad
+{
+  public:
+    SquarePad(double a=1) : BasePad(a)
+    {
+    }
+
+    SquarePad(double ax, double ay) : BasePad(ax,ay) 
+    {
+    }
+
+    SquarePad(double ax, double ay, double X, double Y, double q=0) : SquarePad(ax,ay)
+    {
+      charge=q;
+      FindIndex(X,Y);
+    }
+
+    SquarePad(double a, double X, double Y, double q=0)  : SquarePad(a,a,X,Y,q)
+    {
+    }
+  protected:
+
+    void FindIndex(double x,double y)
+    {
+      xhit=x;
+      yhit=y;
+      x = x/fxsize;
+      y=y/fysize;
+      fnx = floor(x+0.5);
+      fny = floor(y+0.5);
+      FindPosition(fnx,fny);
+    }
+    void FindPosition(long nx, long ny)
+    {
+      fx = nx*fxsize;
+      fy = ny*fysize;
+    }
+};
+
+
+class HexPad : public BasePad
+{
+  public:
+  HexPad(double a=1) : BasePad(a)
   {
-    Init(a);
   }
 
-  Pad(double a, double X, double Y)
+  HexPad(double ax, double ay) : BasePad(ax,ay) 
   {
-    Init(a);
+  }
+
+  HexPad(double ax, double ay, double X, double Y) : HexPad(ax,ay)
+  {
     FindIndex(X,Y);
   }
-  
-  void Init(double a=1)
+
+  HexPad(double a, double X, double Y)  : HexPad(a,a,X,Y)
   {
-    fa = a;
-    fx=0;
-    fy=0;
-    fnx=0;
-    fny=0;
-    charge=0;
-    nhit=1; //Already have 1 hit
-    xhit=0;
-    yhit=0;
   }
 
-
+  protected:
   void FindPosition(long nx, long ny)
   {
     int even = fabs(nx%2);
-    fx = (floor(nx/2.)*1.5 + 0.75*even)*fa;
-    fy = (ny + 0.5*even)*sqrt(3.0)/2.0*fa;
+    fx = (floor(nx/2.)*1.5 + 0.75*even)*fxsize;
+    fy = (ny + 0.5*even)*sqrt(3.0)/2.0*fysize;
   }
 
   void FindIndex(double x, double y)
@@ -70,8 +124,8 @@ class Pad
     xhit=x;
     yhit=y;
     //step 1 normalize position on size
-    x = x/fa;
-    y=y/(sqrt(3.0)/2.0*fa);
+    x = x/fxsize;
+    y=y/(sqrt(3.0)/2.0*fysize);
     //step 2 found number of cell
     long Nx = floor((x+0.5)/1.5);
     long Ny = floor((y+0.5));
@@ -103,36 +157,25 @@ class Pad
   }
 };
 
+
+
+//typedef SquarePad  Pad;
+typedef HexPad  Pad;
 inline bool operator==(const Pad & p1, const Pad & p2) 
 {
-  return p1.fnx == p2.fnx && p1.fny==p2.fny;
+  return p1.nx() == p2.nx() && p1.ny()==p2.ny();
 }
 
 inline bool operator!=(const Pad & p1, const Pad & p2) 
 {
-  return p1.fnx != p2.fnx || p1.fny!=p2.fny;
+  return p1.nx() != p2.nx() || p1.ny()!=p2.ny();
 }
 
 inline bool operator<(const Pad & p1, const Pad & p2) 
 {
-  if(p1.fnx< p2.fnx) return  true;
-  if(p1.fnx>p2.fnx)  return false;
-  return p1.fny<p2.fny;
+  if(p1.nx()< p2.nx()) return  true;
+  if(p1.nx()>p2.nx())  return false;
+  return p1.ny()<p2.ny();
 }
-
-//inline bool operator>(const Pad & p1, const Pad & p2) 
-//{
-//  return p1.fnx > p2.fnx || p1.fny>p2.fny;
-//}
-//inline bool operator<=(const Pad & p1, const Pad & p2) 
-//{
-//  return p1.fnx <= p2.fnx && p1.fny<=p2.fny;
-//}
-//
-//inline bool operator>=(const Pad & p1, const Pad & p2) 
-//{
-//  return p1.fnx >= p2.fnx && p1.fny>=p2.fny;
-//}
-
 #endif
 

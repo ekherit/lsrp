@@ -40,12 +40,6 @@
 
 #include <list>
 
-/// Tracker hit class
-///
-/// It defines data members to store the trackID, chamberNb, energy deposit,
-/// and position of charged particles in a selected volume:
-/// - fTrackID, fChamberNB, fEdep, fPos
-
 class GEMHit : public G4VHit
 {
   public:
@@ -73,7 +67,11 @@ class GEMHit : public G4VHit
     void SetPos      (G4ThreeVector xyz){ fPos = xyz; };
     void SetMomentum (const G4ThreeVector & k ) { fMomentum = k;}
     void SetCharge   (G4double charge)  { fCharge = charge; fPad.charge=fCharge; }
-    void FindPad(void) { fPad = Pad(Cfg.pad_size*mm, fPos.x(), fPos.y()); fPad.charge=fCharge;}
+    void FindPad(void) 
+    { 
+      fPad = Pad(Cfg.pad_xsize*mm, Cfg.pad_ysize*mm, fPos.x(), fPos.y());
+      fPad.charge=fCharge;
+    }
     void SetPads(const std::list<Pad> & pads ) { fPads = pads;}
 
     // Get methods

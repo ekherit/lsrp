@@ -70,6 +70,8 @@ class DetectorMessenger: public G4UImessenger
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPresamplerWidthCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPsmGemLengthCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeXCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeYCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
