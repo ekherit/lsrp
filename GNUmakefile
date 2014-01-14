@@ -21,7 +21,7 @@ endif
 all: RootEventDict.cc lib bin 
 
 RootEventDict.cc :
-			rootcint  -f src/RootEventDict.cc  -c -I/home/nikolaev/work include/RootEvent.hh  include/RootLinkDef.hh 
+			rootcint  -f src/RootEventDict.cc  -c -I/home/nikolaev/work -I$(G4INCLUDE)  -p include/RootEvent.hh  include/RootLinkDef.hh 
 
 myclean :
 			rm -rf dict.* $(G4TMP)/$(G4SYSTEM)/lsrp

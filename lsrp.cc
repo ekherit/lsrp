@@ -98,13 +98,13 @@ int main(int argc,char** argv)
   po::options_description opt_desc("Allowed options");
   opt_desc.add_options()
     ("psm_width", po::value<double>(&Cfg.psm_width)->default_value(5.6), "Presampler width, mm")
-    ("psm_size", po::value<double>(&Cfg.psm_size)->default_value(200), "Presampler width, mm")
+    ("psm_size", po::value<double>(&Cfg.psm_size)->default_value(500), "Presampler size, mm")
     ("gem_width", po::value<double>(&Cfg.gem_width)->default_value(0.3), "GEM width, cm")
     ("psm_gem_length", po::value<double>(&Cfg.psm_gem_length)->default_value(1.0), "Distance between presampler and GEM, in mm")
     ("pad_size", po::value<double>(&Cfg.pad_size), "hexagonal pad size, mm")
     ("pad_xsize", po::value<double>(&Cfg.pad_xsize)->default_value(1), "hexagonal pad x size, mm")
     ("pad_ysize", po::value<double>(&Cfg.pad_ysize)->default_value(1), "hexagonal pad y size, mm")
-    ("gem_size", po::value<double>(&Cfg.gem_size)->default_value(100), "gem size, mm")
+    ("gem_size", po::value<double>(&Cfg.gem_size)->default_value(200), "gem size, mm")
     ("gem_amplification", po::value<double>(&Cfg.gem_amplification)->default_value(1e4), "GEM amplificiation")
     ("gem_cascade_number", po::value<unsigned>(&Cfg.gem_cascade_number)->default_value(3), "Number of amplificiation cascades")
     ("photon_number", po::value<unsigned>(&Cfg.photon_number)->default_value(1), "Number of photons per pulse")
@@ -138,8 +138,8 @@ int main(int argc,char** argv)
     if(opt.count("pad_size"))
     {
       Cfg.pad_size = opt["pad_size"].as<double>();
-      Cfg.pad_xsize = Cfg.pad_size;
-      Cfg.pad_ysize = Cfg.pad_size;
+      Cfg.pad_xsize = Cfg.pad_size*mm;
+      Cfg.pad_ysize = Cfg.pad_size*mm;
     }
   } 
   catch (boost::program_options::unknown_option & o)

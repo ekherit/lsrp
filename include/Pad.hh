@@ -20,18 +20,23 @@
 #include <cmath>
 #include <list>
 #include <iostream>
+#include "Config.h"
+
 class BasePad
 {
   protected:
+  int fpad_type=0; //pad type 0,1,2...
   double fxsize; // pad size x
   double fysize; // pad size y
   double fx=0;
   double fy=0; //coordinate of the center of the pad
   long fnx=0; //x index of pad
   long fny=0; //y index of pad
+  double farea=0; // area of the pad
   public:
   BasePad(double ax, double ay) : fxsize(ax), fysize(ay)
   {
+    farea = fxsize*fysize;
   }
   BasePad(double a=1) : BasePad(a,a)
   {
@@ -47,6 +52,8 @@ class BasePad
   double size(void) const {return std::max(fxsize, fysize);}
   double xsize(void) const {return fxsize;}
   double ysize(void) const {return fysize;}
+  double area(void) const { return farea;}
+  int type(void) const {return fpad_type;}
   std::list<unsigned> tracks; //original track ids
 };
 
@@ -54,22 +61,14 @@ class BasePad
 class SquarePad : public BasePad
 {
   public:
-    SquarePad(double a=1) : BasePad(a)
+    SquarePad(void) : BasePad()
     {
     }
 
-    SquarePad(double ax, double ay) : BasePad(ax,ay) 
-    {
-    }
-
-    SquarePad(double ax, double ay, double X, double Y, double q=0) : SquarePad(ax,ay)
+    SquarePad(double X, double Y, double q=0) : SquarePad(Cfg.pad_xsize,Cfg.pad_ysize)
     {
       charge=q;
       FindIndex(X,Y);
-    }
-
-    SquarePad(double a, double X, double Y, double q=0)  : SquarePad(a,a,X,Y,q)
-    {
     }
   protected:
 
@@ -85,8 +84,64 @@ class SquarePad : public BasePad
     }
     void FindPosition(long nx, long ny)
     {
-      fx = nx*fxsize;
-      fy = ny*fysize;
+      fx = (nx+0.5)*fxsize;
+      fy = (ny+0.5)*fysize;
+    }
+};
+
+class VariableSquarePad : public BasePad
+{
+  double fHighSensWidthX=64; //high sensetive region width in x
+  double fHighSensWidthY=20; //high sensitive region width in y
+  double fRoughScaleX=2;
+  double fRoughScaleY=2;
+  enum { FINE_PAD=0, ROUGH_PAD=1};
+  public:
+    VariableSquarePad(void) : BasePad()
+    {
+    }
+
+    VariableSquarePad(double X, double Y, double q=0)
+    {
+      double ax = Cfg.pad_xsize;
+      double ay = Cfg.pad_ysize;
+      fHighSensWidthX = Cfg.pad_high_sens_xwidth;
+      fHighSensWidthY = Cfg.pad_high_sens_ywidth;
+      fRoughScaleX = Cfg.pad_rough_xscale;
+      fRoughScaleY = Cfg.pad_rough_yscale;
+      if(fabs(X) <= fHighSensWidthX*0.5 && fabs(Y)<=fHighSensWidthY*0.5)
+      {
+        fxsize=ax;
+        fysize=ay;
+        fpad_type = FINE_PAD;
+      }
+      else
+      {
+        fxsize=ax*fRoughScaleX;
+        fysize=ay*fRoughScaleY;
+        fpad_type = ROUGH_PAD;
+      }
+      farea=fxsize*fysize;
+      charge=q;
+      FindIndex(X,Y);
+    }
+
+
+    void FindIndex(double x,double y)
+    {
+      xhit=x;
+      yhit=y;
+      x = x/fxsize;
+      y = y/fysize;
+      fnx = floor(x);
+      fny = floor(y);
+      FindPosition(fnx,fny);
+    }
+
+    void FindPosition(long nx, long ny)
+    {
+      fx = (nx+0.5)*fxsize;
+      fy = (ny+0.5)*fysize;
     }
 };
 
@@ -94,21 +149,13 @@ class SquarePad : public BasePad
 class HexPad : public BasePad
 {
   public:
-  HexPad(double a=1) : BasePad(a)
+  HexPad() : BasePad()
   {
   }
 
-  HexPad(double ax, double ay) : BasePad(ax,ay) 
-  {
-  }
-
-  HexPad(double ax, double ay, double X, double Y) : HexPad(ax,ay)
+  HexPad(double X, double Y) : HexPad(Cfg.pad_xsize, Cfg.pad_ysize)
   {
     FindIndex(X,Y);
-  }
-
-  HexPad(double a, double X, double Y)  : HexPad(a,a,X,Y)
-  {
   }
 
   protected:
@@ -160,21 +207,28 @@ class HexPad : public BasePad
 
 
 //typedef SquarePad  Pad;
-typedef HexPad  Pad;
+//typedef HexPad  Pad;
+typedef VariableSquarePad Pad;
 inline bool operator==(const Pad & p1, const Pad & p2) 
 {
-  return p1.nx() == p2.nx() && p1.ny()==p2.ny();
+  return p1.nx() == p2.nx() && p1.ny()==p2.ny() && p1.type()==p2.type();
 }
 
 inline bool operator!=(const Pad & p1, const Pad & p2) 
 {
-  return p1.nx() != p2.nx() || p1.ny()!=p2.ny();
+  return ! (p1 == p2);
 }
 
 inline bool operator<(const Pad & p1, const Pad & p2) 
 {
+  if(p1.type()<p2.type()) return true;
+  if(p1.type()>p2.type()) return false;
+  //go there is pad type are equal
+  //now compare pads using x coord
   if(p1.nx()< p2.nx()) return  true;
   if(p1.nx()>p2.nx())  return false;
+  //go there if xpad are equal
+  //now compare y position
   return p1.ny()<p2.ny();
 }
 #endif

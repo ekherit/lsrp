@@ -78,39 +78,36 @@ void EventAction::EndOfEventAction(const G4Event* event)
   if ( eventID % fPrintModulo == 0)
     G4cout << "---> End of event: " << eventID << G4endl;
 
-  G4TrajectoryContainer* trajectoryContainer = event->GetTrajectoryContainer();
-  G4int n_trajectories = 0;
-  if (trajectoryContainer) n_trajectories = trajectoryContainer->entries();
-
   G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
   std::list<int> phot_list; //list of registered photons
 
   auto RM = ROOTManager::Instance();
-  RM->event.d=Cfg.psm_width;
-  RM->event.l=Cfg.psm_gem_length;
-  RM->event.psx=Cfg.pad_xsize;
-  RM->event.psy=Cfg.pad_ysize;
-  RM->event.run=Cfg.run;
-  RM->event.eventID = eventID;
-  RM->event.Eb = RM->event.gen[0].Eb;
-  RM->event.P = RM->event.gen[0].P;
-  RM->event.nphot=Cfg.photon_number;
-  RM->event.nhit = hc->GetSize();
-  RM->event.hit.resize(hc->GetSize());
+  auto & Revent = RM->event;
+  Revent.d=Cfg.psm_width;
+  Revent.l=Cfg.psm_gem_length;
+  Revent.psx=Cfg.pad_xsize;
+  Revent.psy=Cfg.pad_ysize;
+  Revent.run=Cfg.run;
+  Revent.eventID = eventID;
+  Revent.Eb = Revent.gen[0].Eb;
+  Revent.P = Revent.gen[0].P;
+  Revent.nphot=Cfg.photon_number;
+  Revent.nhit = hc->GetSize();
+  Revent.hit.resize(hc->GetSize());
   for(unsigned i=0; i< hc->GetSize();i++)
   {
     GEMHit * hit = (GEMHit*)hc->GetHit(i);
-    RM->event.hit[i].trackID = hit->GetTrackID();
-    RM->event.hit[i].OrigTrackID = hit->GetOriginalTrackID();
-    RM->event.hit[i].pid = hit->GetParticleID();
-    RM->event.hit[i].volumeID = hit->GetVolumeID();
-    RM->event.hit[i].E = hit->GetEdep()/MeV;
-    RM->event.hit[i].x = hit->GetPos().x()/mm;
-    RM->event.hit[i].y = hit->GetPos().y()/mm;
-    RM->event.hit[i].z = hit->GetPos().z()/mm;
-    RM->event.hit[i].rho = sqrt(ibn::sq(RM->event.hit[i].y) + ibn::sq(RM->event.hit[i].y));
-    RM->event.hit[i].phi = hit->GetPos().phi();
-    RM->event.hit[i].q = hit->GetCharge()/coulomb*1e15;
+    Revent.hit[i].trackID = hit->GetTrackID();
+    Revent.hit[i].OrigTrackID = hit->GetOriginalTrackID();
+    Revent.hit[i].pid = hit->GetParticleID();
+    Revent.hit[i].volumeID = hit->GetVolumeID();
+    Revent.hit[i].E = hit->GetEdep()/MeV;
+    Revent.hit[i].x = hit->GetPos().x()/mm;
+    Revent.hit[i].y = hit->GetPos().y()/mm;
+    Revent.hit[i].z = hit->GetPos().z()/mm;
+    Revent.hit[i].rho = sqrt(ibn::sq(Revent.hit[i].y) + ibn::sq(Revent.hit[i].y));
+    Revent.hit[i].phi = hit->GetPos().phi();
+    Revent.hit[i].q = hit->GetCharge()/coulomb*1e15;
     for(auto & pad : hit->GetPads())
     {
       auto p = std::find(std::begin(fPads),std::end(fPads), pad);
@@ -128,12 +125,12 @@ void EventAction::EndOfEventAction(const G4Event* event)
   }
   fPads.sort();
   //amplification of the charge
-  RM->event.npad = fPads.size();
-  RM->event.pad.resize(fPads.size());
+  Revent.npad = fPads.size();
+  Revent.pad.resize(fPads.size());
   int i=0;
   for(auto & p : fPads) 
   {
-    PadEvent & epad=RM->event.pad[i];
+    PadEvent & epad=Revent.pad[i];
     p.tracks.sort(); //sort initial photon track identificators
     p.tracks.unique(); //remove doubles
     phot_list.insert(std::end(phot_list), std::begin(p.tracks), std::end(p.tracks)); //write tracks id to global registered photon list
@@ -144,11 +141,19 @@ void EventAction::EndOfEventAction(const G4Event* event)
     epad.ny = p.ny();
     epad.xhit = p.xhit;
     epad.yhit = p.yhit;
+    epad.s = p.area();
+    epad.type = p.type();
     //spread hit position over pad
-    do {
-      epad.x = p.x() + p.size()*(G4UniformRand()-0.5);
-      epad.y = p.y() + p.size()*(G4UniformRand()-0.5)*sqrt(3.0)/2.0;
-    } while (Pad(p.xsize(),p.ysize(), epad.x, epad.y)!= p);
+    do
+    {
+      epad.x = p.x() + p.xsize()*(G4UniformRand()-0.5);
+      epad.y = p.y() + p.ysize()*(G4UniformRand()-0.5);
+      //epad.x = p.x() + p.xsize()*(G4UniformRand());
+      //epad.y = p.y() + p.ysize()*(G4UniformRand());
+      //std::cout << "fPads: spread: "<< p.x()<<","<<p.y()<<","<<p.type()<< " " << epad.x << "," << epad.y  << std::endl;
+      //Pad newpad(epad.x, epad.y);
+      //std::cout << "newpad: " << newpad.x() << " " << newpad.y() << " " << newpad.type() << std::endl;
+    } while (Pad(epad.x, epad.y) != p);
     epad.r = ibn::rho(epad.x,epad.y);
     //variate amplification
     do { epad.q = p.charge*(1+0.3*G4RandGauss::shoot()); } while(epad.q <=0);
@@ -163,14 +168,52 @@ void EventAction::EndOfEventAction(const G4Event* event)
         G4cout << "Original track more then photon number: " << track << " > " << Cfg.photon_number << G4endl;
         continue;
       }
-      RM->event.gen[track-1].pad.push_back(epad);
-      RM->event.gen[track-1].npad++;
+      Revent.gen[track-1].pad.push_back(epad);
+      Revent.gen[track-1].npad++;
     }
     i++;
   }
   phot_list.sort();
   phot_list.unique();
-  RM->event.ndet=phot_list.size();
+  Revent.ndet=phot_list.size();
+
+  double nup=0;
+  double ndown=0;
+  double ysum=0;
+  double xsum=0;
+  double y2sum=0;
+  double x2sum=0;
+  for(const auto & pad : Revent.pad)
+  {
+    if(pad.y > 0) nup++;
+    if(pad.y < 0) ndown++;
+    ysum+=pad.y;
+    xsum+=pad.x;
+    y2sum+=pad.y*pad.y;
+    x2sum+=pad.x*pad.x;
+  }
+  //find average y
+  double My = ysum/Revent.pad.size();
+  double Mx = xsum/Revent.pad.size();
+  double My2 = y2sum/Revent.pad.size();
+  double Mx2 = x2sum/Revent.pad.size();
+  Revent.My = My;
+  Revent.Mx = Mx;
+  Revent.xRMS = sqrt(Mx2 - Mx*Mx);
+  Revent.yRMS = sqrt(My2 - My*My);
+  Revent.asym = Revent.P*(nup-ndown)/(nup+ndown);
+  //calculate asym2
+  nup=0;
+  ndown=0;
+  for(const auto & pad : Revent.pad)
+  {
+    if(pad.y > My) nup++;
+    if(pad.y < Mx) ndown++;
+  }
+  Revent.asym2 = Revent.P*(nup-ndown)/(nup+ndown);
+
+
+
   RM->tree->Fill();
 
   // periodic printing
@@ -184,19 +227,19 @@ void EventAction::EndOfEventAction(const G4Event* event)
   {
     G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
     G4cout << ">>> Event: " << eventID  <<  ".  ";
-    G4cout << RM->event.ndet << " photons, "  
+    G4cout << Revent.ndet << " photons, "  
       << hc->GetSize() << " hits and " 
-      << RM->event.npad << " pads stored in this event.";
+      << Revent.npad << " pads stored in this event.";
     if(geometry_print_index % 10 ==0)
     {
-      G4cout << " ( Nphot=" << RM->event.nphot << ", dPb=" << Cfg.psm_width/mm << " mm" 
+      G4cout << " ( Nphot=" << Revent.nphot << ", dPb=" << Cfg.psm_width/mm << " mm" 
              << ", l="  << Cfg.psm_gem_length/mm<< " mm"
              << ", psx=" << Cfg.pad_xsize/mm << " mm, psy=" << Cfg.pad_ysize/mm << " mm )" ;
     }
     geometry_print_index++;
     G4cout<< G4endl;
   }
-  RM->event.clear();
+  Revent.clear();
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

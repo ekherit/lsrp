@@ -53,6 +53,7 @@ class G4Event;
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
+    static PrimaryGeneratorAction* Instance(void);
     unique_ptr<ibn::phys::compton> fCompton; 
     PrimaryGeneratorAction();    
     virtual ~PrimaryGeneratorAction();
@@ -66,10 +67,15 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4double fFlightLength;
     G4double fThetaMax;
     G4double fBeamEnergy;
+    G4double fBeamCurrent;
     G4ParticleDefinition * fElectron;
     G4ParticleDefinition * fGamma;
+
+
+    void Init(void);
   private:
     G4ParticleGun*          fParticleGun; // G4 particle gun
+    static PrimaryGeneratorAction* fgInstance;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

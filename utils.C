@@ -18,40 +18,41 @@
 //#include <iomanip>
 //#include <vector>
 
-double get_fhwm(TH1F * h)
+double get_fwhm(TH1F * h, double * error_result=0)
 {
   double max = h->GetMaximum();
-  cout << "max=" << max << endl;
+//  cout << "max=" << max << endl;
   int max_bin =  h->GetMaximumBin();
-  cout << max_bin << " " << max << endl;
+//  cout << max_bin << " " << max << endl;
   int upper, lower;
   for(int i=max_bin; i<h->GetNbinsX();i++)
   {
     double y = h->GetBinContent(i);
-    cout << i << " " << y << endl;
+ //   cout << i << " " << y << endl;
     if(y<max/2) 
     {
       upper = i;
       break;
     }
   }
-  cout << "Upper bin = " << upper << endl;
+  //cout << "Upper bin = " << upper << endl;
   for(int i=max_bin; i>=0;i--)
   {
     double y = h->GetBinContent(i);
-    cout << i << " " << y << endl;
+   // cout << i << " " << y << endl;
     if(y<max/2) 
     {
       lower = i;
       break;
     }
   }
-  cout << "Lower bin = " << lower << endl;
+  //cout << "Lower bin = " << lower << endl;
   double error= h->GetBinWidth(upper)/2.;
   double width = h->GetBinCenter(upper)-h->GetBinCenter(lower);
-  cout << h->GetBinCenter(upper) << endl;
-  cout << h->GetBinCenter(lower) << endl;
-  cout << "Width = " <<  width << " +- "  << error*sqrt(2) << endl;
+  //cout << h->GetBinCenter(upper) << endl;
+  //cout << h->GetBinCenter(lower) << endl;
+  //cout << "Width = " <<  width << " +- "  << error*sqrt(2) << endl;
+  if(error_result) *error_result = error*sqrt(2.0);
   return width;
 }
 
@@ -280,4 +281,461 @@ void MassiveCalculateAsymmetry(const char * file_prefix="run")
       << setw(12) << setprecision(3) << R[i].error*100.0/R[i].asymmetry <<endl;
   }
 }
+
+void DrawAsymVSWidth(TTree * t,const char * chan="pad.y", const char * cut="pad.q>0")
+{
+  char sel_up1[1024];
+  char sel_down1[1024];
+  char sel_up2[1024];
+  char sel_down2[1024];
+  sprintf(sel_up1, "Sum$((%s>0)*(%s))/Sum$(%s):d>>prof_up1", chan, cut, cut);
+  sprintf(sel_down1, "Sum$((%s<0)*(%s))/Sum$(%s):d>>prof_down1", chan, cut, cut);
+  sprintf(sel_up2, "Sum$((%s>0)*(%s))/Sum$(%s):d>>prof_up2", chan, cut, cut);
+  sprintf(sel_down2, "Sum$((%s<0)*(%s))/Sum$(%s):d>>prof_down2", chan, cut, cut);
+
+  t->Draw(sel_up1,"P>0","prof");
+  TProfile * puu = new TProfile(*((TProfile*)gDirectory->Get("prof_up1")));
+  t->Draw(sel_down1,"P<0","prof");
+  TProfile * pdd = new TProfile(*((TProfile*)gDirectory->Get("prof_down1")));
+
+  t->Draw(sel_up2,"P<0","prof");
+  TProfile * pud = new TProfile(*((TProfile*)gDirectory->Get("prof_up2")));
+  t->Draw(sel_down2,"P>0","prof");
+  TProfile * pdu = new TProfile(*((TProfile*)gDirectory->Get("prof_down2")));
+
+  TProfile * p1 = new TProfile(*puu);
+  p1->Add(pdd,1);
+  TProfile * p2 = new TProfile(*pud);
+  p2->Add(pdu,1);
+  TProfile * pdif = new TProfile(*p1);
+  pdif->Add(p2,-1);
+  TProfile * psum = new TProfile(*p1);
+  psum->Add(p2,1);
+  TProfile * pasym = new TProfile(*pdif);
+  cout << "1" << endl;
+  //pasym->Divide((TH1*)psum,1);
+  cout << "2" << endl;
+  TCanvas * c = new TCanvas;
+  c->Divide(2,3);
+  c->cd(1);
+  p1->Draw();
+  c->cd(2);
+  p2->Draw();
+  c->cd(3);
+  pdif->Draw();
+  c->cd(4);
+  psum->Draw();
+  c->cd(5);
+  //pasym->Draw();
+}
+
+void DrawDyVSWidth(TTree * t,const char * chan="pad.y", const char * cut="pad.q>0")
+{
+  char sel_up1[1024];
+  char sel_down1[1024];
+  char sel_up2[1024];
+  char sel_down2[1024];
+  sprintf(sel_up1, "Sum$((%s>0)*(%s))/Sum$(%s):d>>prof_up1", chan, cut, cut);
+  sprintf(sel_down1, "Sum$((%s<0)*(%s))/Sum$(%s):d>>prof_down1", chan, cut, cut);
+  sprintf(sel_up2, "Sum$((%s>0)*(%s))/Sum$(%s):d>>prof_up2", chan, cut, cut);
+  sprintf(sel_down2, "Sum$((%s<0)*(%s))/Sum$(%s):d>>prof_down2", chan, cut, cut);
+
+  t->Draw(sel_up1,"P>0","prof");
+  TProfile * puu = new TProfile(*((TProfile*)gDirectory->Get("prof_up1")));
+  t->Draw(sel_down1,"P<0","prof");
+  TProfile * pdd = new TProfile(*((TProfile*)gDirectory->Get("prof_down1")));
+
+  t->Draw(sel_up2,"P<0","prof");
+  TProfile * pud = new TProfile(*((TProfile*)gDirectory->Get("prof_up2")));
+  t->Draw(sel_down2,"P>0","prof");
+  TProfile * pdu = new TProfile(*((TProfile*)gDirectory->Get("prof_down2")));
+
+  TProfile * p1 = new TProfile(*puu);
+  p1->Add(pdd,1);
+  TProfile * p2 = new TProfile(*pud);
+  p2->Add(pdu,1);
+  TProfile * pdif = new TProfile(*p1);
+  pdif->Add(p2,-1);
+  TProfile * psum = new TProfile(*p1);
+  psum->Add(p2,1);
+  TProfile * pasym = new TProfile(*pdif);
+  cout << "1" << endl;
+  //pasym->Divide((TH1*)psum,1);
+  cout << "2" << endl;
+  TCanvas * c = new TCanvas;
+  c->Divide(2,3);
+  c->cd(1);
+  p1->Draw();
+  c->cd(2);
+  p2->Draw();
+  c->cd(3);
+  pdif->Draw();
+  c->cd(4);
+  psum->Draw();
+  c->cd(5);
+  //pasym->Draw();
+}
+
+void DrawDyVSWidth2(TTree * t, const char * cut="pad.q>0")
+{
+  //char sel_up1[1024];
+  //char sel_down1[1024];
+  //char sel_up2[1024];
+  //char sel_down2[1024];
+  //sprintf(sel_up1, "Sum$((%s>0)*(%s))/Sum$(%s):d>>prof_up1", chan, cut, cut);
+  //sprintf(sel_down1, "Sum$((%s<0)*(%s))/Sum$(%s):d>>prof_down1", chan, cut, cut);
+  //sprintf(sel_up2, "Sum$((%s>0)*(%s))/Sum$(%s):d>>prof_up2", chan, cut, cut);
+  //sprintf(sel_down2, "Sum$((%s<0)*(%s))/Sum$(%s):d>>prof_down2", chan, cut, cut);
+  
+
+  t->SetAlias("MY","Sum$(pad.y)/Length$(pad.y)");
+  t->SetAlias("MY2","Sum$(pad.y**2)/Length$(pad.y)");
+
+
+  TCanvas * c = new TCanvas;
+  c->Divide(2,2);
+  c->cd(1);
+  t->SetLineWidth(2);
+  t->SetLineColor(kBlue);
+  t->Draw("MY/sqrt(MY2-MY*MY):d>>pup","P>0","prof");
+  t->SetLineColor(kRed);
+  t->Draw("MY/sqrt(MY2-MY*MY):d>>pdown","P<0","prof");
+  TProfile * pup = new TProfile(*((TProfile*)gDirectory->Get("pup")));
+  TProfile * pdown = new TProfile(*((TProfile*)gDirectory->Get("pdown")));
+  c->cd(2);
+  pup->Draw();
+  pdown->Draw("same");
+  TProfile * pr = new TProfile(*pup);
+  pr->Add(pdown,-1);
+  c->cd(3);
+  pr->Draw();
+}
+
+void DrawDyVSWidth3(TTree * t, const char * xaxis="d", const char * pad_cut="pad.q>1")
+{
+  char MY[1024];
+  char MY2[1024];
+  sprintf(MY, "Sum$(-P*pad.y*(%s))/Sum$(%s)", pad_cut, pad_cut);
+  sprintf(MY2, "Sum$(pad.y*pad.y*(%s))/Sum$(%s)", pad_cut, pad_cut);
+  t->SetAlias("MY",MY);
+  t->SetAlias("MY2",MY2);
+  char sel[1024];
+  sprintf(sel,"MY/sqrt(MY2-MY*MY):%s>>prof", xaxis);
+  t->Draw(sel,"","prof");
+  TProfile * p = new TProfile(*((TProfile*)gDirectory->Get("prof")));
+  int max_bin = p->GetMaximumBin();
+  int min_bin = p->GetMinimumBin();
+  TGraphErrors * g = new TGraphErrors;
+  int i=0;
+  for(int bin=0; bin<100000; bin++)
+  {
+    double y= p->GetBinContent(bin);
+    double dy = p->GetBinError(bin);
+    double x = p->GetBinCenter(bin);
+    if(dy!=0)
+    {
+      g->SetPoint(i, x, y/dy);
+      g->SetPointError(i, 0, 1);
+      i++;
+    }
+    cout << bin << " " << y << " " << dy << endl;
+  }
+  new TCanvas;
+  g->Draw("a*");
+}
+
+struct valer
+{
+  valer(void){}
+  valer(double v, double e)
+  {
+    value = v;
+    error = e;
+  }
+  double value=0;
+  double error=0;
+};
+
+
+void MassiveDrawWidth(const char * file_prefix="run", int N = 10, const char * xaxis, const char * yaxis, const char * pad_cut="pad.q>0", const char * main_cut="1")
+{
+  char filename[1024];
+  string * Fi = new string[N];
+  cout << setw(12) << "file" << setw(12) << "fwhm, mm" << setw(12) << "error, mm" << endl;
+  TGraphErrors * g = new TGraphErrors;
+  Long64_t run;
+  char xaxis_sel[1024];
+  char yaxis_sel[1024];
+  sprintf(yaxis_sel,"%s>>hyaxis",yaxis);
+  TGraphErrors * ygraph = new TGraphErrors;
+  for(int i=0;i<N;i++)
+  {
+    sprintf(filename,"%s%d.root",file_prefix,i);
+    TTree * t = LoadTree(filename);
+    sprintf(xaxis_sel,"%s>>hxaxis",xaxis);
+    t->Draw(xaxis_sel,"","goff");
+    double x = ((TH1F*)gDirectory->Get("hxaxis"))->GetMean();
+    TCut pcut = pad_cut;
+    TCut mcut = main_cut;
+    t->Draw(yaxis_sel,pcut&&mcut,"");
+    TH1F * h = (TH1F*)gDirectory->Get("hyaxis");
+    double y = h->GetMean();
+    double dy = h->GetMeanError();
+    double width_error=1;
+    double width = get_fwhm(h,&width_error);
+    cout <<setw(12) << filename << setw(12) << x << setw(12) << run << setw(12) << y << setw(12) << dy << setw(12) << width << setw(12) << width_error << endl;
+    ygraph->SetPoint(i, x, width);
+    ygraph->SetPointError(i, 0, width_error);
+  }
+  TCanvas * c = new TCanvas;
+  ygraph->Draw("a*");
+}
+
+valer CalculateEffect(TTree * t, const char * channel="pad.y", const char * pad_cut="pad.q>0", const char * gopt="goff")
+{
+  char MY[1024];
+  char MY2[1024];
+  sprintf(MY,  "Sum$(-P*(%s)*(%s))/Sum$(%s)", channel, pad_cut, pad_cut);
+  sprintf(MY2, "Sum$((%s)**2*(%s))/Sum$(%s)", channel, pad_cut, pad_cut);
+  t->SetAlias("MY",MY);
+  t->SetAlias("MY2",MY2);
+  char sel[1024];
+  t->Draw("MY/sqrt(MY2-MY*MY)>>heff", "", gopt);
+  TH1F * heff = (TH1F*)gDirectory->Get("heff");
+  valer effect(heff->GetMean(), heff->GetMeanError());
+  delete heff;
+  return effect;
+}
+
+valer CalculateFWHM(TTree *t, const char * channel, TCut cut, const char * gopt="goff")
+{
+  char hname[1024];
+  sprintf(hname, "h%s",channel);
+  TH1F * hwidth = (TH1F*)gDirectory->Get(hname);
+  if(hwidth) delete hwidth;
+  char sel[1024];
+  sprintf(sel, "%s>>%s", channel, hname);
+  t->Draw(sel, cut, gopt);
+  hwidth = (TH1F*)gDirectory->Get(hname);
+  double error;
+  double width=get_fwhm(hwidth, &error);
+  return valer(width,error);
+}
+
+
+valer CalculateOccupancy(TTree *t, TCut cut=="", const char * gopt="goff")
+{
+  t->Draw("pad.nphot:sqrt(pad.x**2+pad.y**2)>>hocup",cut, "profgoff");
+  double occupancy=hocup->GetBinContent(1);
+  double error=hocup->GetBinError(1);
+  double binwidth= hocup->GetBinWidth(1);
+  double bincenter=hocup->GetBinCenter(1);
+  double rmax = bincenter+binwidth/2;
+  //cout << "rmax = " << rmax << endl;
+  char  buf[1024];
+  sprintf(buf,"pad.r<%f",rmax);
+  TCut bin0 = buf;
+  t->Draw("pad.nphot",cut && bin0, gopt);
+  double nbin = t->GetSelectedRows();
+  cout << "number of event in zero bin: " <<  nbin << endl;
+  cout << "Occupancy = " << occupancy  << " +- " << error*sqrt(nbin) <<  "(" << error <<")" <<  endl;
+  valer result(occupancy, error);
+  return result;
+}
+
+Double_t poissonf(Double_t*x,Double_t*par)                                         
+{                                                                              
+  return par[0]*TMath::Poisson(x[0],par[1]);
+}                                                                              
+
+
+valer CalculateAverageOccupancy(TTree *t, TCut pad_cut, double sigmax, double sigmay, double r=1, const char * gopt="goff")
+{
+  char  buf[1024];
+  sprintf(buf,"sqrt((pad.x/%f)**2 + (pad.y/%f)**2)<%f",sigmax,sigmay, r);
+  TCut center_cut = buf;
+  t->Draw("pad.nphot",pad_cut && center_cut &&"pad.nphot==1", "goff");
+  double n1 = t->GetSelectedRows();
+  t->Draw("pad.nphot",pad_cut && center_cut &&"pad.nphot==2", "goff");
+  double n2 = t->GetSelectedRows();
+  t->Draw("pad.nphot",pad_cut && center_cut &&"pad.nphot==3", "goff");
+  double n3 = t->GetSelectedRows();
+  t->Draw("pad.nphot",pad_cut && center_cut &&"pad.nphot==4", "goff");
+  double n4 = t->GetSelectedRows();
+  double lambda1 = 2.0*n2/n1;
+  double N0 = n1/TMath::Poisson(1.0,lambda1);
+  double lambda2 = sqrt(6.0*n3/n1);
+  double lambda3 = pow(24.0*n4/n1, 1.0/3.0);
+  cout << "lambda1 = " << lambda1 << "   lambda2 = " << lambda2 << " lambda3 = " << lambda3 << endl;
+  TF1 * pois = new TF1("pois",poissonf,1,10,2); // x in [0;10], 2 parameters                  
+  pois->SetParName(0,"Const");                                                
+  pois->SetParName(1,"#lambda"); 
+  pois->SetParameter(0,n1);
+  pois->SetParameter(1,lambda1);
+  t->Fit("pois","pad.nphot",pad_cut && center_cut, gopt,"R");
+  //valer result(hnphot->GetMean(), hnphot->GetMeanError());
+  double lambda = pois->GetParameter(1);
+  double lambda_error = pois->GetParError(1);
+  cout << lambda << "+-" << lambda_error << endl;
+  cout << pois->GetChisquare() << "  ndf = " << pois->GetNDF() << endl;
+  //return valer(lambda, lambda_error*sqrt(pois->GetChisquare()/pois->GetNDF()));
+  //return valer(lambda, lambda_error);
+  return valer(lambda1, lambda1*sqrt(1./n2 + 1./n1));
+}
+
+
+void Draw(TTree * t, TCut pad_cut="")
+{
+  TCanvas * c = new TCanvas;
+  c->Divide(2,2);
+  c->cd(1);
+  valer fwhm_y = CalculateFWHM(t,"pad.y", pad_cut && TCut("abs(pad.y)<15"), "");
+  char ybuf[1024];
+  sprintf(ybuf,"fwhm = %5.1f mm", fwhm_y.value);
+  TLatex * ytex = new TLatex(0,0,ybuf);
+  ytex->Draw();
+  c->cd(2);
+  valer fwhm_x = CalculateFWHM(t,"pad.x", pad_cut && TCut("abs(pad.x)<100"), "");
+  char xbuf[1024];
+  sprintf(xbuf,"fwhm = %5.1f mm", fwhm_x.value);
+  TLatex * xtex = new TLatex(0,0,xbuf);
+  xtex->Draw();
+  c->cd(3);
+  valer occup = CalculateAverageOccupancy(t, pad_cut,fwhm_x.value/2.0, fwhm_y.value/2.0, 1, "");
+  c->cd(4);
+  t->Draw("pad.q","pad.q<2000");
+}
+
+void MassiveDraw(const char * file_prefix="run", int N = 10, const char * xaxis, const char * pad_cut="pad.q>0", const char * main_cut="1")
+{
+  char filename[1024];
+  string * Fi = new string[N];
+  TGraphErrors * g = new TGraphErrors;
+  Long64_t run;
+  char xaxis_sel[1024];
+  TGraphErrors * ygraph = new TGraphErrors;
+  TGraphErrors * effect_graph = new TGraphErrors;
+  TGraphErrors * confidence_graph = new TGraphErrors;
+  TGraphErrors * occupancy_graph = new TGraphErrors;
+  cout << setw(12) << "file" << setw(5) << "run" <<  setw(6) << xaxis;
+  cout << setw(24) << "fwhm y" << flush;
+  cout << setw(24) << "fwhm x" << flush;
+  cout << setw(24) << "effect" << flush;
+  cout << setw(25) << "occupancy" << flush;
+  cout << endl;
+  for(int i=0;i<N;i++)
+  {
+    sprintf(filename,"%s%d.root",file_prefix,i);
+    cout << "Loading tree" << endl;
+    if(gSystem->AccessPathName(filename)) continue;
+    TTree * t = LoadTree(filename);
+    cout << "Calculating x axis value" << endl;
+    sprintf(xaxis_sel,"%s>>hxaxis",xaxis);
+    t->Draw(xaxis_sel,"","goff",10);
+    double x = ((TH1F*)gDirectory->Get("hxaxis"))->GetMean();
+    cout <<setw(12) << filename << setw(5) << run << setw(6) << x  << flush;
+    TCut pcut = pad_cut;
+    TCut mcut = main_cut;
+    valer fwhm_y = CalculateFWHM(t,"pad.y", pcut && TCut("abs(pad.y)<15"));
+    cout << setw(12) << fwhm_y.value << "+-" << fwhm_y.error << flush;
+    valer fwhm_x = CalculateFWHM(t,"pad.x", pcut && TCut("abs(pad.x)<100"));
+    cout << setw(12) << fwhm_x.value << "+-" << fwhm_x.error << flush;
+    valer effect = CalculateEffect(t,"pad.y", pcut);
+    cout << setw(12) << effect.value << "+-" << effect.error << flush;
+    //valer occup = CalculateOccupancy(t, pad_cut);
+    valer occup = CalculateAverageOccupancy(t, pad_cut,fwhm_x.value/2.0, fwhm_y.value/2.0,1);
+    cout << setw(12) << occup.value << "+-" << occup.error << flush;
+    cout << endl;
+    ygraph->SetPoint(i, x, fwhm_y.value);
+    ygraph->SetPointError(i, 0, fwhm_y.error);
+
+    effect_graph->SetPoint(i,x, effect.value);
+    effect_graph->SetPointError(i,0, effect.error);
+
+    confidence_graph->SetPoint(i,x, effect.value/effect.error);
+    confidence_graph->SetPointError(i,0, 1);
+
+    occupancy_graph->SetPoint(i,x, occup.value);
+    occupancy_graph->SetPointError(i,0, occup.error);
+  }
+  TCanvas * c1 = new TCanvas;
+  ygraph->Draw("a*");
+  TCanvas * c2 = new TCanvas;
+  effect_graph->Draw("a*");
+  TCanvas * c3 = new TCanvas;
+  confidence_graph->Draw("a*");
+  TCanvas * c4 = new TCanvas;
+  occupancy_graph->Draw("a*");
+}
+
+
+void DrawChargeThresholdEffect(TTree * t, double qmin=0, double qmax=5, double dq=1)
+{
+  TGraphErrors * delta_graph =new TGraphErrors;
+  TGraphErrors * effect_graph=new TGraphErrors;
+  int i=0;
+  cout  << "charge, fC" << "   effect " <<  " confidence level " << endl;
+  printf("%15s%15s%16s\n", "charge, fC", "effect, %", " CL, sigma");
+
+  for(double q=qmin;q<=qmax;q+=dq)
+  {
+    char cut[1024];
+    sprintf(cut, "pad.q>%f", q);
+    valer effect;
+    valer effect = CalculateEffect(t, "pad.y", cut);
+    delta_graph->SetPoint(i, q, effect.value);
+    delta_graph->SetPointError(i, 0, effect.error);
+    effect_graph->SetPoint(i, q, effect.value/effect.error);
+    effect_graph->SetPointError(i, 0, 1);
+    printf("%15.1f%9.2f+-%4.2f%16.2f\n", q, effect.value*100, effect.error*100, effect.value/effect.error);
+    i++;
+  }
+  TCanvas * c = new TCanvas;
+  c->Divide(2,1);
+  c->cd(1);
+  delta_graph->Draw("a*");
+  c->cd(2);
+  effect_graph->Draw("a*");
+}
+
+void DrawOccupancyPoisson(TTree *t, int n1, int n2)
+{
+  TGraphErrors * mu_graph=new TGraphErrors;
+  TF1 * pois = new TF1("pois",poissonf,1,10,2); // x in [0;10], 2 parameters                  
+  pois->SetParName(0,"Const");                                                
+  pois->SetParName(1,"#lambda"); 
+  int i=0;
+  Long64_t N0 = lsrp->GetEntries();
+  for(int n=n1 ; n<=n2; n++)
+  {
+    char cut[1024];
+    sprintf(cut, "(pad.nx==0 || pad.nx==-1) && pad.ny==%d",n);
+    Long64_t N = lsrp->GetEntries(cut); //number of pad with nphot>0
+    double P0 = double(N0-N)/double(N0);
+    double lambda0 = -log(P0);
+    //remaining number 
+    pois->SetParameter(0,N);
+    pois->SetParameter(1,lambda0);
+    t->Draw("pad.Y",cut,"goff",10);
+    TH1F * h = t->GetHistogram();
+    //cout << h << endl;
+    //h->Print();
+    //cout << h->GetMean() << endl;
+    double y = h->GetMean(); //((TH1F*)gDirectory->Get("htemp"))->GetMean();
+    cout << "Ymean =  " << y << endl;
+    new TCanvas;
+    t->Fit("pois","pad.nphot",cut, "","R");
+    double lambda = pois->GetParameter(1);
+    double lambda_error = pois->GetParError(1);
+    mu_graph->SetPoint(i, y, lambda);
+    mu_graph->SetPointError(i, 0, lambda_error);
+    cout << lambda0 << endl;
+    cout << lambda << "+-" << lambda_error << endl;
+    cout << pois->GetChisquare() << "  ndf = " << pois->GetNDF() << endl;
+    i++;
+  }
+  new TCanvas;
+  mu_graph->Draw("*ac");
+}
+
 

@@ -41,6 +41,7 @@ class G4UIdirectory;
 class G4UIcmdWithAString;
 class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWithAnInteger;
+class G4UIcmdWithADouble;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -64,6 +65,9 @@ class DetectorMessenger: public G4UImessenger
     DetectorConstruction*  fDetectorConstruction;
 
     std::unique_ptr<G4UIdirectory>    fDirectory;
+    std::unique_ptr<G4UIdirectory>    fLaserDirectory;
+    std::unique_ptr<G4UIdirectory>    fBeamDirectory;
+
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fStepMaxCmd;
     std::unique_ptr<G4UIcmdWithAnInteger> fPhotonNumberCmd;
     std::unique_ptr<G4UIcmdWithAString>   fRootFileCmd;
@@ -72,6 +76,18 @@ class DetectorMessenger: public G4UImessenger
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeXCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeYCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fHighSensWidthXCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fHighSensWidthYCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fRoughScaleXCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fRoughScaleYCmd;
+    std::unique_ptr<G4UIcmdWithADouble> fBeamSigmaZCmd; //vertical angular spread at 1.55 GeV
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamCurrentCmd; //mA
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamEnergyCmd; 
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserWaveLengthCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserPulseEnergyCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserPulseTimeCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserFrequencyCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPhotonFlightLengthCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

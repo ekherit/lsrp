@@ -31,6 +31,8 @@ class PadEvent : public TObject
 {
   public:
   PadEvent(void);
+  Double_t s=-99999;//area of the pad
+  Double_t type=-99999;//pad type
   Double_t X=-99999; //mm //center of the pad
   Double_t Y=-99999; //mm
   Double_t xhit=-99999;//mm
@@ -117,6 +119,12 @@ class RootEvent : public TObject
   std::vector<HitEvent> hit;
   std::vector<PadEvent> pad;
   std::vector<GeneratorEvent> gen;
+  Double_t asym=-99999; //asymmetry
+  Double_t asym2=-99999; //asymmetry
+  Double_t Mx=-99999; //average y
+  Double_t My=-99999; //average x
+  Double_t xRMS=-99999;
+  Double_t yRMS=-99999;
   void clear(void)
   {
     d=-99999;
@@ -130,6 +138,12 @@ class RootEvent : public TObject
     nphot=-99999;
     nhit=-99999;
     npad=-99999;
+    asym=-99999;
+    asym2=-99999;
+    Mx=-99999;
+    My=-99999;
+    xRMS=-99999;
+    yRMS=-99999;
     hit.clear();
     pad.clear();
     gen.clear();

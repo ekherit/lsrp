@@ -37,15 +37,26 @@
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4UIcmdWithAnInteger.hh"
+#include "G4UIcmdWithADouble.hh"
 
+#include "G4UnitsTable.hh"
+
+#include "UnitDefinition.hh"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
  : G4UImessenger(),
    fDetectorConstruction(Det)
 {
+  DefineUnits();
   fDirectory.reset(new G4UIdirectory("/lsrp/"));
   fDirectory->SetGuidance("UI commands for Laser Polarimeter Simulation");
+
+  fLaserDirectory.reset(new G4UIdirectory("/lsrp/laser/"));
+  fLaserDirectory->SetGuidance("Laser parameters");
+
+  fBeamDirectory.reset(new G4UIdirectory("/lsrp/beam/"));
+  fBeamDirectory->SetGuidance("Beam parameters");
 
   fStepMaxCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/stepMax",this));
   fStepMaxCmd->SetGuidance("Define a step max");
@@ -93,6 +104,78 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fPadSizeYCmd->SetParameterName("PadSizeY",false);
   fPadSizeYCmd->SetUnitCategory("Length");
   fPadSizeYCmd->AvailableForStates(G4State_Idle);
+
+  fHighSensWidthXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/HighSensWidthX",this));
+  fHighSensWidthXCmd->SetGuidance("Size of the hexagonal pad");
+  fHighSensWidthXCmd->SetParameterName("HighSensWidthX",false);
+  fHighSensWidthXCmd->SetUnitCategory("Length");
+  fHighSensWidthXCmd->AvailableForStates(G4State_Idle);
+
+  fHighSensWidthYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/HighSensWidthY",this));
+  fHighSensWidthYCmd->SetGuidance("Size of the hexagonal pad");
+  fHighSensWidthYCmd->SetParameterName("HighSensWidthY",false);
+  fHighSensWidthYCmd->SetUnitCategory("Length");
+  fHighSensWidthYCmd->AvailableForStates(G4State_Idle);
+
+  fRoughScaleXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/RoughScaleX",this));
+  fRoughScaleXCmd->SetGuidance("X Scale of big pad");
+  fRoughScaleXCmd->SetParameterName("RoughScaleX",false);
+  fRoughScaleXCmd->AvailableForStates(G4State_Idle);
+
+  fRoughScaleYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/RoughScaleY",this));
+  fRoughScaleYCmd->SetGuidance("Y scale of big pad");
+  fRoughScaleYCmd->SetParameterName("RoughScaleY",false);
+  fRoughScaleYCmd->AvailableForStates(G4State_Idle);
+
+  fBeamSigmaZCmd.reset(new G4UIcmdWithADouble("/lsrp/beam/SigmaZ",this));
+  fBeamSigmaZCmd->SetGuidance("Vertical beam angular spread");
+  fBeamSigmaZCmd->SetParameterName("BeamSigmaZ",false);
+  fBeamSigmaZCmd->AvailableForStates(G4State_Idle);
+
+  fBeamCurrentCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/beam/Current",this));
+  fBeamCurrentCmd->SetGuidance("Beam current");
+  fBeamCurrentCmd->SetParameterName("BeamCurrent",false);
+  fBeamCurrentCmd->SetUnitCategory("Electric current");
+  fBeamCurrentCmd->AvailableForStates(G4State_Idle);
+
+  fBeamEnergyCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/beam/Energy",this));
+  fBeamEnergyCmd->SetGuidance("Beam energy");
+  fBeamEnergyCmd->SetParameterName("BeamEnergy",false);
+  fBeamEnergyCmd->SetUnitCategory("Energy");
+  fBeamEnergyCmd->AvailableForStates(G4State_Idle);
+
+  fLaserWaveLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/laser/WaveLength",this));
+  fLaserWaveLengthCmd->SetGuidance("Laser wave length");
+  fLaserWaveLengthCmd->SetParameterName("LaserWaveLength",false);
+  fLaserWaveLengthCmd->SetUnitCategory("Length");
+  fLaserWaveLengthCmd->AvailableForStates(G4State_Idle);
+
+
+  fLaserPulseEnergyCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/laser/PulseEnergy",this));
+  fLaserPulseEnergyCmd->SetGuidance("Laser wave length");
+  fLaserPulseEnergyCmd->SetParameterName("LaserPulseEnergy",false);
+  fLaserPulseEnergyCmd->SetUnitCategory("Energy");
+  fLaserPulseEnergyCmd->AvailableForStates(G4State_Idle);
+
+  fLaserPulseTimeCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/laser/PulseTime",this));
+  fLaserPulseTimeCmd->SetGuidance("Laser wave length");
+  fLaserPulseTimeCmd->SetParameterName("LaserPulseTime",false);
+  fLaserPulseTimeCmd->SetUnitCategory("Time");
+  fLaserPulseTimeCmd->AvailableForStates(G4State_Idle);
+
+  
+  fLaserFrequencyCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/laser/Frequency",this));
+  fLaserFrequencyCmd->SetGuidance("Laser wave length");
+  fLaserFrequencyCmd->SetParameterName("LaserFrequency",false);
+  fLaserFrequencyCmd->SetUnitCategory("Frequency");
+  fLaserFrequencyCmd->AvailableForStates(G4State_Idle);
+
+
+  fPhotonFlightLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PhotonFlightLength",this));
+  fPhotonFlightLengthCmd->SetGuidance("Photon flight length");
+  fPhotonFlightLengthCmd->SetParameterName("PhotonFlightLength",false);
+  fPhotonFlightLengthCmd->SetUnitCategory("Length");
+  fPhotonFlightLengthCmd->AvailableForStates(G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -131,17 +214,70 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   
   if( command == fPadSizeCmd.get())
   {
-    Cfg.pad_size = fPadSizeCmd->GetNewDoubleValue(newValue)/mm;
+    Cfg.pad_size = fPadSizeCmd->GetNewDoubleValue(newValue);
     Cfg.pad_xsize = Cfg.pad_size;
     Cfg.pad_ysize = Cfg.pad_size;
   }
   if( command == fPadSizeXCmd.get())
   {
-    Cfg.pad_xsize = fPadSizeXCmd->GetNewDoubleValue(newValue)/mm;
+    Cfg.pad_xsize = fPadSizeXCmd->GetNewDoubleValue(newValue);
   }
   if( command == fPadSizeYCmd.get())
   {
-    Cfg.pad_ysize = fPadSizeYCmd->GetNewDoubleValue(newValue)/mm;
+    Cfg.pad_ysize = fPadSizeYCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fHighSensWidthXCmd.get())
+  {
+    Cfg.pad_high_sens_xwidth = fHighSensWidthXCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fHighSensWidthYCmd.get())
+  {
+    Cfg.pad_high_sens_ywidth = fHighSensWidthYCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fRoughScaleXCmd.get())
+  {
+    Cfg.pad_rough_xscale = fRoughScaleXCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fRoughScaleYCmd.get())
+  {
+    Cfg.pad_rough_yscale = fRoughScaleYCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fBeamSigmaZCmd.get())
+  {
+    Cfg.beam.sigmaZ = fBeamSigmaZCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fBeamCurrentCmd.get())
+  {
+    Cfg.beam.I = fBeamCurrentCmd->GetNewDoubleValue(newValue);
+    std::cout  << "Beam Current (Messanger) = " << Cfg.beam.I << std::endl;
+  }
+  if( command == fBeamEnergyCmd.get())
+  {
+    Cfg.beam.E = fBeamEnergyCmd->GetNewDoubleValue(newValue);
+    std::cout  << Cfg.beam.E << std::endl;
+  }
+
+  if( command == fLaserWaveLengthCmd.get())
+  {
+    Cfg.laser.lambda = fLaserWaveLengthCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fLaserPulseEnergyCmd.get())
+  {
+    Cfg.laser.pulse_energy = fLaserPulseEnergyCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fLaserPulseTimeCmd.get())
+  {
+    Cfg.laser.pulse_time = fLaserPulseTimeCmd->GetNewDoubleValue(newValue);
+  }
+
+  if( command == fLaserFrequencyCmd.get())
+  {
+    Cfg.laser.frequency = fLaserFrequencyCmd->GetNewDoubleValue(newValue);
+  }
+
+  if( command == fPhotonFlightLengthCmd.get())
+  {
+    Cfg.photon_flight_length = fPhotonFlightLengthCmd->GetNewDoubleValue(newValue);
   }
 }
 

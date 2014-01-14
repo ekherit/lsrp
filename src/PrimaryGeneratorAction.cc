@@ -48,7 +48,13 @@
 #include <ibn/phys/constant.h>
 extern GeneratorEvent makeGeneratorEvent(const ibn::phys::compton &c);
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+PrimaryGeneratorAction * PrimaryGeneratorAction::fgInstance = 0;
+
+PrimaryGeneratorAction* PrimaryGeneratorAction::Instance(void)
+{
+  if (fgInstance == 0) fgInstance = new PrimaryGeneratorAction();
+  return fgInstance;
+}
 
 
 PrimaryGeneratorAction::PrimaryGeneratorAction()
@@ -64,68 +70,84 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   fElectron = G4Electron::Definition();
   std::cout << fGamma << " " << fElectron << std::endl;
 
+  Init();
 
-  const G4double Hz = 1.0/s;
-  const G4double kHz = 1e3/s;
-//  const G4double MHz = 1e6/s;
-  const G4double GHz = 1e9/s;
-  const G4double mA = 1e-3; //A
-
-  fFlightLength = Cfg.photon_flight_length*mm;
-  //Ymax should be smaller than detector size in order to supress outside world volume hit
-  G4double Ymax = 0.5*(Cfg.psm_size*mm/2.);
-  fThetaMax = Ymax/fFlightLength;
-  G4cout << "fThetaMax = " << fThetaMax << G4endl;
-  fBeamEnergy = 5*GeV;
-  double lambda = 0.5e-6; //in meters
-  //const double hc = 197.326968e-15; // MeV*m;
-  double photon_energy = 2*M_PI*ibn::phys::hc/lambda*MeV; //MeV, should be 2.48e-6 MeV
-  fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy,1,1));
-  double cos_rf = fCompton->cos_rf(cos(fThetaMax));
-  double xmax = fCompton->xcos(cos_rf);
-  double xmin = 1./(1.0+2.0*fCompton->chi);
-  double Integral  = ibn::dgaus(*fCompton,xmin,xmax,1e-10);
-  double I = 1*mA; //Amper
-  G4cout << "Beam current: " << I/mA << " mA" << G4endl;
-  double f0 = 818.924*kHz; //Hz revolution frequency
-  G4cout << "Revolution frequency: " << f0/kHz << " kHz" << G4endl;
-  double Ne = I/(f0/Hz)/ibn::phys::e_SI; // number of electrons in beam
-  G4cout << "Number of elctrons in beam: " << Ne << G4endl;
-  double puls_time = 6e-9*s; //sec
-  double puls_length= puls_time*(ibn::phys::c*m/s);
-  double puls_size = 3e-3*m; //m
-  G4cout << "puls time = " << puls_time/ns << " ns" << G4endl;
-  G4cout << "puls length = " << puls_length/m << " m" << G4endl;
-  G4cout << "puls size = " << puls_size/mm << " mm" << G4endl;
-  G4double pulse_energy = 100e-6; //pulse energy, Joul
-  G4cout << "pulse energy = " << pulse_energy << " mkJ" << G4endl;
-  G4cout << "photon energy = " << photon_energy/eV << " eV" << G4endl;
-  G4double Ngamma = pulse_energy/ibn::phys::e_SI/(photon_energy/eV);
-  G4double ngamma = Ngamma/(puls_length*ibn::sq(puls_size));
-  G4cout << "number of initial photons: " << Ngamma << G4endl;
-  G4cout << "density of photon beam: " << ngamma*mm*mm*mm << " 1/mm^3" << G4endl;
-  G4cout << "Ymax = " << fFlightLength*fThetaMax/cm << " cm" << G4endl;
-  G4cout << "fThetaMax = " << fThetaMax << G4endl;
-  G4cout << "xmin = " << xmin << endl;
-  G4cout << "xmax = " << xmax << endl;
-  G4cout << "Integral = " << Integral << endl;
-  G4double sigma = M_PI*ibn::sq(ibn::phys::r_e)/fCompton->chi*Integral*m*m; //m^2
-  G4cout << "sigma = " << sigma/(m*m) << " m^2" << " (" << sigma/(1e-24*cm*cm) << " b)"<<G4endl;
-  G4double nu = sigma*(ibn::phys::c*m/s)*Ne*ngamma;
-  G4cout << "Rate: " << nu/GHz << " GHz" << G4endl;
-  G4double Ncbs = nu*puls_time/2.0;
-  G4cout << "number of scattered photons: " <<  Ncbs<< " per pulse" << G4endl; //двойка из-за встречного движения пучка
-  G4double  laser_frequency = 5*kHz;
-  G4cout << "Laser frequency: " << laser_frequency/kHz << " kHz" << G4endl;
-  G4double rate = Ncbs*laser_frequency;
-  G4cout << "Photon rate to detector: " << rate/kHz <<" kHz" <<  G4endl;
 }
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
   delete fParticleGun;
+}
+
+void PrimaryGeneratorAction::Init(void)
+{
+  fFlightLength = Cfg.photon_flight_length;
+  G4cout << "Photon flight length: " << fFlightLength/m << " m" << G4endl;
+  //Ymax should be smaller than detector size in order to supress outside world volume hit
+  G4double Ymax = 0.49*(Cfg.psm_size*mm/2.);
+  fThetaMax = Ymax/fFlightLength;
+  G4cout << "fThetaMax = " << fThetaMax << G4endl;
+
+  //beam parameters
+  fBeamEnergy = Cfg.beam.E;
+  fBeamCurrent = Cfg.beam.I;
+  G4cout << "Beam energy: " << fBeamEnergy/GeV  << " GeV " << G4endl;
+  G4cout << "Beam current: " << fBeamCurrent/mA  << " mA " << G4endl;
+  G4double f0 = Cfg.beam.revolution_frequency; //Hz revolution frequency
+  G4cout << "Beam revolution frequency: " << f0/kHz << " kHz" << G4endl;
+  G4double Ne = fBeamCurrent/f0/eplus; // number of electrons in beam
+  G4cout << "Beam number of elctrons = " << Ne << G4endl;
+
+  //laser parameters
+  G4double lambda = Cfg.laser.lambda; //in meters
+  G4cout << "Laser wave length: " << Cfg.laser.lambda / micrometer << " mkm" << G4endl;
+  G4double  laser_frequency = Cfg.laser.frequency;
+  G4cout << "Laser frequency: " << laser_frequency/kHz << " kHz" << G4endl;
+  G4double pulse_time = Cfg.laser.pulse_time; //sec
+  G4cout << "Laser pulse time: " << pulse_time/ns << " ns" << G4endl;
+  G4double pulse_energy = Cfg.laser.pulse_energy; //pulse energy, Joul
+  G4cout << "Laser pulse energy: " << pulse_energy / mkJ << " mkJ" << G4endl;
+  G4double pulse_length= pulse_time*(ibn::phys::c*m/s);
+  G4cout << "Laser pulse length = " << pulse_length/m << " m" << G4endl;
+  G4cout << "Laser focus length = " << Cfg.laser.focus_length/cm << " cm" << G4endl;
+  G4double pulse_size = Cfg.laser.pulse_size; //m
+  G4cout << "Laser pulse size = " << pulse_size/mm << " mm" << G4endl;
+  G4double photon_energy = 2*M_PI*hc/lambda; 
+  G4cout << "Laser photon energy = " << photon_energy/eV << " eV" << G4endl;// eV, should be 2.48 eV
+  G4double Ngamma = pulse_energy/photon_energy;
+  G4cout << "Laser photon number = " << Ngamma << G4endl;
+  G4double ngamma = Ngamma/(pulse_length*ibn::sq(pulse_size)*M_PI/4.0);
+  G4cout << "Laser photon density = " << ngamma*(cm*cm*cm) << " cm^-3" <<G4endl;
+
+
+
+  //const double hc = 197.326968e-15; // MeV*m;
+  fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy/MeV,1,1));
+  double cos_rf = fCompton->cos_rf(cos(fThetaMax));
+  double xmax = fCompton->xcos(cos_rf);
+  double xmin = 1./(1.0+2.0*fCompton->chi);
+  G4cout << "xmin = " << xmin << G4endl;
+  G4cout << "xmax = " << xmax << G4endl;
+  G4cout << "Ymax = " << fFlightLength*fThetaMax/cm << " cm" << G4endl;
+  double Integral  = ibn::dgaus(*fCompton,xmin,xmax,1e-10);
+  G4cout << "Integral = " << Integral << endl;
+
+  //G4double Ngamma = pulse_energy/ibn::phys::e_SI/(photon_energy/eV);
+  //G4cout << "number of initial photons: " << Ngamma << G4endl;
+  //G4cout << "density of photon beam: " << ngamma*mm*mm*mm << " 1/mm^3" << G4endl;
+  //G4cout << "fThetaMax = " << fThetaMax << G4endl;
+  G4double sigma = M_PI*ibn::sq(ibn::phys::r_e)/fCompton->chi*Integral*m*m; //m^2
+  G4cout << "sigma = " << sigma/(m*m) << " m^2" << " (" << sigma/barn << " b)"<<G4endl;
+  G4double nu = sigma*(ibn::phys::c*m/s)*Ne*ngamma;
+  G4cout << "Rate: " << nu/GHz << " GHz" << G4endl;
+  G4double Ncbs = nu*Cfg.laser.focus_length/pulse_length*Cfg.laser.pulse_time;
+  G4cout << "number of scattered photons: " <<  Ncbs<< " per pulse" << G4endl; //двойка из-за встречного движения пучка
+  G4double rate = Ncbs*laser_frequency;
+  G4cout << "Photon rate to detector: " << rate/kHz <<" kHz" <<  G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -185,6 +207,23 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         gevent.x = 0;
         gevent.y = 0;
         gevent.z = 0;
+        gevent.E = 400;
+        ROOTManager::Instance()->event.gen.push_back(gevent);
+      }
+    case 3:
+      fParticleGun->SetParticleDefinition(fGamma);
+      fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
+      fParticleGun->SetParticleEnergy(400*MeV);
+      G4double x = (G4UniformRand()-0.5)*Cfg.psm_size;
+      G4double y = (G4UniformRand()-0.5)*Cfg.psm_size;
+      G4double z = DetectorConstruction::Instance()->GetFrontZ();
+      fParticleGun->SetParticlePosition(G4ThreeVector(x, y, z));
+      fParticleGun->GeneratePrimaryVertex(anEvent);
+      {
+        GeneratorEvent gevent;;
+        gevent.x = x;
+        gevent.y = y;
+        gevent.z = z;
         gevent.E = 400;
         ROOTManager::Instance()->event.gen.push_back(gevent);
       }

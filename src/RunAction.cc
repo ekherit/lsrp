@@ -30,6 +30,7 @@
 
 #include "RunAction.hh"
 #include "ROOTManager.hh"
+#include "PrimaryGeneratorAction.hh"
 #include "Config.h"
 
 #include "G4Run.hh"
@@ -58,6 +59,11 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
   //inform the runManager to save random number seed
 
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
+
+  auto PG = PrimaryGeneratorAction::Instance();
+  PG->Init();
+  //PG->fBeamEnergy = Cfg.beam.E;
+  //PG->fBeamCurrent = Cfg.beam.I;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

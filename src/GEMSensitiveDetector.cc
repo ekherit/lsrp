@@ -71,16 +71,14 @@ void GEMSensitiveDetector::Initialize(G4HCofThisEvent* hce)
   hce->AddHitsCollection( hcID, fHitsCollection ); 
 }
 
-std::list<Pad> GetHitPadList(G4ThreeVector hit_pos, double total_charge, double spot_size, unsigned N=2500)
+std::list<Pad> GetHitPadList(G4ThreeVector hit_pos, double total_charge, double spot_size, unsigned N=400)
 {
   std::list<Pad> Pads;
   for(unsigned i=0;i<N;i++)
   {
     G4double x = G4RandGauss::shoot(hit_pos.x(), spot_size);
     G4double y = G4RandGauss::shoot(hit_pos.y(), spot_size);
-    Pad pad(Cfg.pad_xsize, Cfg.pad_ysize, x,y);
-    //std::cout << hit_pos.x() << "," << hit_pos.y() << " ->     " << x << "," << y << " spot_size=" << spot_size/mm << " mm";
-    //std::cout << "     " << pad.x() << "," << pad.y() << std::endl;
+    Pad pad(x,y);
     auto p = std::find(std::begin(Pads),std::end(Pads), pad);
     if(p==Pads.end()) 
     {

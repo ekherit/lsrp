@@ -69,7 +69,7 @@ class GEMHit : public G4VHit
     void SetCharge   (G4double charge)  { fCharge = charge; fPad.charge=fCharge; }
     void FindPad(void) 
     { 
-      fPad = Pad(Cfg.pad_xsize*mm, Cfg.pad_ysize*mm, fPos.x(), fPos.y());
+      fPad = Pad(fPos.x(), fPos.y());
       fPad.charge=fCharge;
     }
     void SetPads(const std::list<Pad> & pads ) { fPads = pads;}
