@@ -28,6 +28,7 @@ static void DefineUnits(void)
   new G4UnitDefinition("megahertz","MHz","Frequency",1e6/second);
   new G4UnitDefinition("gigahertz","GHz","Frequency",1e9/second);
   new G4UnitDefinition("microjoule","mkJ","Energy",1e-6*joule);
+  new G4UnitDefinition("microradian","mkrad","Angle",1e-6*radian);
 }
 
 #endif

@@ -34,6 +34,7 @@
 #include "GEMHit.hh"
 #include <ibn/math.h>
 #include "Config.h"
+#include "PrimaryGeneratorAction.hh"
 
 #include "G4Event.hh"
 #include "G4EventManager.hh"
@@ -89,9 +90,12 @@ void EventAction::EndOfEventAction(const G4Event* event)
   Revent.psy=Cfg.pad_ysize;
   Revent.run=Cfg.run;
   Revent.eventID = eventID;
-  Revent.Eb = Revent.gen[0].Eb;
-  Revent.P = Revent.gen[0].P;
-  Revent.nphot=Cfg.photon_number;
+	auto PGA = PrimaryGeneratorAction::Instance();
+  Revent.Nphot = PGA->fPhotonNumber;
+  Revent.nphot = PGA->fRealPhotonNumber;
+  Revent.gen.resize(Revent.nphot);
+  Revent.Eb = PGA->fBeamEnergy;
+  Revent.P = PGA->fPolarization;
   Revent.nhit = hc->GetSize();
   Revent.hit.resize(hc->GetSize());
   for(unsigned i=0; i< hc->GetSize();i++)
@@ -107,7 +111,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
     Revent.hit[i].z = hit->GetPos().z()/mm;
     Revent.hit[i].rho = sqrt(ibn::sq(Revent.hit[i].y) + ibn::sq(Revent.hit[i].y));
     Revent.hit[i].phi = hit->GetPos().phi();
-    Revent.hit[i].q = hit->GetCharge()/coulomb*1e15;
+    //Revent.hit[i].q = hit->GetCharge()/coulomb*1e15;
+    Revent.hit[i].q = hit->GetCharge();
     for(auto & pad : hit->GetPads())
     {
       auto p = std::find(std::begin(fPads),std::end(fPads), pad);
@@ -158,14 +163,14 @@ void EventAction::EndOfEventAction(const G4Event* event)
     //variate amplification
     do { epad.q = p.charge*(1+0.3*G4RandGauss::shoot()); } while(epad.q <=0);
     //scale charge
-    epad.q = epad.q/coulomb*1e15; //fC or femtocoulomb 
+    //epad.q = epad.q/coulomb*1e15; //fC or femtocoulomb 
     epad.nhit = p.nhit;
     epad.nphot = p.tracks.size();
     for(auto & track : p.tracks) 
     {
-      if(track>Cfg.photon_number)
+      if(track>Revent.nphot)
       {
-        G4cout << "Original track more then photon number: " << track << " > " << Cfg.photon_number << G4endl;
+        G4cout << "Original track more then real photon number: " << track << " > " << Revent.nphot << G4endl;
         continue;
       }
       Revent.gen[track-1].pad.push_back(epad);

@@ -71,6 +71,7 @@ class GeneratorEvent : public TObject
   double x=-99999; //position,mm
   double y=-99999;
   double z=-99999; 
+  //Long64_t nphot=-9999; //number of generated photons
   unsigned npad;
   std::vector<PadEvent> pad;
   ClassDef(GeneratorEvent, 1); //The class title
@@ -111,6 +112,7 @@ class RootEvent : public TObject
   //beam information
   Double_t P=0; //polarization of gamma quant
   Double_t Eb=-99999; //electron beam energy
+  Double_t Nphot=-99999; //expected number of photons
   Long64_t nphot=-99999; //number of generated photons
   Long64_t ndet=-99999; //nomber of registered photons
   //detector information

@@ -18,6 +18,19 @@
 //#include <iomanip>
 //#include <vector>
 
+struct valer
+{
+  valer(void){}
+  valer(double v, double e)
+  {
+    value = v;
+    error = e;
+  }
+  double value=0;
+  double error=0;
+};
+
+
 double get_fwhm(TH1F * h, double * error_result=0)
 {
   double max = h->GetMaximum();
@@ -89,6 +102,42 @@ inline void DrawAsymmetry(TTree *t, const char * channel, TCut cut, const char *
   new TCanvas;
   hasym->Draw(gopt);
 }
+//Рисует ассимметрию с нормировкой на полное число событий.
+inline void DrawAsymmetry2(TTree *t, const char * channel, TCut cut, const char * gopt="")
+{
+  TCut Pup="P>0";
+  TCut Pdown = "P<0";
+  //t->SetLineColor(kBlue);
+  //t->SetLineWidth(2);
+  TH1F *hdown = (TH1F*)gDirectory->Get("hdown");
+  TH1F *hup   = (TH1F*)gDirectory->Get("hup");
+  if(hdown!=0) delete hdown;
+  if(hup!=0) delete hup;
+  t->Draw((channel+string(">>hup")).c_str(), Pup&&cut,"goff");
+  //t->SetLineColor(kRed);
+  //t->SetLineWidth(2);
+  t->Draw((channel+string(">>hdown")).c_str(), Pdown&&cut, "goff");
+  hdown = (TH1F*)gDirectory->Get("hdown");
+  hup   = (TH1F*)gDirectory->Get("hup");
+  hup->Print();
+  hdown->Print();
+  TH1F * hplus = new TH1F(*hup);
+  hplus->Add(hdown, +1);
+	hplus->Scale(0.5);
+  TH1F * hminus = new TH1F(*hup);
+  hminus->Add(hplus, -1);
+  //TH1F * hasym = new TH1F(*hminus);
+  TH1F * hasym = new TH1F(*hminus);
+  hasym->SetLineColor(t->GetLineColor());
+  hasym->SetLineWidth(t->GetLineWidth());
+  hasym->Divide(hplus);
+  new TCanvas;
+  hminus->Draw();
+  new TCanvas;
+  hplus->Draw();
+  new TCanvas;
+  hasym->Draw(gopt);
+}
 
 inline void CalculateAsymmetry2(TTree *t, const char * channel, TCut cut, const char * gopt="")
 {
@@ -107,6 +156,59 @@ inline void CalculateAsymmetry2(TTree *t, const char * channel, TCut cut, const 
   cout << "uu-ud = " << int(uu-ud) << endl;
   //cout << "Assymetry: " <<  eps << " +- " << error << endl;
   cout << "Asymmetry: " <<  eps << " +- " << error << " ("<< error/eps*100.0 << "%)"<< endl;
+}
+
+inline valer CalculateEffect3(TTree *t, const char * channel, TCut cut, const char * gopt="")
+{
+  TCut Pup="P>0";
+  TCut Pdown = "P<0";
+  TCut up = (channel+string(">0")).c_str();
+  TCut down = (channel+string("<0")).c_str();
+  t->Draw(channel, ((Pup && up) || (Pdown && down)) && cut,"goff");
+  double uu = t->GetSelectedRows();
+  t->Draw(channel, ((Pup && down) || (Pdown && up)) && cut,"goff");
+  double ud = t->GetSelectedRows();
+  //cout << "uu = " << Long64_t(uu) << endl;
+  //cout << "ud = " << Long64_t(ud) << endl;
+  double sum = uu+ud;
+  double eps =(uu-ud)/(uu+ud);
+  double error = 2.0*uu*ud/(sum*sum)*sqrt(1.0/uu+1.0/ud);
+  //cout << "uu-ud = " << int(uu-ud) << endl;
+  //cout << "Assymetry: " <<  eps << " +- " << error << endl;
+  return valer(eps,error);
+}
+//Расчёт эффекта с учётом вычисления центра распределения
+inline valer CalculateEffect4(TTree *t, const char * channel, TCut cut, const char * gopt="")
+{
+	t->Draw(channel,  cut,  "goff");
+	TH1F * h = (TH1F*) t->GetHistogram();
+	double mean = h->GetMean();
+	//cout << "mean = " << mean << endl;
+  TCut Pup="P>0";
+  TCut Pdown = "P<0";
+	char buf[1024];
+	sprintf(buf, "%s>%f", channel,  mean);
+  TCut up = buf;
+	sprintf(buf, "%s<%f", channel,  mean);
+  TCut down = buf;
+  t->Draw(channel, ((Pup && up) || (Pdown && down)) && cut,"goff");
+  double uu = t->GetSelectedRows();
+  t->Draw(channel, ((Pup && down) || (Pdown && up)) && cut,"goff");
+  double ud = t->GetSelectedRows();
+  //cout << "uu = " << Long64_t(uu) << endl;
+  //cout << "ud = " << Long64_t(ud) << endl;
+  double sum = uu+ud;
+  double eps =(uu-ud)/(uu+ud);
+  double error = 2.0*uu*ud/(sum*sum)*sqrt(1.0/uu+1.0/ud);
+  //cout << "uu-ud = " << int(uu-ud) << endl;
+  //cout << "Assymetry: " <<  eps << " +- " << error << endl;
+  return valer(eps,error);
+}
+
+inline void CalculateAsymmetry3(TTree *t, const char * channel, TCut cut, const char * gopt="")
+{
+  valer v = CalculateEffect3(t,channel,cut,gopt);
+  cout << "Asymmetry: " <<  v.value << " +- " << v.error << " ("<< v.error/v.value*100.0 << "%)"<< endl;
 }
 
 inline double sq(double x) { return x*x;}
@@ -444,17 +546,6 @@ void DrawDyVSWidth3(TTree * t, const char * xaxis="d", const char * pad_cut="pad
   g->Draw("a*");
 }
 
-struct valer
-{
-  valer(void){}
-  valer(double v, double e)
-  {
-    value = v;
-    error = e;
-  }
-  double value=0;
-  double error=0;
-};
 
 
 void MassiveDrawWidth(const char * file_prefix="run", int N = 10, const char * xaxis, const char * yaxis, const char * pad_cut="pad.q>0", const char * main_cut="1")
@@ -603,7 +694,8 @@ void Draw(TTree * t, TCut pad_cut="")
   c->cd(3);
   valer occup = CalculateAverageOccupancy(t, pad_cut,fwhm_x.value/2.0, fwhm_y.value/2.0, 1, "");
   c->cd(4);
-  t->Draw("pad.q","pad.q<2000");
+  t->Draw("pad.q","pad.q<1e5");
+	gPad->SetLogy();
 }
 
 void MassiveDraw(const char * file_prefix="run", int N = 10, const char * xaxis, const char * pad_cut="pad.q>0", const char * main_cut="1")
@@ -669,33 +761,43 @@ void MassiveDraw(const char * file_prefix="run", int N = 10, const char * xaxis,
 }
 
 
-void DrawChargeThresholdEffect(TTree * t, double qmin=0, double qmax=5, double dq=1)
+void DrawChargeThresholdEffect(TTree * t, double qmin=0, double qmax=5e4, double dq=1e4,  const char * main_cut="1")
 {
   TGraphErrors * delta_graph =new TGraphErrors;
   TGraphErrors * effect_graph=new TGraphErrors;
   int i=0;
   cout  << "charge, fC" << "   effect " <<  " confidence level " << endl;
-  printf("%15s%15s%16s\n", "charge, fC", "effect, %", " CL, sigma");
-
+  printf("%15s%15s%16s\n", "charge,(Ne) ", "effect, %", " CL, sigma");
+	TCut MCut = main_cut;
+	
   for(double q=qmin;q<=qmax;q+=dq)
   {
     char cut[1024];
     sprintf(cut, "pad.q>%f", q);
     valer effect;
-    valer effect = CalculateEffect(t, "pad.y", cut);
-    delta_graph->SetPoint(i, q, effect.value);
-    delta_graph->SetPointError(i, 0, effect.error);
-    effect_graph->SetPoint(i, q, effect.value/effect.error);
-    effect_graph->SetPointError(i, 0, 1);
-    printf("%15.1f%9.2f+-%4.2f%16.2f\n", q, effect.value*100, effect.error*100, effect.value/effect.error);
+    valer effect = CalculateEffect4(t, "pad.y", cut && MCut);
+    delta_graph->SetPoint(i, q, fabs(effect.value)*100);
+    delta_graph->SetPointError(i, 0, effect.error*100);
+    effect_graph->SetPoint(i, q, fabs(effect.value/effect.error));
+    effect_graph->SetPointError(i, 0, 0);
+    printf("%15.1f%9.2f+-%4.2f%16.2f\n", q, effect.value*100, effect.error*100, fabs(effect.value/effect.error));
     i++;
   }
   TCanvas * c = new TCanvas;
   c->Divide(2,1);
   c->cd(1);
   delta_graph->Draw("a*");
+	delta_graph->GetXaxis()->SetTitle("charge");
+	delta_graph->GetYaxis()->SetTitle("(N^{+}-N^{-}) / (N^{+}+N^{-}),  %");
+	delta_graph->SetTitle("depolarization effect");
   c->cd(2);
-  effect_graph->Draw("a*");
+	gPad->SetLogx();
+  effect_graph->Draw("apc");
+	effect_graph->SetMarkerStyle(21);
+	effect_graph->GetXaxis()->SetTitle("charge");
+	effect_graph->SetTitle("Confidence level");
+	effect_graph->GetYaxis()->SetTitle("#varepsilon/#sigma_{#varepsilon}");
+
 }
 
 void DrawOccupancyPoisson(TTree *t, int n1, int n2)
@@ -736,6 +838,18 @@ void DrawOccupancyPoisson(TTree *t, int n1, int n2)
   }
   new TCanvas;
   mu_graph->Draw("*ac");
+}
+
+
+double theory_asymmetry(double y,  double chi)
+{
+	double r =  - 2*chi*y*(1+y*y)/(2*chi*chi*(1+y*y) + (1+y*y+2*chi)*(1+y*y*y*y));
+	return r;
+}
+
+double theory_asymmetry(double *x,  double *p)
+{
+	return theory_asymmetry(y, chi);
 }
 
 

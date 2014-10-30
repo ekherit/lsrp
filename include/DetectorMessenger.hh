@@ -67,6 +67,8 @@ class DetectorMessenger: public G4UImessenger
     std::unique_ptr<G4UIdirectory>    fDirectory;
     std::unique_ptr<G4UIdirectory>    fLaserDirectory;
     std::unique_ptr<G4UIdirectory>    fBeamDirectory;
+    std::unique_ptr<G4UIdirectory>    fDetectorDirectory;
+    std::unique_ptr<G4UIdirectory>    fPadDirectory;
 
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fStepMaxCmd;
     std::unique_ptr<G4UIcmdWithAnInteger> fPhotonNumberCmd;
@@ -78,9 +80,10 @@ class DetectorMessenger: public G4UImessenger
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeYCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fHighSensWidthXCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fHighSensWidthYCmd;
-    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fRoughScaleXCmd;
-    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fRoughScaleYCmd;
-    std::unique_ptr<G4UIcmdWithADouble> fBeamSigmaZCmd; //vertical angular spread at 1.55 GeV
+    std::unique_ptr<G4UIcmdWithADouble> fRoughScaleXCmd;
+    std::unique_ptr<G4UIcmdWithADouble> fRoughScaleYCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamSigmaYCmd; //vertical angular spread at 1.55 GeV
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamSigmaXCmd; //radial angular spread at 1.55 GeV
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamCurrentCmd; //mA
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamEnergyCmd; 
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserWaveLengthCmd;

@@ -65,7 +65,8 @@ class SquarePad : public BasePad
     {
     }
 
-    SquarePad(double X, double Y, double q=0) : SquarePad(Cfg.pad_xsize,Cfg.pad_ysize)
+
+    SquarePad(double X, double Y, double q=0) : BasePad(Cfg.pad_xsize, Cfg.pad_ysize)
     {
       charge=q;
       FindIndex(X,Y);
@@ -153,7 +154,7 @@ class HexPad : public BasePad
   {
   }
 
-  HexPad(double X, double Y) : HexPad(Cfg.pad_xsize, Cfg.pad_ysize)
+  HexPad(double X, double Y) : BasePad(Cfg.pad_xsize, Cfg.pad_ysize)
   {
     FindIndex(X,Y);
   }

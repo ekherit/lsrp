@@ -36,10 +36,11 @@ const G4double mkJ = joule*1e-6;
 const G4double mJ =  joule*1e-3;
 const G4double mkm = micrometer;
 const G4double hc = 197.326968e-15*MeV*m;
+const G4double mkrad = 1e-6*radian;
 
 struct Config_t
 {
-  unsigned photon_number; //number of photons in one pulse
+  unsigned photon_number=0; //number of photons in one pulse
   double photon_flight_length=25*m; //Photon flight length in mm
   //geometry
   double psm_width; //presampler width in cm
@@ -66,7 +67,8 @@ struct Config_t
   {
     double I=1*mA; //current
     double E=5*GeV; //energy
-    double sigmaZ=21.2e-6*radian;
+    double sigmaY=21.2*mkrad;
+    double sigmaX=104*mkrad;
     double revolution_frequency=818.924*kHz; //Hz
   } beam;
 

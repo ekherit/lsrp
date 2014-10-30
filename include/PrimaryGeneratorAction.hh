@@ -64,10 +64,15 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
     void SetRandomFlag(G4bool );
     
-    G4double fFlightLength;
-    G4double fThetaMax;
-    G4double fBeamEnergy;
-    G4double fBeamCurrent;
+    G4double fFlightLength; //Distance from scattering point to detector
+    G4double fThetaMax; //Maximum angle for generator
+    G4double fBeamEnergy; // beam energy
+    G4double fBeamCurrent; //beam current
+    G4double fSigmaY; // vertical angular spread
+    G4double fSigmaX; //horizontal angular spread
+    G4double fPhotonNumber; //number of scattered photons (average)
+    G4double fPolarization; //number of scattered photons (average)
+    G4int fRealPhotonNumber; //real scattered photon number in event
     G4ParticleDefinition * fElectron;
     G4ParticleDefinition * fGamma;
 

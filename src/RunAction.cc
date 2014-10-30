@@ -60,10 +60,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
 
-  auto PG = PrimaryGeneratorAction::Instance();
-  PG->Init();
-  //PG->fBeamEnergy = Cfg.beam.E;
-  //PG->fBeamCurrent = Cfg.beam.I;
+  PrimaryGeneratorAction::Instance()->Init();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

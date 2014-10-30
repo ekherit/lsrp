@@ -58,6 +58,12 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fBeamDirectory.reset(new G4UIdirectory("/lsrp/beam/"));
   fBeamDirectory->SetGuidance("Beam parameters");
 
+  fDetectorDirectory.reset(new G4UIdirectory("/lsrp/det/"));
+  fDetectorDirectory->SetGuidance("Detector parameters");
+
+  fPadDirectory.reset(new G4UIdirectory("/lsrp/det/pad/"));
+  fPadDirectory->SetGuidance("GEM pad parameters");
+
   fStepMaxCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/stepMax",this));
   fStepMaxCmd->SetGuidance("Define a step max");
   fStepMaxCmd->SetParameterName("stepMax",false);
@@ -75,62 +81,69 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fRootFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 
-  fPresamplerWidthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PresamplerWidth",this));
+  fPresamplerWidthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/PresamplerWidth",this));
   fPresamplerWidthCmd->SetGuidance("Define a width of the presampler");
   fPresamplerWidthCmd->SetParameterName("presamplerWidth",false);
   fPresamplerWidthCmd->SetUnitCategory("Length");
   fPresamplerWidthCmd->AvailableForStates(G4State_Idle);
 
-  fPsmGemLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PsmGemLength",this));
+  fPsmGemLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/PsmGemLength",this));
   fPsmGemLengthCmd->SetGuidance("Define distance betwee presampler and gem");
   fPsmGemLengthCmd->SetParameterName("PsmGemLength",false);
   fPsmGemLengthCmd->SetUnitCategory("Length");
   fPsmGemLengthCmd->AvailableForStates(G4State_Idle);
 
-  fPadSizeCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PadSize",this));
+  fPadSizeCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/pad/Size",this));
   fPadSizeCmd->SetGuidance("Size of the hexagonal pad");
   fPadSizeCmd->SetParameterName("PadSize",false);
   fPadSizeCmd->SetUnitCategory("Length");
   fPadSizeCmd->AvailableForStates(G4State_Idle);
 
-  fPadSizeXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PadSizeX",this));
+  fPadSizeXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/pad/SizeX",this));
   fPadSizeXCmd->SetGuidance("Size of the hexagonal pad");
   fPadSizeXCmd->SetParameterName("PadSizeX",false);
   fPadSizeXCmd->SetUnitCategory("Length");
   fPadSizeXCmd->AvailableForStates(G4State_Idle);
 
-  fPadSizeYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PadSizeY",this));
+  fPadSizeYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/pad/SizeY",this));
   fPadSizeYCmd->SetGuidance("Size of the hexagonal pad");
   fPadSizeYCmd->SetParameterName("PadSizeY",false);
   fPadSizeYCmd->SetUnitCategory("Length");
   fPadSizeYCmd->AvailableForStates(G4State_Idle);
 
-  fHighSensWidthXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/HighSensWidthX",this));
+  fHighSensWidthXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/pad/HighSensWidthX",this));
   fHighSensWidthXCmd->SetGuidance("Size of the hexagonal pad");
   fHighSensWidthXCmd->SetParameterName("HighSensWidthX",false);
   fHighSensWidthXCmd->SetUnitCategory("Length");
   fHighSensWidthXCmd->AvailableForStates(G4State_Idle);
 
-  fHighSensWidthYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/HighSensWidthY",this));
+  fHighSensWidthYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/pad/HighSensWidthY",this));
   fHighSensWidthYCmd->SetGuidance("Size of the hexagonal pad");
   fHighSensWidthYCmd->SetParameterName("HighSensWidthY",false);
   fHighSensWidthYCmd->SetUnitCategory("Length");
   fHighSensWidthYCmd->AvailableForStates(G4State_Idle);
 
-  fRoughScaleXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/RoughScaleX",this));
+  fRoughScaleXCmd.reset(new G4UIcmdWithADouble("/lsrp/det/pad/RoughScaleX",this));
   fRoughScaleXCmd->SetGuidance("X Scale of big pad");
   fRoughScaleXCmd->SetParameterName("RoughScaleX",false);
   fRoughScaleXCmd->AvailableForStates(G4State_Idle);
 
-  fRoughScaleYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/RoughScaleY",this));
+  fRoughScaleYCmd.reset(new G4UIcmdWithADouble("/lsrp/det/pad/RoughScaleY",this));
   fRoughScaleYCmd->SetGuidance("Y scale of big pad");
   fRoughScaleYCmd->SetParameterName("RoughScaleY",false);
   fRoughScaleYCmd->AvailableForStates(G4State_Idle);
 
-  fBeamSigmaZCmd.reset(new G4UIcmdWithADouble("/lsrp/beam/SigmaZ",this));
-  fBeamSigmaZCmd->SetGuidance("Vertical beam angular spread");
-  fBeamSigmaZCmd->SetParameterName("BeamSigmaZ",false);
-  fBeamSigmaZCmd->AvailableForStates(G4State_Idle);
+  fBeamSigmaYCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/beam/SigmaY",this));
+  fBeamSigmaYCmd->SetGuidance("Vertical beam angular spread");
+  fBeamSigmaYCmd->SetParameterName("BeamSigmaY",false);
+  fBeamSigmaYCmd->SetUnitCategory("Angle");
+  fBeamSigmaYCmd->AvailableForStates(G4State_Idle);
+
+  fBeamSigmaXCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/beam/SigmaX",this));
+  fBeamSigmaXCmd->SetGuidance("Vertical beam angular spread");
+  fBeamSigmaXCmd->SetParameterName("BeamSigmaX",false);
+  fBeamSigmaXCmd->SetUnitCategory("Angle");
+  fBeamSigmaXCmd->AvailableForStates(G4State_Idle);
 
   fBeamCurrentCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/beam/Current",this));
   fBeamCurrentCmd->SetGuidance("Beam current");
@@ -242,9 +255,13 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   {
     Cfg.pad_rough_yscale = fRoughScaleYCmd->GetNewDoubleValue(newValue);
   }
-  if( command == fBeamSigmaZCmd.get())
+  if( command == fBeamSigmaYCmd.get())
   {
-    Cfg.beam.sigmaZ = fBeamSigmaZCmd->GetNewDoubleValue(newValue);
+    Cfg.beam.sigmaY = fBeamSigmaYCmd->GetNewDoubleValue(newValue);
+  }
+  if( command == fBeamSigmaXCmd.get())
+  {
+    Cfg.beam.sigmaX = fBeamSigmaXCmd->GetNewDoubleValue(newValue);
   }
   if( command == fBeamCurrentCmd.get())
   {

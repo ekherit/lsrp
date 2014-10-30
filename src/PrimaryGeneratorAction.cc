@@ -60,6 +60,7 @@ PrimaryGeneratorAction* PrimaryGeneratorAction::Instance(void)
 PrimaryGeneratorAction::PrimaryGeneratorAction()
  : G4VUserPrimaryGeneratorAction()
 {
+  fgInstance = this;
   G4int nofParticles = 1;
   fParticleGun = new G4ParticleGun(nofParticles);
 
@@ -68,7 +69,6 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   fGamma = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
   //fElectron  = G4ParticleTable::GetParticleTable()->FindParticle("electron");
   fElectron = G4Electron::Definition();
-  std::cout << fGamma << " " << fElectron << std::endl;
 
   Init();
 
@@ -85,17 +85,21 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 
 void PrimaryGeneratorAction::Init(void)
 {
-  fFlightLength = Cfg.photon_flight_length;
-  G4cout << "Photon flight length: " << fFlightLength/m << " m" << G4endl;
-  //Ymax should be smaller than detector size in order to supress outside world volume hit
-  G4double Ymax = 0.49*(Cfg.psm_size*mm/2.);
-  fThetaMax = Ymax/fFlightLength;
-  G4cout << "fThetaMax = " << fThetaMax << G4endl;
-
+  G4cout << "Beam parameters: " << G4endl;
   //beam parameters
   fBeamEnergy = Cfg.beam.E;
-  fBeamCurrent = Cfg.beam.I;
   G4cout << "Beam energy: " << fBeamEnergy/GeV  << " GeV " << G4endl;
+  fSigmaX = Cfg.beam.sigmaX;
+  G4cout << "Beam radial angular spread: " << fSigmaX/mkrad << " mkrad (E=1.55 GeV)" << G4endl;
+  fSigmaY = Cfg.beam.sigmaY;
+  G4cout << "Beam vertical angular spread: " << fSigmaY/mkrad << " mkrad (E=1.55 GeV)" << G4endl;
+  fSigmaX = Cfg.beam.sigmaX*fBeamEnergy/(1.55*GeV);
+  G4cout << "Beam radial angular spread =  " << fSigmaX/mkrad << " mkrad (E="<<fBeamEnergy/GeV << " GeV)" << G4endl;
+  fSigmaY = Cfg.beam.sigmaY*fBeamEnergy/(1.55*GeV);
+  G4cout << "Beam vertical angular spread = " << fSigmaY/mkrad << " mkrad (E="<<fBeamEnergy/GeV << " GeV)" << G4endl;
+
+
+  fBeamCurrent = Cfg.beam.I;
   G4cout << "Beam current: " << fBeamCurrent/mA  << " mA " << G4endl;
   G4double f0 = Cfg.beam.revolution_frequency; //Hz revolution frequency
   G4cout << "Beam revolution frequency: " << f0/kHz << " kHz" << G4endl;
@@ -123,31 +127,39 @@ void PrimaryGeneratorAction::Init(void)
   G4double ngamma = Ngamma/(pulse_length*ibn::sq(pulse_size)*M_PI/4.0);
   G4cout << "Laser photon density = " << ngamma*(cm*cm*cm) << " cm^-3" <<G4endl;
 
-
-
   //const double hc = 197.326968e-15; // MeV*m;
+  G4cout << "Scattering parameters: " << G4endl;
+  //Ymax should be smaller than detector size in order to supress outside world volume hit
+  fFlightLength = Cfg.photon_flight_length;
+  G4cout << "Photon flight length: " << fFlightLength/m << " m" << G4endl;
+  G4double Ymax = 0.49*(Cfg.psm_size*mm/2.);
+  G4cout << "\tYmax = " << fFlightLength*fThetaMax/cm << " cm" << G4endl;
+  fThetaMax = Ymax/fFlightLength;
+  G4cout << "\tfThetaMax = " << fThetaMax/mrad << " mrad"  << G4endl;
+  G4cout << "\tCharacteristic spot size on detector: " << G4endl;
+  G4cout << "\t\tsize_x = " << 2*sqrt(ibn::sq(fSigmaX*fFlightLength) + ibn::sq(0.511*MeV/fBeamEnergy))/mm << " mm" << G4endl;
+  G4cout << "\t\tsize_y = " << 2*sqrt(ibn::sq(fSigmaY*fFlightLength) + ibn::sq(0.511*MeV/fBeamEnergy))/mm << " mm" << G4endl;
   fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy/MeV,1,1));
   double cos_rf = fCompton->cos_rf(cos(fThetaMax));
   double xmax = fCompton->xcos(cos_rf);
   double xmin = 1./(1.0+2.0*fCompton->chi);
-  G4cout << "xmin = " << xmin << G4endl;
-  G4cout << "xmax = " << xmax << G4endl;
-  G4cout << "Ymax = " << fFlightLength*fThetaMax/cm << " cm" << G4endl;
+  G4cout << "\txmin = " << xmin << G4endl;
+  G4cout << "\txmax = " << xmax << G4endl;
   double Integral  = ibn::dgaus(*fCompton,xmin,xmax,1e-10);
-  G4cout << "Integral = " << Integral << endl;
-
-  //G4double Ngamma = pulse_energy/ibn::phys::e_SI/(photon_energy/eV);
-  //G4cout << "number of initial photons: " << Ngamma << G4endl;
-  //G4cout << "density of photon beam: " << ngamma*mm*mm*mm << " 1/mm^3" << G4endl;
-  //G4cout << "fThetaMax = " << fThetaMax << G4endl;
+  G4cout << "\tIntegral = " << Integral << endl;
   G4double sigma = M_PI*ibn::sq(ibn::phys::r_e)/fCompton->chi*Integral*m*m; //m^2
-  G4cout << "sigma = " << sigma/(m*m) << " m^2" << " (" << sigma/barn << " b)"<<G4endl;
+  G4cout << "\tsigma = " << sigma/(cm*cm) << " cm^2" << " (" << sigma/barn << " b)"<<G4endl;
   G4double nu = sigma*(ibn::phys::c*m/s)*Ne*ngamma;
-  G4cout << "Rate: " << nu/GHz << " GHz" << G4endl;
-  G4double Ncbs = nu*Cfg.laser.focus_length/pulse_length*Cfg.laser.pulse_time;
-  G4cout << "number of scattered photons: " <<  Ncbs<< " per pulse" << G4endl; //двойка из-за встречного движения пучка
-  G4double rate = Ncbs*laser_frequency;
-  G4cout << "Photon rate to detector: " << rate/kHz <<" kHz" <<  G4endl;
+  G4cout << "\tRate = " << nu/GHz << " GHz" << G4endl;
+  fPhotonNumber = nu*Cfg.laser.focus_length/pulse_length*Cfg.laser.pulse_time;
+  G4cout << "Scattered photon number = " << fPhotonNumber<< " per pulse" << G4endl; //двойка из-за встречного движения пучка
+  G4double rate = fPhotonNumber*laser_frequency;
+  G4cout << "Scattered photon number which hit detector = " << rate/kHz <<" kHz" <<  G4endl;
+  if(Cfg.photon_number != 0 ) 
+  {
+    fPhotonNumber = Cfg.photon_number;
+    G4cout << "Redefine photon number by config: " << fPhotonNumber << G4endl;
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -231,15 +243,14 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   }
   fParticleGun->SetParticleDefinition(fGamma);
   // This function is called at the begining of event
-  double Pg = 2.0*(eventID%2)-1.0; //calculate polarization
-  fCompton->SetPhotonPolarization(Pg);
-  for(unsigned i=0;i<Cfg.photon_number;i++)
+  fPolarization = 2.0*(eventID%2)-1.0; //calculate polarization
+  fCompton->SetPhotonPolarization(fPolarization);
+  fRealPhotonNumber = CLHEP::RandPoissonQ::shoot(fPhotonNumber);
+  for(unsigned i=0;i<fRealPhotonNumber;i++)
   {
     //generate compton backscattering
     fCompton->generate([](double xmin, double xmax) { return (xmax-xmin)*G4UniformRand()+xmin; },fThetaMax);
-    double dx = 1e-4*fCompton->Ee/1850.0;
-    double kz_kx = 0.2;
-    variate_agnle(*fCompton,dx,dx*kz_kx); 
+    variate_agnle(*fCompton,fSigmaX,fSigmaY); 
 
     //calculate position
     G4double z = DetectorConstruction::Instance()->GetFrontZ();
