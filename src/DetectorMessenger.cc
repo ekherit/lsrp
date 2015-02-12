@@ -271,7 +271,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command == fBeamEnergyCmd.get())
   {
     Cfg.beam.E = fBeamEnergyCmd->GetNewDoubleValue(newValue);
-    std::cout  << Cfg.beam.E << std::endl;
+    std::cout  << "Cfg.beam.E = " << Cfg.beam.E << std::endl;
   }
 
   if( command == fLaserWaveLengthCmd.get())
