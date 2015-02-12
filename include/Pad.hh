@@ -73,20 +73,20 @@ class SquarePad : public BasePad
     }
   protected:
 
-    void FindIndex(double x,double y)
+    void FindIndex(double X,double Y)
     {
-      xhit=x;
-      yhit=y;
-      x = x/fxsize;
-      y=y/fysize;
-      fnx = floor(x+0.5);
-      fny = floor(y+0.5);
+      xhit=X;
+      yhit=Y;
+      X = X/fxsize;
+      Y=Y/fysize;
+      fnx = floor(X+0.5);
+      fny = floor(Y+0.5);
       FindPosition(fnx,fny);
     }
-    void FindPosition(long nx, long ny)
+    void FindPosition(long NX, long NY)
     {
-      fx = (nx+0.5)*fxsize;
-      fy = (ny+0.5)*fysize;
+      fx = (NX+0.5)*fxsize;
+      fy = (NY+0.5)*fysize;
     }
 };
 
@@ -128,21 +128,21 @@ class VariableSquarePad : public BasePad
     }
 
 
-    void FindIndex(double x,double y)
+    void FindIndex(double X,double Y)
     {
-      xhit=x;
-      yhit=y;
-      x = x/fxsize;
-      y = y/fysize;
-      fnx = floor(x);
-      fny = floor(y);
+      xhit=X;
+      yhit=Y;
+      X = X/fxsize;
+      Y = Y/fysize;
+      fnx = floor(X);
+      fny = floor(Y);
       FindPosition(fnx,fny);
     }
 
-    void FindPosition(long nx, long ny)
+    void FindPosition(long NX, long NY)
     {
-      fx = (nx+0.5)*fxsize;
-      fy = (ny+0.5)*fysize;
+      fx = (NX+0.5)*fxsize;
+      fy = (NY+0.5)*fysize;
     }
 };
 
@@ -160,37 +160,37 @@ class HexPad : public BasePad
   }
 
   protected:
-  void FindPosition(long nx, long ny)
+  void FindPosition(long NX, long NY)
   {
-    int even = fabs(nx%2);
-    fx = (floor(nx/2.)*1.5 + 0.75*even)*fxsize;
-    fy = (ny + 0.5*even)*sqrt(3.0)/2.0*fysize;
+    int even = fabs(NX%2);
+    fx = (floor(NX/2.)*1.5 + 0.75*even)*fxsize;
+    fy = (NY + 0.5*even)*sqrt(3.0)/2.0*fysize;
   }
 
-  void FindIndex(double x, double y)
+  void FindIndex(double X, double Y)
   {
-    xhit=x;
-    yhit=y;
+    xhit=X;
+    yhit=Y;
     //step 1 normalize position on size
-    x = x/fxsize;
-    y=y/(sqrt(3.0)/2.0*fysize);
+    X = X/fxsize;
+    Y=Y/(sqrt(3.0)/2.0*fysize);
     //step 2 found number of cell
-    long Nx = floor((x+0.5)/1.5);
-    long Ny = floor((y+0.5));
+    long Nx = floor((X+0.5)/1.5);
+    long Ny = floor((Y+0.5));
     //step 3 found couurdinates inside cell
-    x = x - 1.5*Nx;
-    y = y - Ny;
+    X = X - 1.5*Nx;
+    Y = Y - Ny;
     //step 4 found hexagon
     enum {A,B,C,D,E} hex;
-    if(y>0)
+    if(Y>0)
     {
-      if(y<0.5+2*(x+0.25) && y<0.5-2*(x-0.25)) hex=A;
-      else hex = x>0 ? B : E;
+      if(Y<0.5+2*(X+0.25) && Y<0.5-2*(X-0.25)) hex=A;
+      else hex = X>0 ? B : E;
     }
     else 
     {
-      if(y>=-0.5-2*(x+0.25) && y>=-0.5+2*(x-0.25)) hex=A;
-      else hex = x>0 ? C : D;
+      if(Y>=-0.5-2*(X+0.25) && Y>=-0.5+2*(X-0.25)) hex=A;
+      else hex = X>0 ? C : D;
     }
     //step 5 calculate index;
     switch(hex)

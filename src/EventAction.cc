@@ -74,6 +74,7 @@ void EventAction::BeginOfEventAction(const G4Event* event)
 void EventAction::EndOfEventAction(const G4Event* event)
 {
   // print per event (modulo n)
+  //G4cout << "EndofEventAction:" << G4endl;
 
   G4int eventID = event->GetEventID();
   if ( eventID % fPrintModulo == 0)
@@ -96,8 +97,11 @@ void EventAction::EndOfEventAction(const G4Event* event)
   Revent.gen.resize(Revent.nphot);
   Revent.Eb = PGA->fBeamEnergy;
   Revent.P = PGA->fPolarization;
+//G4cout << "Before hc->GetSIze()" << G4endl;
   Revent.nhit = hc->GetSize();
   Revent.hit.resize(hc->GetSize());
+//G4cout << "After hc->GetSize() = " << hc->GetSize() << G4endl;
+
   for(unsigned i=0; i< hc->GetSize();i++)
   {
     GEMHit * hit = (GEMHit*)hc->GetHit(i);
@@ -245,6 +249,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
     G4cout<< G4endl;
   }
   Revent.clear();
+  //G4cout << "End end of event action" << G4endl;
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

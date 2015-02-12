@@ -53,7 +53,7 @@
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
 
-#include "G4SystemOfUnits.hh"
+//#include "G4SystemOfUnits.hh"
 
 //#include "G4ios.hh"
 
@@ -133,15 +133,20 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   fPresamplerWidth = Cfg.psm_width*mm; //presampler width
   fPsmGemLength=Cfg.psm_gem_length*mm; //distance between presampler and gem
   G4double psm_radius =  Cfg.psm_size*mm/2.0; //Radius of the presampler
-  G4double world_size=2*psm_radius*1.2;
-  G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size);
+  G4double world_size_xy=2*psm_radius*1.2;
+  G4double world_size_z=30*m;
+  fAirSensWidth=1*mm;
+  G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size_z);
 
   GEM.reset(new GEMDetector);
 
   //G4ThreeVector psm_position = G4ThreeVector(0,0,+fPresamplerWidth/2.0+presampler_front_position);
   //G4ThreeVector gem_position = G4ThreeVector(0,0,presampler_front_position+fPresamplerWidth+psm_gem_length+GEM->GetWidth()/2.0);
   G4ThreeVector psm_position = G4ThreeVector(0,0,-fPsmGemLength-fPresamplerWidth/2.0);
+  G4ThreeVector airsens_position = G4ThreeVector(0,0,-fPsmGemLength -fPresamplerWidth - fAirSensWidth/2.0);
+  G4cout << "fPsmGemLength=" << fPsmGemLength/mm << "mm,   psm.z = " << psm_position.z()/mm  << " mm"<< G4endl;
   G4ThreeVector gem_position = G4ThreeVector(0,0,GEM->GetWidth()/2.0);
+
   //presampler_front_position=-psm_gem_length-fPresamplerWidth;
 
   // World
@@ -151,7 +156,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     << " mm" << G4endl;
 
   G4Box* worldS = new G4Box("world",                                    //its name
-      world_size/2,world_size/2,world_size/2); //its size
+      world_size_xy/2,world_size_xy/2,world_size_z/2); //its size
 
   worldLV = 
     new G4LogicalVolume ( worldS,air,"World"); 
@@ -179,6 +184,17 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
       worldLV,         // its mother volume
       false,           // no boolean operations
       10,               // copy number
+      fCheckOverlaps); // checking overlaps 
+
+  G4Tubs* AirSensSolid = new G4Tubs("AirSens",0.,psm_radius,fAirSensWidth/2.0,0.*deg,360.*deg);
+  fLogicAirSens = new G4LogicalVolume(AirSensSolid,air ,"AirSens",0,0,0);
+  fAirSens = new G4PVPlacement(0,               // no rotation
+      airsens_position,  // at (x,y,z)
+      fLogicAirSens,    // its logical volume
+      "AirSens",        // its name
+      worldLV,         // its mother volume
+      false,           // no boolean operations
+      666,               // copy number
       fCheckOverlaps); // checking overlaps 
 
 
@@ -212,7 +228,8 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
   //GEM->SetUserLimits(new G4UserLimits(0.1*mm));
   GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
-
+  fLogicAirSens->SetSensitiveDetector(fGEMSensitiveDetector);
+  fLogicAirSens->SetUserLimits(new G4UserLimits(1*mm));
   //BGO 145 22
   // Always return the physical world
   return worldPV;
@@ -263,4 +280,11 @@ void DetectorConstruction::SetPresamplerGeometry(G4double width, G4double distan
   fPresampler->SetTranslation(position);
   //close geometry
   geometry->CloseGeometry(fPresampler);
+
+  //airsens position before presampler
+  position = position + G4ThreeVector(0,0,-fPresamplerWidth/2.0 - fAirSensWidth/2.0);
+  geometry->OpenGeometry(fAirSens);
+  fAirSens->SetTranslation(position);
+  geometry->CloseGeometry(fAirSens);
+
 }

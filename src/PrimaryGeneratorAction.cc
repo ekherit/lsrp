@@ -40,7 +40,7 @@
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
-#include "G4SystemOfUnits.hh"
+//#include "G4SystemOfUnits.hh"
 #include "G4Electron.hh"
 
 #include "Randomize.hh"
@@ -139,13 +139,13 @@ void PrimaryGeneratorAction::Init(void)
   G4cout << "\tCharacteristic spot size on detector: " << G4endl;
   G4cout << "\t\tsize_x = " << 2*sqrt(ibn::sq(fSigmaX*fFlightLength) + ibn::sq(0.511*MeV/fBeamEnergy))/mm << " mm" << G4endl;
   G4cout << "\t\tsize_y = " << 2*sqrt(ibn::sq(fSigmaY*fFlightLength) + ibn::sq(0.511*MeV/fBeamEnergy))/mm << " mm" << G4endl;
-  fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy/MeV,1,1));
+  fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy/MeV,0,0));
   double cos_rf = fCompton->cos_rf(cos(fThetaMax));
   double xmax = fCompton->xcos(cos_rf);
   double xmin = 1./(1.0+2.0*fCompton->chi);
   G4cout << "\txmin = " << xmin << G4endl;
   G4cout << "\txmax = " << xmax << G4endl;
-  double Integral  = ibn::dgaus(*fCompton,xmin,xmax,1e-10);
+  double Integral  = ibn::dgaus(*fCompton,xmin,xmax,1e-13);
   G4cout << "\tIntegral = " << Integral << endl;
   G4double sigma = M_PI*ibn::sq(ibn::phys::r_e)/fCompton->chi*Integral*m*m; //m^2
   G4cout << "\tsigma = " << sigma/(cm*cm) << " cm^2" << " (" << sigma/barn << " b)"<<G4endl;
@@ -160,6 +160,7 @@ void PrimaryGeneratorAction::Init(void)
     fPhotonNumber = Cfg.photon_number;
     G4cout << "Redefine photon number by config: " << fPhotonNumber << G4endl;
   }
+  fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy/MeV,1,1));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -211,15 +212,15 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     case 2:
       fParticleGun->SetParticleDefinition(fGamma);
       fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-      fParticleGun->SetParticleEnergy(400*MeV);
-      fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, 0));
+      fParticleGun->SetParticleEnergy(50*MeV);
+      fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, -10*m));
       fParticleGun->GeneratePrimaryVertex(anEvent);
       {
         GeneratorEvent gevent;;
         gevent.x = 0;
         gevent.y = 0;
         gevent.z = 0;
-        gevent.E = 400;
+        gevent.E = 50;
         ROOTManager::Instance()->event.gen.push_back(gevent);
       }
     case 3:
@@ -245,6 +246,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // This function is called at the begining of event
   fPolarization = 2.0*(eventID%2)-1.0; //calculate polarization
   fCompton->SetPhotonPolarization(fPolarization);
+  //G4cout << fPhotonNumber << G4endl;
   fRealPhotonNumber = CLHEP::RandPoissonQ::shoot(fPhotonNumber);
   for(unsigned i=0;i<fRealPhotonNumber;i++)
   {
@@ -258,13 +260,17 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     G4double y = fCompton->ky/fCompton->kz*(fFlightLength+z);
 
     G4ThreeVector k(fCompton->kx, fCompton->ky, fCompton->kz);
+    //G4ThreeVector k(0, 0, 1);
     
 
     //Configurate the particle gun
     fParticleGun->SetParticleEnergy(fCompton->E*MeV);
+    //fParticleGun->SetParticleEnergy(400*MeV);
 
     //set position
     fParticleGun->SetParticlePosition(G4ThreeVector(x, y, z));
+    //fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, -14.5*m));
+    //fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, -0.5*m));
 
     //set direction
     fParticleGun->SetParticleMomentumDirection(k);

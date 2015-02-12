@@ -5,7 +5,7 @@
 #include "EventAction.hh"
 #include "TrackingAction.hh"
 
-#include "G4StepLimiterBuilder.hh"
+//#include "G4StepLimiterBuilder.hh"
 
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
@@ -144,7 +144,7 @@ int main(int argc,char** argv)
   runManager->SetUserInitialization(detector_construction);
 
   G4VModularPhysicsList* physicsList = new FTFP_BERT;
-  physicsList->RegisterPhysics(new G4StepLimiterBuilder());
+  //physicsList->RegisterPhysics(new G4StepLimiterBuilder());
   runManager->SetUserInitialization(physicsList);
     
   // Set user action classes

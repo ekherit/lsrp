@@ -56,7 +56,7 @@ class GEMDetector
     std::unique_ptr<G4LogicalVolume>  LV;
     public:
     G4LogicalVolume * GetLogicalVolume(void) { return LV.get(); }
-    AmplificationCascade(G4double size, G4double kapton_width=50e-6*m, G4double cuprum_width=5e-6*m);
+    AmplificationCascade(G4double size, G4double kapton_width=50e-6*CLHEP::m, G4double cuprum_width=5e-6*CLHEP::m);
     G4double GetWidth(void) const { return fKaptonWidth+2*fCuprumWidth;}
     G4double GetKaptonWidth(void) const { return fKaptonWidth; }
     G4double GetCuprumWidth(void) const { return fCuprumWidth; }

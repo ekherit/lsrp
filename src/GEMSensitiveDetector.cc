@@ -106,7 +106,7 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   G4double charge = edep/(85.7*eV);
   G4ThreeVector r = aStep->GetPostStepPoint()->GetPosition(); //hit position 
 
-  if (edep==0.) return false;
+  //if (edep==0.) return false;
 
   GEMHit* newHit = new GEMHit();
 
@@ -120,30 +120,35 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   newHit->SetEdep(edep);
   newHit->SetPos(r);
   newHit->SetMomentum(track->GetVertexMomentumDirection());
-  //G4cout<< "Before find pad" << G4endl;
-  newHit->FindPad();
-  newHit->SetCharge(charge*GetAmplification(newHit->GetVolumeID()));
-  std::list<Pad> pad_list;
-  if(Cfg.drift_spread)
+  if(newHit->GetVolumeID()==666  && newHit->GetMomentum().z() < 0 ) return false;
+  
+  //G4cout << r.x() << " " << r.y() << " " << r.z() <<  " VolumeID = " << newHit->GetVolumeID()<< G4endl;
+  if(newHit->GetVolumeID()!=666 && edep > 0)
   {
-    // calculate drift length
-    G4double  drift_length = fPadZPosition - r.z();
-    G4double  drift_speed = 15*um/mm;
-    G4double  spot_size = drift_speed*drift_length;
-    pad_list = GetHitPadList(r, newHit->GetCharge(), spot_size);
+	  newHit->FindPad();
+	  newHit->SetCharge(charge*GetAmplification(newHit->GetVolumeID()));
+	  std::list<Pad> pad_list;
+	  if(Cfg.drift_spread)
+	  {
+		  // calculate drift length
+		  G4double  drift_length = fPadZPosition - r.z();
+		  G4double  drift_speed = 15*um/mm;
+		  G4double  spot_size = drift_speed*drift_length;
+		  pad_list = GetHitPadList(r, newHit->GetCharge(), spot_size);
+	  }
+	  else 
+	  {
+		  pad_list.push_back(newHit->GetPad());
+	  }
+	  //Fill information about original photon
+	  for(auto & p : pad_list)
+	  {
+		  p.tracks.clear();
+		  p.tracks.push_back(info->GetOriginalTrackID());
+		  //no there is only one id in each pad.
+	  }
+	  newHit->SetPads(pad_list);
   }
-  else 
-  {
-    pad_list.push_back(newHit->GetPad());
-  }
-  //Fill information about original photon
-  for(auto & p : pad_list)
-  {
-    p.tracks.clear();
-    p.tracks.push_back(info->GetOriginalTrackID());
-    //no there is only one id in each pad.
-  }
-  newHit->SetPads(pad_list);
   //std::cout << "initial pad: " << newHit->GetPad().x() << "," << newHit->GetPad().y() << std::endl;
   //for(auto & p : newHit->GetPads())
   //{

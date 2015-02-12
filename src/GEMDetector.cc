@@ -21,6 +21,7 @@
 #include "G4UserLimits.hh"
 #include "Config.h"
 
+#include "G4SystemOfUnits.hh"
 #include <boost/lexical_cast.hpp>
 GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double kapton_width, G4double cuprum_width)
 {

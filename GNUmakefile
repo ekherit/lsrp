@@ -6,12 +6,10 @@
 name := lsrp
 G4TARGET := $(name)
 G4EXLIB := true
-CPPFLAGS := -std=c++11 `root-config --cflags` -I./ -I$(HOME)/work -I$(WORKDIR)  
-LDFLAGS := \
-			`root-config --libs` -lMinuit  \
-			-L/usr/lib \
+CPPFLAGS := -std=c++11 `root-config --cflags` -I./  -I$(WORKDIR)
+LDFLAGS :=  `root-config --libs`  \
 			-lboost_program_options \
-			src/RootEventDict.cc \
+		#	-lMinuit  \
 
 ifndef G4INSTALL
   G4INSTALL = ../../../..
@@ -21,7 +19,7 @@ endif
 all: RootEventDict.cc lib bin 
 
 RootEventDict.cc :
-			rootcint  -f src/RootEventDict.cc  -c -I/home/nikolaev/work -I$(G4INCLUDE)  -p include/RootEvent.hh  include/RootLinkDef.hh 
+			rootcint  -f src/RootEventDict.cc  -c  -I$(G4INCLUDE)  -p include/RootEvent.hh  include/RootLinkDef.hh 
 
 myclean :
 			rm -rf dict.* $(G4TMP)/$(G4SYSTEM)/lsrp

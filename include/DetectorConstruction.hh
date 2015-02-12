@@ -91,6 +91,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume*  fPresampler; //physical volume of the presampler
     G4Material*         fPresamplerMaterial;  // pointer to the target  material
 
+    G4LogicalVolume*    fLogicAirSens;
+    G4VPhysicalVolume*  fAirSens; //physical volume of the presampler
+
     G4UserLimits* fStepLimit;            // pointer to user step limits
 
     DetectorMessenger*  fMessenger;   // messenger
@@ -100,6 +103,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     static DetectorConstruction * fgInstance;
 
     G4double fPresamplerWidth;
+    G4double fAirSensWidth;
     G4double fPsmGemLength;
     G4double fPadZPosition; //Z position of pad plate
 
