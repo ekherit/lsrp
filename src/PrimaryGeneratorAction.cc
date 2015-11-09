@@ -254,10 +254,11 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     fCompton->generate([](double xmin, double xmax) { return (xmax-xmin)*G4UniformRand()+xmin; },fThetaMax);
     variate_agnle(*fCompton,fSigmaX,fSigmaY); 
 
+    //fCompton->kx =fabs(fCompton->kx);
     //calculate position
     G4double z = DetectorConstruction::Instance()->GetFrontZ();
     G4double x  = fCompton->kx/fCompton->kz*(fFlightLength+z);
-    G4double y = fCompton->ky/fCompton->kz*(fFlightLength+z);
+    G4double y =  fCompton->ky/fCompton->kz*(fFlightLength+z);
 
     G4ThreeVector k(fCompton->kx, fCompton->ky, fCompton->kz);
     //G4ThreeVector k(0, 0, 1);
