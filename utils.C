@@ -180,16 +180,16 @@ inline valer CalculateEffect3(TTree *t, const char * channel, TCut cut, const ch
 //Расчёт эффекта с учётом вычисления центра распределения
 inline valer CalculateEffect4(TTree *t, const char * channel, TCut cut, const char * gopt="")
 {
-	t->Draw(channel,  cut,  "goff");
-	TH1F * h = (TH1F*) t->GetHistogram();
-	double mean = h->GetMean();
-	//cout << "mean = " << mean << endl;
+  t->Draw(channel,  cut,  "goff");
+  TH1F * h = (TH1F*) t->GetHistogram();
+  double mean = h->GetMean();
+  //cout << "mean = " << mean << endl;
   TCut Pup="P>0";
   TCut Pdown = "P<0";
-	char buf[1024];
-	sprintf(buf, "%s>%f", channel,  mean);
+  char buf[1024];
+  sprintf(buf, "%s>%f", channel,  mean);
   TCut up = buf;
-	sprintf(buf, "%s<%f", channel,  mean);
+  sprintf(buf, "%s<%f", channel,  mean);
   TCut down = buf;
   t->Draw(channel, ((Pup && up) || (Pdown && down)) && cut,"goff");
   double uu = t->GetSelectedRows();
@@ -853,3 +853,9 @@ double theory_asymmetry(double *x,  double *p)
 }
 
 
+inline void CalculateEffect4(TTree *t)
+{
+	valer e;
+	e = CalculateEffect4(t,"pad.y","abs(pad.y)<20 && abs(pad.x)<64");
+	std::cout << e.value*100 << "proc +- " << e.error*100 << " proc"<< " " << e.value/e.error;
+}
