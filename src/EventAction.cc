@@ -132,8 +132,37 @@ void EventAction::EndOfEventAction(const G4Event* event)
       }
     }
   }
-  fPads.sort();
-  //amplification of the charge
+  //fPads.sort(); //fPads.global pad list
+  //sort by charge
+  fPads.sort([](const Pad & p1, const Pad & p2){return p1.charge < p2.charge; });
+  fPads.erase(++fPads.begin(), fPads.end());
+  
+  //std::list<Pad> Pads; //list  of result pad
+  //for(auto &p : fPads)
+  //{
+  //  if(Pads.empty()) 
+  //  {
+  //    Pads.push_back(p); //fill first element
+  //    continue; //go to the next
+  //  }
+  //  auto & last_valid_pad = Pads.back();
+  //  if( p == last_valid_pad)
+  //  {
+  //    last_valid_pad.charge += p.charge;
+  //    last_valid_pad.tracks.merge(p.tracks);
+  //  }
+  //  else
+  //  {
+  //    Pads.push_back(p);
+  //  }
+  //}
+
+  //if(fPads.size() != Pads.size())
+  //{ 
+  //cout << " Pads old size = " << fPads.size() <<  "  new size = " << Pads.size() << endl;
+  //}
+   
+
   Revent.npad = fPads.size();
   Revent.pad.resize(fPads.size());
   int i=0;
