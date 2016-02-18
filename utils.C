@@ -242,6 +242,11 @@ inline  AsymmetryResult_t CalculateAsymmetry(TTree *t, const char * channel, TCu
   return ar;
 }
 
+double get_fhwm(TH1 *h)
+{
+	return 0;
+}
+
 void drift_comparison(const char * fn1, const char *fn2)
 {
   c = new TCanvas;
@@ -330,6 +335,7 @@ OcupancyResult_t DrawOccupancy(TTree *t, TCut cut=="")
   result.mean_error = error;
   return result;
 }
+
 #include <iomanip>
 void MassiveDrawOccupancy(const char * file_prefix="run")
 {
@@ -339,7 +345,7 @@ void MassiveDrawOccupancy(const char * file_prefix="run")
   //double mean_error[11];
   int N=11;
   string * Fi = new string[N];
-  OcupancyResult_t * Oc = new OcupancyResult_t[N]
+  OcupancyResult_t * Oc = new OcupancyResult_t[N];
   cout << setw(12) << "file" << setw(12) << "occupancy" << setw(12) << "spread" << setw(12) << "mean_error" << endl;
   for(int i=0;i<N;i++)
   {

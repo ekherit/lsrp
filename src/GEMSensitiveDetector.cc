@@ -103,7 +103,8 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {  
   // energy deposit
   G4double edep = aStep->GetTotalEnergyDeposit();
-  G4double charge = edep/(85.7*eV);
+  //G4double charge = edep/(85.7*eV);
+  G4double charge = edep/(26*eV);
   G4ThreeVector r = aStep->GetPostStepPoint()->GetPosition(); //hit position 
 
   //if (edep==0.) return false;
