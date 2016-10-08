@@ -6,7 +6,7 @@
 name := lsrp
 G4TARGET := $(name)
 G4EXLIB := true
-CPPFLAGS := -std=c++11 `root-config --cflags` -I./  -I$(WORKDIR)
+CPPFLAGS := -fPIC -std=c++11 `root-config --cflags` -I./  -I$(WORKDIR)
 LDFLAGS :=  `root-config --libs`  \
 			-lboost_program_options \
 		#	-lMinuit  \
@@ -15,14 +15,30 @@ ifndef G4INSTALL
   G4INSTALL = ../../../..
 endif
 
-.PHONY: all
-all: RootEventDict.cc lib bin 
 
-RootEventDict.cc :
-			rootcint  -f src/RootEventDict.cc  -c  -I$(G4INCLUDE)  -p include/RootEvent.hh  include/RootLinkDef.hh 
+.PHONY: all
+
+TARGET = RootEvent
+
+all: lib$(TARGET).so lib bin 
+
+
+lib$(TARGET).so : $(TARGET).o $(TARGET)Dict.o
+		g++ -o $@ -shared -fPIC  $^ $(LDFLAGS) 
+
+$(TARGET).o : src/$(TARGET).cc
+		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
+
+$(TARGET)Dict.o : src/$(TARGET)Dict.cc
+		g++ -o $@ -I/$(G4INCLUDE) $(CPPFLAGS)  -c $< 
+
+src/$(TARGET)Dict.cc : include/$(TARGET).hh include/$(TARGET)LinkDef.hh
+		rootcint -f $@ -I$(G4INCLUDE) -c $^
+
+
 
 myclean :
-			rm -rf dict.* $(G4TMP)/$(G4SYSTEM)/lsrp
+			rm -rf dict.* $(G4TMP)/$(G4SYSTEM)/lsrp *.o *.so src/$(TARGET)Dict.cc src/*.pcm
 
 include $(G4INSTALL)/config/binmake.gmk
 

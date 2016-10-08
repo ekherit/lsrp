@@ -7,9 +7,27 @@
 #/hits/verbose 0
 /tracking/verbose 0
 /hits/verbose 0
-#/slrp/det/setField 100 tesla
-/lsrp/RootFile tmp2.root
-/run/beamOn 10
+#/random/setSeeds 1 2
 
-/lsrp/RootFile tmp3.root
-/run/beamOn 5
+
+#/lsrp/RootFile f2kHz_300sec_l2mm_100mkJ_12mmPb.root
+/lsrp/RootFile tmp.root
+/lsrp/PhotonFlightLength 42 m
+/lsrp/beam/Energy  4.100 GeV
+/lsrp/beam/SigmaY  20 mkrad
+/lsrp/beam/SigmaX  100 mkrad
+/lsrp/beam/Current 5.0 milliampere
+
+/lsrp/laser/WaveLength 0.527 micrometer
+/lsrp/laser/Frequency 2 kHz
+/lsrp/laser/PulseEnergy 100 mkJ
+/lsrp/laser/PulseTime 6  nanosecond
+
+/lsrp/det/PresamplerWidth 12 mm
+/lsrp/det/PsmGemLength 2 mm
+/lsrp/det/pad/SizeX 1 mm
+/lsrp/det/pad/SizeY 1 mm
+/lsrp/det/pad/HighSensWidthX 1000 mm
+/lsrp/det/pad/HighSensWidthY 1000 mm
+
+/run/beamOn 1000
