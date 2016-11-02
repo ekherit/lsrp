@@ -8,3 +8,5 @@ run.mac
 nohup.out
 *.wrl
 
+*.o
+*.so
