@@ -57,7 +57,7 @@
 
 //#include "G4ios.hh"
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//------------------------------------------------------------------------- 
 
 DetectorConstruction * DetectorConstruction::fgInstance = 0;
 
@@ -81,7 +81,7 @@ DetectorConstruction::DetectorConstruction()
   fgInstance = this;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//------------------------------------------------------------------------- 
  
 DetectorConstruction::~DetectorConstruction()
 {
@@ -91,7 +91,7 @@ DetectorConstruction::~DetectorConstruction()
   delete fMessenger;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//------------------------------------------------------------------------- 
  
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
@@ -102,7 +102,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   return DefineVolumes();
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//------------------------------------------------------------------------- 
 
 void DetectorConstruction::DefineMaterials()
 {
@@ -125,8 +125,7 @@ void DetectorConstruction::DefineMaterials()
   G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+//------------------------------------------------------------------------- 
 
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
@@ -134,13 +133,12 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   fPsmGemLength = Cfg.psm_gem_length * mm; //distance between presampler and gem
   G4double psm_radius = Cfg.psm_size*mm / 2.0; //Radius of the presampler
   G4double world_size_xy = 2 * psm_radius * 1.2;
-  G4double world_size_z = 50 * m;
+  G4double world_size_z = 47 * m;
   G4double air_length = 23 * m;
   G4double vacuum_chamber_size_z = 20 * m;
   G4double vacuum_chamber_size_xy = world_size_xy * 0.9;
-  G4double vacuum_chamber_wall_width = 0.5 * mm; 
-  G4double vacuum_wall_size_xy = vacuum_chamber_size_xy + vacuum_chamber_wall_width * 2.0;
-  G4double vacuum_wall_size_z = vacuum_chamber_size_z + vacuum_chamber_wall_width * 2.0;
+  G4double vacuum_wall_size_xy = vacuum_chamber_size_xy;
+  G4double vacuum_wall_size_z = 0.5 * mm;
   fAirSensWidth = 1 * mm;
   G4double mirror_size_xy = 20 * cm;
   G4double mirror_size_z = 0.5 * cm; 
@@ -148,9 +146,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size_z);
 
   GEM.reset(new GEMDetector);
-  //G4ThreeVector anchor_point = G4ThreeVector(0, 0, 0);
   
-  //G4ThreeVector psm_position = G4ThreeVector(0,0,+fPresamplerWidth/2.0+presampler_front_position);
   //G4ThreeVector gem_position = G4ThreeVector(0,0,presampler_front_position+fPresamplerWidth+psm_gem_length+GEM->GetWidth()/2.0);
   G4ThreeVector psm_position = G4ThreeVector(0, 0, -fPsmGemLength-fPresamplerWidth/2.0 + air_length);
   G4ThreeVector airsens_position = G4ThreeVector(0,0,-fPsmGemLength -fPresamplerWidth - fAirSensWidth/2.0 + air_length);
@@ -161,8 +157,11 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   G4cout << "fPsmGemLength=" << fPsmGemLength/mm << "mm,   psm.z = " << psm_position.z()/mm  << " mm"<< G4endl;
 
   //presampler_front_position=-psm_gem_length-fPresamplerWidth;
-
+  
+  //------------------------------------------------------------------------- 
   // World
+  //-------------------------------------------------------------------------
+  
   G4Material* air  = G4Material::GetMaterial("G4_AIR");
   G4cout << "Computed tolerance = "
     << G4GeometryTolerance::GetInstance()->GetSurfaceTolerance()/mm
@@ -192,10 +191,12 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     0,               // copy number
     fCheckOverlaps   // checking overlaps 
   ); 
-    
+
+  //-------------------------------------------------------------------------  
   // Vacuum chamber
-  
-  G4NistManager* nistManager = G4NistManager::Instance();    // ????????????? Почему менеджер вынесен отдельно? 
+  //------------------------------------------------------------------------- 
+
+  G4NistManager* nistManager = G4NistManager::Instance();
   G4Material* vacuum_mat = nistManager->FindOrBuildMaterial("G4_Galactic");
 
   G4Box* vacuum_chamber_solid = new G4Box(
@@ -220,10 +221,12 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     false,                             //no boolean operation
     0,                                 //copy number
     fCheckOverlaps                     //overlaps checking
-  );      
-  
+  );
+
+  //------------------------------------------------------------------------- 
   // Vacuum chamber wall
-  /*
+  //------------------------------------------------------------------------- 
+
   G4Material* vacuum_wall_mat = nistManager->FindOrBuildMaterial("G4_STAINLESS-STEEL");
   
   G4Box* vacuum_wall_solid = new G4Box(
@@ -237,41 +240,42 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     vacuum_wall_solid,
     vacuum_wall_mat, 
     "Vacuum_wall"
-    );             
-               
+    );
+         
   new G4PVPlacement(
     0,                                 //no rotation
-    vacuum_chamber_position,           //at position
+    G4ThreeVector(),                   //at position
     vacuum_wall_logic,                 //its logical volume
     "Vacuum_wall",                     //its name
     worldLV,                           //its mother  volume
     false,                             //no boolean operation
     0,                                 //copy number
     fCheckOverlaps                     //overlaps checking
-  );  */            
-   
+  );
+  
+  //------------------------------------------------------------------------- 
   // Mirror
-
+  //-------------------------------------------------------------------------
+  
   G4String name, symbol;             // a=mass of a mole;
   G4double a, z, density;            // z=mean number of protons;  
   G4int ncomponents, natoms; 
   
   a = 28.09*g/mole;  
-  G4Element* elSi = new G4Element(name="Silicon", symbol="Si", z=14., a);  // создание Si
+  G4Element* elSi = new G4Element(name="Silicon", symbol="Si", z=14., a);  // create Si
 
   a = 16.00*g/mole;
-  G4Element* elO  = new G4Element(name="Oxygen"  ,symbol="O" , z= 8., a);  // создание O
-
+  G4Element* elO  = new G4Element(name="Oxygen"  ,symbol="O" , z= 8., a);  // create O
 
   density = 2.200*g/cm3;
-  G4Material* SiO2 = new G4Material(name="quartz", density, ncomponents=2); // создание кварца
+  G4Material* SiO2 = new G4Material(name="quartz", density, ncomponents=2); // create quartz
   SiO2->AddElement(elSi, natoms=1);
   SiO2->AddElement(elO , natoms=2);
 
   G4Material* mirror_mat = nistManager->FindOrBuildMaterial("quartz");
   
-  G4RotationMatrix *rm = new G4RotationMatrix; // создание матрицы поворота
-  rm->rotateX(-45*deg);		// поворот      
+  G4RotationMatrix *rm = new G4RotationMatrix;
+  rm->rotateX(-45*deg);		// rotation      
   
   G4Box* mirror_solid = new G4Box(
     "mirror",
@@ -288,47 +292,78 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
                
   new G4PVPlacement(
     rm,
-    mirror_position,        //at position
-    mirror_logic,           //its logical volume
-    "Mirror",               //its name
-    worldLV,                //its mother  volume
-    false,                  //no boolean operation
-    0,                      //copy number
-    fCheckOverlaps          //overlaps checking  
-    );                                   
-
+    mirror_position,
+    mirror_logic,
+    "Mirror",
+    worldLV,
+    false,
+    0,
+    fCheckOverlaps
+  );          
+                             
+  //-------------------------------------------------------------------------
   // Presampler
-  G4Tubs* psm_solid = new G4Tubs("presampler",0.,psm_radius,fPresamplerWidth/2,0.*deg,360.*deg);
-  fLogicPresampler = new G4LogicalVolume(psm_solid, fPresamplerMaterial,"Presampler",0,0,0);
-  fPresampler = new G4PVPlacement(0,               // no rotation
-      psm_position,  // at (x,y,z)
-      fLogicPresampler,    // its logical volume
-      "Presampler",        // its name
-      worldLV,         // its mother volume
-      false,           // no boolean operations
-      10,               // copy number
-      fCheckOverlaps); // checking overlaps 
+  //-------------------------------------------------------------------------
+
+  G4Tubs* psm_solid = new G4Tubs(
+    "presampler", 
+    0.,
+    psm_radius,
+    fPresamplerWidth / 2.,
+    0.*deg, 360.*deg
+  );
+  
+  fLogicPresampler = new G4LogicalVolume(
+    psm_solid,
+    fPresamplerMaterial,
+    "Presampler", 
+    0, 0, 0
+  );
+  
+  fPresampler = new G4PVPlacement(
+    0,
+    psm_position,
+    fLogicPresampler,
+    "Presampler",
+    worldLV,
+    false,
+    10,
+    fCheckOverlaps
+  );
+  
+  //-------------------------------------------------------------------------
+  // AirSens
+  //-------------------------------------------------------------------------
 
   G4Tubs* AirSensSolid = new G4Tubs("AirSens",0.,psm_radius,fAirSensWidth/2.0,0.*deg,360.*deg);
   fLogicAirSens = new G4LogicalVolume(AirSensSolid,air ,"AirSens",0,0,0);
-  fAirSens = new G4PVPlacement(0,               // no rotation
-      airsens_position,  // at (x,y,z)
-      fLogicAirSens,    // its logical volume
-      "AirSens",        // its name
-      worldLV,         // its mother volume
-      false,           // no boolean operations
-      666,               // copy number
-      fCheckOverlaps); // checking overlaps 
+  fAirSens = new G4PVPlacement(
+    0,
+    airsens_position,
+    fLogicAirSens,
+    "AirSens",
+    worldLV,
+    false,
+    666,
+    fCheckOverlaps
+  );
+  
+  //-------------------------------------------------------------------------
+  // GEM
+  //-------------------------------------------------------------------------
 
-
-  fGem = new G4PVPlacement(0,               // no rotation
-                    gem_position, // at (x,y,z)
-                    GEM->GetLogicalVolume(),       // its logical volume
-                    "GEM",       // its name
-                    worldLV,         // its mother  volume
-                    false,           // no boolean operations
-                    0,               // copy number
-                    fCheckOverlaps); // checking overlaps 
+  fGem = new G4PVPlacement(
+    0,
+    gem_position,
+    GEM->GetLogicalVolume(),
+    "GEM",
+    worldLV,
+    false,
+    0,
+    fCheckOverlaps
+  );
+      
+  //------------------------------------------------------------------------- 
 
   fPadZPosition = GEM->GetPadZ() + gem_position.z();
   // Visualization attributes
@@ -358,21 +393,15 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   return worldPV;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void DetectorConstruction::SetMaxStep(G4double maxStep)
 {
   if ((fStepLimit)&&(maxStep>0.)) fStepLimit->SetMaxAllowedStep(maxStep);
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void DetectorConstruction::SetCheckOverlaps(G4bool checkOverlaps)
 {
   fCheckOverlaps = checkOverlaps;
 }  
-
-
 
 void DetectorConstruction::SetPresamplerWidth(G4double width)
 {

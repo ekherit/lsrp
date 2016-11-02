@@ -256,7 +256,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
     //fCompton->kx =fabs(fCompton->kx);
     //calculate position
-    G4double z = -16 * m;    //DetectorConstruction::Instance()->GetFrontZ();
+    G4double z = -19.5 * m;    //DetectorConstruction::Instance()->GetFrontZ();
     G4double x = 0;          //fCompton->kx/fCompton->kz*(fFlightLength+z);
     G4double y = 0;          //fCompton->ky/fCompton->kz*(fFlightLength+z);
 
