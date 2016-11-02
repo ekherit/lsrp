@@ -6,4 +6,5 @@ src/*Dict.h
 *.pdf
 run.mac
 nohup.out
+*.wrl
 
