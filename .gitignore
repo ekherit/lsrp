@@ -10,3 +10,4 @@ nohup.out
 
 *.o
 *.so
+*.macro
