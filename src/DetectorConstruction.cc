@@ -141,7 +141,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   G4double vacuum_wall_size_z = 0.5 * mm;
   fAirSensWidth = 1 * mm;
   G4double mirror_size_xy = 20 * cm;
-  G4double mirror_size_z = 0.5 * cm; 
+  G4double mirror_size_z;
   
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size_z);
 
@@ -255,24 +255,41 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   
   //------------------------------------------------------------------------- 
   // Mirror
+  // SiO2 or Cu
   //-------------------------------------------------------------------------
   
-  G4String name, symbol;             // a=mass of a mole;
-  G4double a, z, density;            // z=mean number of protons;  
-  G4int ncomponents, natoms; 
+  int mirror_type = 1; // 1 - SiO2 , 2 - Cu
+  G4Material* mirror_mat;
   
-  a = 28.09*g/mole;  
-  G4Element* elSi = new G4Element(name="Silicon", symbol="Si", z=14., a);  // create Si
+  switch(mirror_type)
+  {
+    case 1:
+    {
+      mirror_size_z = 0.5 * cm;
+      
+      G4String name, symbol;             // a=mass of a mole;
+      G4double a, z, density;            // z=mean number of protons;  
+      G4int ncomponents, natoms; 
+  
+      a = 28.09*g/mole;  
+      G4Element* elSi = new G4Element(name="Silicon", symbol="Si", z=14., a);  // create Si
 
-  a = 16.00*g/mole;
-  G4Element* elO  = new G4Element(name="Oxygen"  ,symbol="O" , z= 8., a);  // create O
+      a = 16.00*g/mole;
+      G4Element* elO  = new G4Element(name="Oxygen"  ,symbol="O" , z= 8., a);  // create O
 
-  density = 2.200*g/cm3;
-  G4Material* SiO2 = new G4Material(name="quartz", density, ncomponents=2); // create quartz
-  SiO2->AddElement(elSi, natoms=1);
-  SiO2->AddElement(elO , natoms=2);
+      density = 2.200*g/cm3;
+      G4Material* SiO2 = new G4Material(name="quartz", density, ncomponents=2); // create quartz
+      SiO2->AddElement(elSi, natoms=1);
+      SiO2->AddElement(elO , natoms=2);
 
-  G4Material* mirror_mat = nistManager->FindOrBuildMaterial("quartz");
+      mirror_mat = nistManager->FindOrBuildMaterial("quartz");
+    } break;
+    case 2:
+    {
+      mirror_size_z = 1 * cm; 
+      mirror_mat = nistManager->FindOrBuildMaterial("G4_Cu");
+    } break;
+  }
   
   G4RotationMatrix *rm = new G4RotationMatrix;
   rm->rotateX(-45*deg);		// rotation      
