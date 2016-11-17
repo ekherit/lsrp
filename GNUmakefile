@@ -33,12 +33,12 @@ $(TARGET)Dict.o : src/$(TARGET)Dict.cc
 		g++ -o $@ -I/$(G4INCLUDE) $(CPPFLAGS)  -c $< 
 
 src/$(TARGET)Dict.cc : include/$(TARGET).hh include/$(TARGET)LinkDef.hh
-		rootcint -f $@ -I$(G4INCLUDE) -c $^
+		rootcling -f $@ -I$(G4INCLUDE) -c $^
 
 
 
 myclean :
-			rm -rf dict.* $(G4TMP)/$(G4SYSTEM)/lsrp *.o *.so src/$(TARGET)Dict.cc src/*.pcm
+			rm -rf dict.* $(G4TMP)/$(G4SYSTEM)/lsrp *.o *.so src/$(TARGET)Dict.cc src/*.pcm   *.pcm
 
 include $(G4INSTALL)/config/binmake.gmk
 

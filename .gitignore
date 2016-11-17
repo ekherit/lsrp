@@ -7,6 +7,7 @@ src/*Dict.h
 run.mac
 nohup.out
 *.wrl
+*.pcm
 
 *.o
 *.so

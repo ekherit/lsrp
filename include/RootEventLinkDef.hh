@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 
-#ifdef __CINT__
+#ifdef __CLING__
 #pragma link C++ class RootEvent+;
 #pragma link C++ class GeneratorEvent+;
 #pragma link C++ class HitEvent+;
