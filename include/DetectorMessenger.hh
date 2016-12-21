@@ -91,6 +91,7 @@ class DetectorMessenger: public G4UImessenger
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserPulseTimeCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserFrequencyCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPhotonFlightLengthCmd;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fAirLengthCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

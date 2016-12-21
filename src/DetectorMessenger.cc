@@ -189,6 +189,13 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fPhotonFlightLengthCmd->SetParameterName("PhotonFlightLength",false);
   fPhotonFlightLengthCmd->SetUnitCategory("Length");
   fPhotonFlightLengthCmd->AvailableForStates(G4State_Idle);
+  
+  
+  fAirLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/AirLength", this));
+  fAirLengthCmd->SetGuidance("Length of the air");
+  fAirLengthCmd->SetParameterName("AirLength", false);
+  fAirLengthCmd->SetUnitCategory("Length");
+  fAirLengthCmd->AvailableForStates(G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -295,6 +302,11 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command == fPhotonFlightLengthCmd.get())
   {
     Cfg.photon_flight_length = fPhotonFlightLengthCmd->GetNewDoubleValue(newValue);
+  }
+  
+  if( command == fAirLengthCmd.get())
+  {
+    Cfg.air_length = fAirLengthCmd->GetNewDoubleValue(newValue);
   }
 }
 

@@ -60,6 +60,7 @@ struct Config_t
 	double pad_high_sens_ywidth=20;
 	double pad_rough_xscale=2;
 	double pad_rough_yscale=2;
+	double air_length;
 
 	struct 
 	{
