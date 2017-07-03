@@ -67,22 +67,6 @@ int main(int argc,char** argv)
   namespace po=boost::program_options;
   po::options_description opt_desc("Allowed options");
   opt_desc.add_options()
-    ("psm_width", po::value<double>(&Cfg.psm_width)->default_value(5.6), "Presampler width, mm")
-    ("psm_size", po::value<double>(&Cfg.psm_size)->default_value(500), "Presampler size, mm")
-    ("gem_width", po::value<double>(&Cfg.gem_width)->default_value(0.3), "GEM width, cm")
-    ("psm_gem_length", po::value<double>(&Cfg.psm_gem_length)->default_value(1.0), "Distance between presampler and GEM, in mm")
-    ("pad_size", po::value<double>(&Cfg.pad_size), "hexagonal pad size, mm")
-    ("pad_xsize", po::value<double>(&Cfg.pad_xsize), "hexagonal pad x size, mm")
-    ("pad_ysize", po::value<double>(&Cfg.pad_ysize), "hexagonal pad y size, mm")
-    ("gem_size", po::value<double>(&Cfg.gem_size)->default_value(200), "gem size, mm")
-    ("gem_amplification", po::value<double>(&Cfg.gem_amplification)->default_value(1e4), "GEM amplificiation")
-    ("gem_cascade_number", po::value<unsigned>(&Cfg.gem_cascade_number)->default_value(3), "Number of amplificiation cascades")
-    ("photon_number", po::value<unsigned>(&Cfg.photon_number), "Number of photons per pulse")
-    ("photon_flight_length", po::value<double>(&Cfg.photon_flight_length), "Photon flight length in mm")
-    ("output", po::value<std::string>(&Cfg.output_file)->default_value("tmp.root"), "Output file name")
-    ("test_beam", po::value<unsigned>(&Cfg.test_beam)->default_value(0), "Test electron beam")
-    ("drift_spread", po::value<unsigned>(&Cfg.drift_spread)->default_value(1), "Drift spread on")
-    ("seed", po::value<unsigned long>(&Cfg.seed)->default_value(time(0)), "Random seed number")
     ("help", "Print this help")
     ;
   po::positional_options_description pos;
@@ -99,17 +83,6 @@ int main(int argc,char** argv)
     {
       std::clog << opt_desc;
       return 0;
-    }
-    cout << "psm_width="      <<  Cfg.psm_width << endl;
-    cout << "gem_width="      <<  Cfg.gem_width << endl;
-    cout << "psm_gem_length=" <<  Cfg.psm_gem_length << endl;
-    cout << "pad_size="       <<  Cfg.pad_size << endl;
-    cout << "photon_number="  <<  Cfg.photon_number << endl;
-    if(opt.count("pad_size"))
-    {
-      Cfg.pad_size = opt["pad_size"].as<double>();
-      Cfg.pad_xsize = Cfg.pad_size*mm;
-      Cfg.pad_ysize = Cfg.pad_size*mm;
     }
   } 
   catch (boost::program_options::unknown_option & o)

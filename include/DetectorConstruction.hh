@@ -36,8 +36,9 @@
 
 #include <memory>
 
-class G4VPhysicalVolume;
 class G4LogicalVolume;
+class G4VSolid;
+class G4VPhysicalVolume;
 class G4Material;
 class G4UserLimits;
 
@@ -65,10 +66,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     // Set methods
     void SetMaxStep (G4double );
     void SetCheckOverlaps(G4bool );
-    void SetPresamplerWidth(G4double);
-    void SetPsmGemLength(G4double);
-    void SetPresamplerGeometry(G4double width,G4double distance);
-
+    void UpdateGeometry(void);
+    void CalculateGeometry(void);
     static DetectorConstruction * Instance();
 
     //G4double presampler_front_position;
@@ -85,19 +84,32 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     //std::unique_ptr<GEMSensitiveDetector> fGEMSensitiveDetector;
     GEMSensitiveDetector * fGEMSensitiveDetector;
 
-    G4LogicalVolume* worldLV;
+    //G4LogicalVolume* worldLV;
+    
+    struct VolumeItem_t
+    {
+        int shape;
+        std::shared_ptr<G4VSolid> solid;
+        std::shared_ptr<G4LogicalVolume> logic;
+        std::shared_ptr<G4VPhysicalVolume> phys;
+        void update_geometry(double size_x, double size_y, double size_z, G4ThreeVector pos);
+    };
 
-    G4LogicalVolume*    fLogicPresampler;
-    G4VPhysicalVolume*  fPresampler; //physical volume of the presampler
-    G4Material*         fPresamplerMaterial;  // pointer to the target  material
+    std::map<std::string, VolumeItem_t> fVol; //list of all volumes
 
-    G4LogicalVolume*    fLogicAirSens;
-    G4VPhysicalVolume*  fAirSens; //physical volume of the presampler
+    G4Material *     fConverterMaterial;
+
+    //G4LogicalVolume*    fLogicConverter;
+    //G4VPhysicalVolume*  fConverter; //physical volume of the presampler
+
+    //G4LogicalVolume*    fLogicAirSens;
+    //G4VPhysicalVolume*  fAirSens; //physical volume of the presampler
 
     G4UserLimits* fStepLimit;            // pointer to user step limits
 
     DetectorMessenger*  fMessenger;   // messenger
     MagneticField*      fMagField;     // magnetic field
+
     
     G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps 
     static DetectorConstruction * fgInstance;
@@ -107,6 +119,31 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double fPsmGemLength;
     G4double fPadZPosition; //Z position of pad plate
 
+    G4double fVacuumChamberLength; 
+
+    //new infrastructure
+    G4ThreeVector fGEMPosition;
+    G4ThreeVector fConverterPosition;
+    G4ThreeVector fFlangePosition;
+    G4ThreeVector fMirrorPosition;
+    G4ThreeVector fVacuumChamberPosition;
+    G4ThreeVector fInteractionPointPosition;
+    G4ThreeVector fSensBeforeConverterPosition;
+
+
+  private:
+    enum { BOX, TUBE};
+    void MakeVolume(
+            std::string name, 
+            G4Material * material,
+            int shape,
+            double size_x, 
+            double size_y, 
+            double size_z, 
+            std::string mother_name = "",
+            G4ThreeVector position = {0,0,0},
+            G4RotationMatrix * rotation_matrix = nullptr,
+            int copy_number = 0);
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

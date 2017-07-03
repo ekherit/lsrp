@@ -39,17 +39,35 @@ const G4double mkrad = 1e-6*radian;
 struct Config_t
 {
 	unsigned photon_number=0; //number of photons in one pulse
-	double photon_flight_length=25*m; //Photon flight length in mm
+
 	//geometry
-	double psm_width; //presampler width in cm
-	double psm_size;  //size of the presampler
-	double psm_gem_length; //distance between presampler and gem
-	double gem_width; //gem width
-	double gem_size; //size of the gem in mm
+    double world_size_x = 1*m;
+    double world_size_y = 1*m;
+    double world_size_z = 100*m;
+    double gem_world_distance = 10*cm; //the position of GEM from right (z>0) edge of the world
+	double gem_width; //gem width  will calculated from GEM
+	double gem_size_x=50*cm; //xy size of the gem in mm 
+	double gem_size_y=50*cm; //xy size of the gem in mm 
+	double converter_gem_distance=3*mm; //distance between converter and GEM detector
+	double converter_width=12*mm; //presampler width in mm
+	double converter_size=50*cm;  //size of the presampler
+	//double air_length = 15*m; //air length from gem detector to flange
+    double flange_gem_distance = 19*m; //distance between vacuum chamber flange and detector
+    double flange_width = 1*mm; //flange width
+    double mirror_flange_distance = 1*m; //mirror flange distance
+    double mirror_width = 4*mm; //the vacuum mirrror width
+    double mirror_size_x = 10*cm; //The mirror size x
+    double mirror_size_y = 10*cm; //The mirror size y
+	double photon_flight_length=25*m; //Photon flight length in mm
+    double vacuum_chamber_size = 10*cm; 
+
+    double sens_before_converter_width = 1*mm;
+
+
 	double gem_amplification;  //1e4
-	double pad_size;  //size of signe pad in mm
-	double pad_xsize;  //x size of signe pad in mm
-	double pad_ysize;  //y size of signe pad in mm
+	double pad_size = 1*mm;  //size of signe pad in mm
+	double pad_xsize = 1*mm;  //x size of signe pad in mm
+	double pad_ysize = 1*mm;  //y size of signe pad in mm
 	unsigned gem_cascade_number; //number of amplification cascades 3
 	std::string output_file; //output file name
 	unsigned test_beam;
@@ -60,7 +78,6 @@ struct Config_t
 	double pad_high_sens_ywidth=20;
 	double pad_rough_xscale=2;
 	double pad_rough_yscale=2;
-	double air_length;
 
 	struct 
 	{

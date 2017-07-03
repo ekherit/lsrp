@@ -33,7 +33,7 @@ GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double 
   Cu     = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
   G4Tubs * KaptonSV = new G4Tubs("Kapton",0,fRadius, fWidth/2.,0.*deg,360.*deg);
   G4Tubs * CuprumSV = new G4Tubs("Cuprum",0,fRadius, fCuprumWidth/2.,0.*deg,360.*deg);
-  //define logical volume for kopton
+  //define logical volume for kapton
   LV.reset(new G4LogicalVolume(KaptonSV, kapton,"Kapton"));
   //define cuprum
   G4LogicalVolume * CuprumLV = new G4LogicalVolume(CuprumSV,Cu,"Cuprum");
@@ -86,8 +86,8 @@ G4Material * StefMaterial(void)
 GEMDetector::GEMDetector(void)
 {
   //describe main size
-  fSizeX = Cfg.gem_size*mm;
-  fSizeY = Cfg.gem_size*mm;
+  fSizeX = Cfg.gem_size_x;
+  fSizeY = Cfg.gem_size_y;
   fRadius = std::max(fSizeX, fSizeY)/2.0;
   fStefWidth=1.5*mm;
   fDriftLength = 3*mm;

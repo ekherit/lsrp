@@ -23,11 +23,11 @@
 /lsrp/laser/PulseEnergy 100 mkJ
 /lsrp/laser/PulseTime 6  nanosecond
 
-/lsrp/det/PresamplerWidth 12 mm
-/lsrp/det/PsmGemLength 2 mm
+/lsrp/ConverterWidth 12 mm
+/lsrp/ConverterGEMDistance 2 mm
 /lsrp/det/pad/SizeX 1 mm
 /lsrp/det/pad/SizeY 1 mm
 /lsrp/det/pad/HighSensWidthX 1000 mm
 /lsrp/det/pad/HighSensWidthY 1000 mm
 
-/run/beamOn 1000
+/run/beamOn 50000

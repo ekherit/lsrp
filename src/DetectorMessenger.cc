@@ -81,17 +81,17 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fRootFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 
-  fPresamplerWidthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/PresamplerWidth",this));
-  fPresamplerWidthCmd->SetGuidance("Define a width of the presampler");
-  fPresamplerWidthCmd->SetParameterName("presamplerWidth",false);
-  fPresamplerWidthCmd->SetUnitCategory("Length");
-  fPresamplerWidthCmd->AvailableForStates(G4State_Idle);
+  //fPresamplerWidthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/PresamplerWidth",this));
+  //fPresamplerWidthCmd->SetGuidance("Define a width of the presampler");
+  //fPresamplerWidthCmd->SetParameterName("presamplerWidth",false);
+  //fPresamplerWidthCmd->SetUnitCategory("Length");
+  //fPresamplerWidthCmd->AvailableForStates(G4State_Idle);
 
-  fPsmGemLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/PsmGemLength",this));
-  fPsmGemLengthCmd->SetGuidance("Define distance betwee presampler and gem");
-  fPsmGemLengthCmd->SetParameterName("PsmGemLength",false);
-  fPsmGemLengthCmd->SetUnitCategory("Length");
-  fPsmGemLengthCmd->AvailableForStates(G4State_Idle);
+  //fPsmGemLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/PsmGemLength",this));
+  //fPsmGemLengthCmd->SetGuidance("Define distance betwee presampler and gem");
+  //fPsmGemLengthCmd->SetParameterName("PsmGemLength",false);
+  //fPsmGemLengthCmd->SetUnitCategory("Length");
+  //fPsmGemLengthCmd->AvailableForStates(G4State_Idle);
 
   fPadSizeCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/det/pad/Size",this));
   fPadSizeCmd->SetGuidance("Size of the hexagonal pad");
@@ -184,18 +184,49 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fLaserFrequencyCmd->AvailableForStates(G4State_Idle);
 
 
-  fPhotonFlightLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PhotonFlightLength",this));
-  fPhotonFlightLengthCmd->SetGuidance("Photon flight length");
-  fPhotonFlightLengthCmd->SetParameterName("PhotonFlightLength",false);
-  fPhotonFlightLengthCmd->SetUnitCategory("Length");
-  fPhotonFlightLengthCmd->AvailableForStates(G4State_Idle);
+  //fPhotonFlightLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/PhotonFlightLength",this));
+  //fPhotonFlightLengthCmd->SetGuidance("Photon flight length");
+  //fPhotonFlightLengthCmd->SetParameterName("PhotonFlightLength",false);
+  //fPhotonFlightLengthCmd->SetUnitCategory("Length");
+  //fPhotonFlightLengthCmd->AvailableForStates(G4State_Idle);
   
   
-  fAirLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/AirLength", this));
-  fAirLengthCmd->SetGuidance("Length of the air");
-  fAirLengthCmd->SetParameterName("AirLength", false);
-  fAirLengthCmd->SetUnitCategory("Length");
-  fAirLengthCmd->AvailableForStates(G4State_Idle);
+  //fAirLengthCmd.reset(new G4UIcmdWithADoubleAndUnit("/lsrp/AirLength", this));
+  //fAirLengthCmd->SetGuidance("Length of the air");
+  //fAirLengthCmd->SetParameterName("AirLength", false);
+  //fAirLengthCmd->SetUnitCategory("Length");
+  //fAirLengthCmd->AvailableForStates(G4State_Idle);
+
+
+
+
+  auto setCmd  = [this](auto & CmdPtr, double & par, std::string dir, std::string title, std::string name, std::string unit)
+  {
+      CmdPtr.reset(new G4UIcmdWithADoubleAndUnit((dir+"/"+name).c_str(), this));
+      CmdPtr->SetGuidance(title.c_str());
+      CmdPtr->SetParameterName(name.c_str(), false);
+      CmdPtr->SetUnitCategory(unit.c_str());
+      CmdPtr->AvailableForStates(G4State_Idle);
+      fMap[static_cast<G4UIcommand*>(CmdPtr.get())] = & par;
+  };
+
+  setCmd(fWorldSizeX,Cfg.world_size_x, "/lsrp/GEM","GEM size x", "SizeX","Length");
+  setCmd(fWorldSizeX,Cfg.world_size_x, "/lsrp/GEM","GEM size y", "SizeY","Length");
+  setCmd(fWorldSizeX,Cfg.world_size_x, "/lsrp","World size x", "WorldSizeX","Length");
+  setCmd(fWorldSizeY,Cfg.world_size_y, "/lsrp","World size y", "WorldSizeY","Length");
+  setCmd(fWorldSizeZ,Cfg.world_size_z, "/lsrp","World size z", "WorldSizeZ","Length");
+  setCmd(fGEMWorldDistance, Cfg.gem_world_distance, "/lsrp","GEM-world distance", "GEMWorldDistance","Length");
+  setCmd(fConverterWidth,Cfg.converter_width, "/lsrp","Converter width", "ConverterWidth","Length");
+  setCmd(fConverterGEMDistance,Cfg.converter_gem_distance, "/lsrp","Converter - GEM distance", "ConverterGEMDistance","Length");
+  setCmd(fConverterSize,Cfg.converter_size, "/lsrp","Converter size (x,y)", "ConverterSize","Length");
+  setCmd(fFlangeGEMDistance, Cfg.flange_gem_distance, "/lsrp","The distance from flange to GEM detector", "FlangeGEMDistance","Length");
+  setCmd(fMirrorFlangeDistance, Cfg.mirror_flange_distance, "/lsrp","Mirror - flange distance", "MirrorFlangeDistance","Length");
+  setCmd(fMirrorWidth, Cfg.mirror_width, "/lsrp","Mirror width", "MirrorWidth","Length");
+  setCmd(fMirrorSizeX, Cfg.mirror_size_x, "/lsrp","Mirror size x", "MirrorSizeX","Length");
+  setCmd(fMirrorSizeY, Cfg.mirror_size_y, "/lsrp","Mirror size y", "MirrorSizeY","Length");
+  setCmd(fPhotonFlightLength, Cfg.photon_flight_length, "/lsrp","Photon Flight length", "PhotonFlightLength","Length");
+  setCmd(fVacuumChamberSize, Cfg.vacuum_chamber_size, "/lsrp","Vacuum chamber size", "VacuumChamberSize","Length");
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -206,21 +237,35 @@ DetectorMessenger::~DetectorMessenger() { }
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 {
+  try
+  {
+    std::cout << command << " " << newValue << std::endl;
+    auto p = fMap.find(command);
+    if (  p!=fMap.end() ) 
+    {
+        std::cout << "Found : " << std::endl;
+        *p->second = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
+        std::cout << p->first << " " << *p->second << std::endl;
+    }
+  }
+  catch(...)
+  {
+  }
 
   if( command == fStepMaxCmd.get() )
   {
     fDetectorConstruction->SetMaxStep(fStepMaxCmd->GetNewDoubleValue(newValue));
   }   
 
-  if( command == fPresamplerWidthCmd.get())
-  {
-    fDetectorConstruction->SetPresamplerWidth(fPresamplerWidthCmd->GetNewDoubleValue(newValue));
-  }   
+  //if( command == fPresamplerWidthCmd.get())
+  //{
+  //  fDetectorConstruction->SetPresamplerWidth(fPresamplerWidthCmd->GetNewDoubleValue(newValue));
+  //}   
 
-  if( command == fPsmGemLengthCmd.get())
-  {
-    fDetectorConstruction->SetPsmGemLength(fPsmGemLengthCmd->GetNewDoubleValue(newValue));
-  }   
+  //if( command == fPsmGemLengthCmd.get())
+  //{
+  //  fDetectorConstruction->SetPsmGemLength(fPsmGemLengthCmd->GetNewDoubleValue(newValue));
+  //}   
 
   if(command == fPhotonNumberCmd.get())
   {
@@ -299,15 +344,15 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
     Cfg.laser.frequency = fLaserFrequencyCmd->GetNewDoubleValue(newValue);
   }
 
-  if( command == fPhotonFlightLengthCmd.get())
-  {
-    Cfg.photon_flight_length = fPhotonFlightLengthCmd->GetNewDoubleValue(newValue);
-  }
+  //if( command == fPhotonFlightLengthCmd.get())
+  //{
+  //  Cfg.photon_flight_length = fPhotonFlightLengthCmd->GetNewDoubleValue(newValue);
+  //}
   
-  if( command == fAirLengthCmd.get())
-  {
-    Cfg.air_length = fAirLengthCmd->GetNewDoubleValue(newValue);
-  }
+  //if( command == fAirLengthCmd.get())
+  //{
+  //  Cfg.air_length = fAirLengthCmd->GetNewDoubleValue(newValue);
+  //}
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

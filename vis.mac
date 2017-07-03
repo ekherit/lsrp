@@ -55,40 +55,15 @@
 /vis/scene/add/line -0.5 0.5 0 0.5 -0.5 0 m 
 
 # Цвета 
-
-/vis/geometry/set/colour Vacuum_wall 1 green
-/vis/geometry/set/colour Mirror 1 yellow
-/vis/geometry/set/colour Vacuum_chamber 1 blue
-/vis/geometry/set/colour GEM 1 yellow
-/vis/geometry/set/colour AirSens 1 blue
-/vis/geometry/set/colour Presampler 1 red
+/vis/geometry/set/colour GEM       1 yellow
+/vis/geometry/set/colour Converter 1 red
+/vis/geometry/set/colour VacuumChamber 1 blue
+/vis/geometry/set/colour Flange    1 green
+/vis/geometry/set/colour Mirror    1 yellow
+/vis/geometry/set/colour SensBeforeConverter 1 blue
 
 # Грани
-
-/vis/geometry/set/forceAuxEdgeVisible Vacuum_chamber 0 true
-
-#------------------------------
-# Проверка геометрии
-
-/lsrp/RootFile tmp.root
-/lsrp/PhotonFlightLength 42 m
-/lsrp/AirLength 19 m
-/lsrp/beam/Energy  4.100 GeV
-/lsrp/beam/SigmaY  20 mkrad
-/lsrp/beam/SigmaX  100 mkrad
-/lsrp/beam/Current 5.0 milliampere
-
-/lsrp/laser/WaveLength 0.527 micrometer
-/lsrp/laser/Frequency 2 kHz
-/lsrp/laser/PulseEnergy 100 mkJ
-/lsrp/laser/PulseTime 6  nanosecond
-
-/lsrp/det/PresamplerWidth 12 mm
-/lsrp/det/PsmGemLength 2 mm  # Между свинцом и GEM
-/lsrp/det/pad/SizeX 1 mm
-/lsrp/det/pad/SizeY 1 mm
-/lsrp/det/pad/HighSensWidthX 1000 mm
-/lsrp/det/pad/HighSensWidthY 1000 mm
+/vis/geometry/set/forceAuxEdgeVisible VacuumChamber 0 true
 
 /run/beamOn 2
 

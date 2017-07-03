@@ -41,7 +41,7 @@ class GEMDetector
   G4double fTransferLength; //1.5 mm
   G4double fInductionLength; //induction length
   G4double fPadWidth;   //Pad width 15 mkm
-  G4double fGEMWidth;
+  G4double fGEMWidth;   //total GEM width calculated from other parameters
   G4double fPadZposition; // z position of the pad
   std::unique_ptr<G4LogicalVolume> LV;
   std::unique_ptr<G4LogicalVolume> fDriftVolume;

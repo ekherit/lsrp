@@ -85,8 +85,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
   auto RM = ROOTManager::Instance();
   auto & Revent = RM->event;
-  Revent.d=Cfg.psm_width;
-  Revent.l=Cfg.psm_gem_length;
+  Revent.d=Cfg.converter_width;
+  Revent.l=Cfg.converter_gem_distance;
   Revent.psx=Cfg.pad_xsize;
   Revent.psy=Cfg.pad_ysize;
   Revent.run=Cfg.run;
@@ -269,8 +269,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
       << Revent.npad << " pads stored in this event.";
     if(geometry_print_index % 10 ==0)
     {
-      G4cout << " ( Nphot=" << Revent.nphot << ", dPb=" << Cfg.psm_width/mm << " mm" 
-             << ", l="  << Cfg.psm_gem_length/mm<< " mm"
+      G4cout << " ( Nphot=" << Revent.nphot << ", dPb=" << Cfg.converter_width/mm << " mm" 
+             << ", l="  << Cfg.converter_gem_distance/mm<< " mm"
              << ", psx=" << Cfg.pad_xsize/mm << " mm, psy=" << Cfg.pad_ysize/mm << " mm )" ;
     }
     geometry_print_index++;

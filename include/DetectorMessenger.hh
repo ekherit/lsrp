@@ -73,11 +73,33 @@ class DetectorMessenger: public G4UImessenger
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fStepMaxCmd;
     std::unique_ptr<G4UIcmdWithAnInteger> fPhotonNumberCmd;
     std::unique_ptr<G4UIcmdWithAString>   fRootFileCmd;
-    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPresamplerWidthCmd;
-    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPsmGemLengthCmd;
+
+
+
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fGEMSizeX;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fGEMSizeY;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeXCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeYCmd;
+
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fWorldSizeX;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fWorldSizeY;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fWorldSizeZ;
+
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fGEMWorldDistance;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fConverterWidth;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fConverterGEMDistance;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fConverterSize;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fFlangeGEMDistance;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fMirrorFlangeDistance;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPhotonFlightLength;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fVacuumChamberSize;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fMirrorSizeX;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fMirrorSizeY;
+    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fMirrorWidth;
+
+
+
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fHighSensWidthXCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fHighSensWidthYCmd;
     std::unique_ptr<G4UIcmdWithADouble> fRoughScaleXCmd;
@@ -90,8 +112,9 @@ class DetectorMessenger: public G4UImessenger
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserPulseEnergyCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserPulseTimeCmd;
     std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserFrequencyCmd;
-    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPhotonFlightLengthCmd;
-    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fAirLengthCmd;
+
+    std::map<G4UIcommand*, double *> fMap; //id of the Cmd is connected with the variable disired to set
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

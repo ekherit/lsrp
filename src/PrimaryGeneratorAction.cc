@@ -132,7 +132,7 @@ void PrimaryGeneratorAction::Init(void)
   //Ymax should be smaller than detector size in order to supress outside world volume hit
   fFlightLength = Cfg.photon_flight_length;
   G4cout << "Photon flight length: " << fFlightLength/m << " m" << G4endl;
-  G4double Ymax = 0.49*(Cfg.psm_size*mm/2.);
+  G4double Ymax = 0.49*(Cfg.converter_size*mm/2.);
   G4cout << "\tYmax = " << fFlightLength*fThetaMax/cm << " cm" << G4endl;
   fThetaMax = Ymax/fFlightLength;
   G4cout << "\tfThetaMax = " << fThetaMax/mrad << " mrad"  << G4endl;
@@ -198,7 +198,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       fParticleGun->SetParticleDefinition(fElectron);
       fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
       fParticleGun->SetParticleEnergy(400*MeV);
-      fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, Cfg.psm_width*mm+Cfg.psm_gem_length*mm));
+      fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, Cfg.converter_width*mm+Cfg.converter_gem_distance*mm));
       fParticleGun->GeneratePrimaryVertex(anEvent);
       {
         GeneratorEvent gevent;;
@@ -227,8 +227,8 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       fParticleGun->SetParticleDefinition(fGamma);
       fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
       fParticleGun->SetParticleEnergy(400*MeV);
-      G4double x = (G4UniformRand()-0.5)*Cfg.psm_size;
-      G4double y = (G4UniformRand()-0.5)*Cfg.psm_size;
+      G4double x = (G4UniformRand()-0.5)*Cfg.converter_size;
+      G4double y = (G4UniformRand()-0.5)*Cfg.converter_size;
       G4double z = DetectorConstruction::Instance()->GetFrontZ();
       fParticleGun->SetParticlePosition(G4ThreeVector(x, y, z));
       fParticleGun->GeneratePrimaryVertex(anEvent);

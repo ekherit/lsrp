@@ -68,8 +68,8 @@ DetectorConstruction* DetectorConstruction::Instance(void)
  
 DetectorConstruction::DetectorConstruction()
 : 
-  fLogicPresampler(nullptr),
-  fPresamplerMaterial(nullptr), 
+  //fLogicConverter(nullptr),
+  fConverterMaterial(nullptr), 
   fStepLimit(nullptr),
   fCheckOverlaps(true)
 {
@@ -115,7 +115,7 @@ void DetectorConstruction::DefineMaterials()
     nistManager->FindOrBuildMaterial("G4_AIR", fromIsotopes);
   
     // Lead defined using NIST Manager
-    fPresamplerMaterial  = nistManager->FindOrBuildMaterial("G4_Pb", fromIsotopes);
+    fConverterMaterial  = nistManager->FindOrBuildMaterial("G4_Pb", fromIsotopes);
     nistManager->FindOrBuildMaterial("G4_Cu", fromIsotopes);
     nistManager->FindOrBuildMaterial("G4_KAPTON", fromIsotopes);
   
@@ -127,134 +127,34 @@ void DetectorConstruction::DefineMaterials()
 
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
-    fPresamplerWidth = Cfg.psm_width * mm; //presampler width
-    fPsmGemLength = Cfg.psm_gem_length * mm; //distance between presampler and gem
-    G4double psm_radius = Cfg.psm_size*mm / 2.0; //Radius of the presampler
-    G4double world_size_xy = 2 * psm_radius * 1.2;
-    G4double world_size_z = 47 * m;
-    G4double air_length = Cfg.air_length;
-    G4double vacuum_chamber_size_z = 20 * m;
-    G4double vacuum_chamber_size_xy = world_size_xy * 0.9;
-    G4double vacuum_wall_size_xy = vacuum_chamber_size_xy;
-    G4double vacuum_wall_size_z = 0.5 * mm;
-    fAirSensWidth = 1 * mm;
-    G4double mirror_size_xy = 20 * cm;
-    G4double mirror_size_z;
-  
-    G4GeometryManager::GetInstance()->SetWorldMaximumExtent(world_size_z);
-
+    G4GeometryManager::GetInstance()->SetWorldMaximumExtent(Cfg.world_size_z);
     GEM.reset(new GEMDetector);
+    CalculateGeometry();
+    G4cout << "Computed tolerance = " << G4GeometryTolerance::GetInstance()->GetSurfaceTolerance()/mm << " mm" << G4endl;
   
-    //G4ThreeVector gem_position = G4ThreeVector(0,0,presampler_front_position+fPresamplerWidth+psm_gem_length+GEM->GetWidth()/2.0);
-    G4ThreeVector psm_position = G4ThreeVector(0, 0, -fPsmGemLength-fPresamplerWidth/2.0 + air_length);
-    G4ThreeVector airsens_position = G4ThreeVector(0,0,-fPsmGemLength -fPresamplerWidth - fAirSensWidth/2.0 + air_length);
-    G4ThreeVector gem_position = G4ThreeVector(0, 0, GEM->GetWidth() / 2.0 + air_length);
-    G4ThreeVector vacuum_chamber_position = G4ThreeVector(0, 0, -vacuum_chamber_size_z / 2.0);
-    G4ThreeVector mirror_position = G4ThreeVector(0, 0, -0.5 * m); 
-
-    G4cout << "fPsmGemLength=" << fPsmGemLength/mm << "mm,   psm.z = " << psm_position.z()/mm  << " mm"<< G4endl;
-
-  //presampler_front_position=-psm_gem_length-fPresamplerWidth;
-  
-  //------------------------------------------------------------------------- 
-  // World
-  //-------------------------------------------------------------------------
+    //------------------------------------------------------------------------- 
+    // World
+    //-------------------------------------------------------------------------
   
     G4Material* air  = G4Material::GetMaterial("G4_AIR");
-    G4cout << "Computed tolerance = "
-        << G4GeometryTolerance::GetInstance()->GetSurfaceTolerance()/mm
-        << " mm" << G4endl;
 
-    G4Box* worldS = new G4Box(
-        "world", 
-        world_size_xy / 2.0,
-        world_size_xy / 2.0,
-        world_size_z / 2.0
-    );
-
-    worldLV = new G4LogicalVolume( 
-        worldS,
-        air,
-        "World"
-    ); 
-  
-    //Must place the World Physical volume unrotated at (0,0,0).
-    G4VPhysicalVolume* worldPV = new G4PVPlacement(
-        0,               // no rotation
-        G4ThreeVector(), // at (0,0,0)
-        worldLV,         // its logical volume
-        "World",         // its name
-        0,               // its mother  volume
-        false,           // no boolean operations
-        0,               // copy number
-        fCheckOverlaps   // checking overlaps 
-    ); 
-
-  //-------------------------------------------------------------------------  
-  // Vacuum chamber
-  //------------------------------------------------------------------------- 
 
     G4NistManager* nistManager = G4NistManager::Instance();
-    G4Material* vacuum_mat = nistManager->FindOrBuildMaterial("G4_Galactic");
+    auto mater = [nistManager](const char * mat_name)
+    {
+        return nistManager->FindOrBuildMaterial(mat_name);
+    };
 
-    G4Box* vacuum_chamber_solid = new G4Box(
-        "vacuum_chamber", 
-        vacuum_chamber_size_xy / 2.0,
-        vacuum_chamber_size_xy / 2.0, 
-        vacuum_chamber_size_z / 2.0
-    );
-                
-    G4LogicalVolume* vacuum_chamber_logic = new G4LogicalVolume(
-        vacuum_chamber_solid,
-        vacuum_mat, 
-        "Vacuum_chamber"
-    );             
-               
-    new G4PVPlacement(
-        0,                                 //no rotation
-        vacuum_chamber_position,           //at position
-        vacuum_chamber_logic,              //its logical volume
-        "Vacuum_chamber",                  //its name
-        worldLV,                           //its mother  volume
-        false,                             //no boolean operation
-        0,                                 //copy number
-        fCheckOverlaps                     //overlaps checking
-    );
 
-  //------------------------------------------------------------------------- 
-  // Vacuum chamber wall
-  //------------------------------------------------------------------------- 
+    MakeVolume("World",G4Material::GetMaterial("G4_AIR"), BOX, Cfg.world_size_x, Cfg.world_size_y, Cfg.world_size_z);
+    MakeVolume("VacuumChamber",mater("G4_Galactic"), TUBE, Cfg.vacuum_chamber_size, 0, fVacuumChamberLength, "World", fVacuumChamberPosition);
+    MakeVolume("Flange",mater("G4_STAINLESS-STEEL"), TUBE, Cfg.vacuum_chamber_size, 0, Cfg.flange_width, "VacuumChamber", fFlangePosition);
 
-    G4Material* vacuum_wall_mat = nistManager->FindOrBuildMaterial("G4_STAINLESS-STEEL");
   
-    G4Box* vacuum_wall_solid = new G4Box(
-        "vacuum_wall", 
-        vacuum_wall_size_xy / 2.0,
-        vacuum_wall_size_xy / 2.0, 
-        vacuum_wall_size_z / 2.0
-    );
-                
-    G4LogicalVolume* vacuum_wall_logic = new G4LogicalVolume(
-        vacuum_wall_solid,
-        vacuum_wall_mat, 
-        "Vacuum_wall"
-    );
-         
-    new G4PVPlacement(
-        0,                                 //no rotation
-        G4ThreeVector(),                   //at position
-        vacuum_wall_logic,                 //its logical volume
-        "Vacuum_wall",                     //its name
-        worldLV,                           //its mother  volume
-        false,                             //no boolean operation
-        0,                                 //copy number
-        fCheckOverlaps                     //overlaps checking
-    );
-  
-  //------------------------------------------------------------------------- 
-  // Mirror
-  // SiO2 or Cu
-  //-------------------------------------------------------------------------
+    //------------------------------------------------------------------------- 
+    // Mirror
+    // SiO2 or Cu
+    //-------------------------------------------------------------------------
   
     int mirror_type = 1; // 1 - SiO2 , 2 - Cu
     G4Material* mirror_mat;
@@ -263,7 +163,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     {
         case 1:
         {
-            mirror_size_z = 0.5 * cm;
+            Cfg.mirror_width = 0.5 * cm;
       
             G4String name, symbol;             // a=mass of a mole;
             G4double a, z, density;            // z=mean number of protons;  
@@ -284,110 +184,43 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
         } break;
         case 2:
         {
-            mirror_size_z = 1 * cm; 
+            Cfg.mirror_width = 1 * cm; 
             mirror_mat = nistManager->FindOrBuildMaterial("G4_Cu");
         } break;
     }
+
+
   
     G4RotationMatrix *rm = new G4RotationMatrix;
     rm->rotateX(-45*deg);		// rotation      
-  
-    G4Box* mirror_solid = new G4Box(
-        "mirror",
-        mirror_size_xy / 2.0,
-        mirror_size_xy / 2.0, 
-        mirror_size_z / 2.0
-    );
-                
-    G4LogicalVolume* mirror_logic = new G4LogicalVolume(
-        mirror_solid,
-        mirror_mat,
-        "Mirror"
-    );
-               
-    new G4PVPlacement(
-        rm,
-        mirror_position,
-        mirror_logic,
-        "Mirror",
-        worldLV,
-        false,
-        0,
-        fCheckOverlaps
-    );          
-                             
-  //-------------------------------------------------------------------------
-  // Presampler
-  //-------------------------------------------------------------------------
+    MakeVolume("Mirror",mirror_mat, BOX, Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, "VacuumChamber", fMirrorPosition, rm);
+    MakeVolume("Converter", fConverterMaterial, BOX, Cfg.converter_size, Cfg.converter_size,Cfg.converter_width, "World", fConverterPosition);
 
-    G4Tubs* psm_solid = new G4Tubs(
-        "presampler", 
-        0.,
-        psm_radius,
-        fPresamplerWidth / 2.,
-        0.*deg, 360.*deg
-    );
-  
-    fLogicPresampler = new G4LogicalVolume(
-        psm_solid,
-        fPresamplerMaterial,
-        "Presampler", 
-        0, 0, 0
-    );
-  
-    fPresampler = new G4PVPlacement(
-        0,
-        psm_position,
-        fLogicPresampler,
-        "Presampler",
-        worldLV,
-        false,
-        10,
-        fCheckOverlaps
-    );
-  
-  //-------------------------------------------------------------------------
-  // AirSens
-  //-------------------------------------------------------------------------
-
-    G4Tubs* AirSensSolid = new G4Tubs("AirSens",0.,psm_radius,fAirSensWidth/2.0,0.*deg,360.*deg);
-    fLogicAirSens = new G4LogicalVolume(AirSensSolid,air ,"AirSens",0,0,0);
-    fAirSens = new G4PVPlacement(
-        0,
-        airsens_position,
-        fLogicAirSens,
-        "AirSens",
-        worldLV,
-        false,
-        666,
-        fCheckOverlaps
-    );
+    MakeVolume("SensBeforeConverter", G4Material::GetMaterial("G4_AIR"), BOX, Cfg.converter_size, Cfg.converter_size, 1*mm,"World", fSensBeforeConverterPosition, nullptr, 666);
   
   //-------------------------------------------------------------------------
   // GEM
   //-------------------------------------------------------------------------
-
+  //
     fGem = new G4PVPlacement(
         0,
-        gem_position,
+        fGEMPosition,
         GEM->GetLogicalVolume(),
         "GEM",
-        worldLV,
+        fVol["World"].logic.get(),
         false,
         0,
         fCheckOverlaps
     );
-      
-  //------------------------------------------------------------------------- 
 
-    fPadZPosition = GEM->GetPadZ() + gem_position.z();
+    fPadZPosition = GEM->GetPadZ() + fGEMPosition.z();
     // Visualization attributes
 
     G4VisAttributes* boxVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));
     G4VisAttributes* chamberVisAtt = new G4VisAttributes(G4Colour(1.0,1.0,0.0));
 
-    worldLV      ->SetVisAttributes(boxVisAtt);
-    fLogicPresampler ->SetVisAttributes(boxVisAtt);
+    fVol["World"].logic -> SetVisAttributes(boxVisAtt);
+    fVol["Converter"].logic->SetVisAttributes(boxVisAtt);
     GEM->GetLogicalVolume()->SetVisAttributes(boxVisAtt);
 
     // Sensitive detectors
@@ -401,11 +234,10 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
     //GEM->SetUserLimits(new G4UserLimits(0.1*mm));
     GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
-    fLogicAirSens->SetSensitiveDetector(fGEMSensitiveDetector);
-    fLogicAirSens->SetUserLimits(new G4UserLimits(1*mm));
-    //BGO 145 22
-    // Always return the physical world
-    return worldPV;
+    fVol["SensBeforeConverter"].logic->SetSensitiveDetector(fGEMSensitiveDetector);
+    fVol["SensBeforeConverter"].logic->SetUserLimits(new G4UserLimits(1*mm));
+
+    return fVol["World"].phys.get(); 
 }
 
 void DetectorConstruction::SetMaxStep(G4double maxStep)
@@ -418,39 +250,136 @@ void DetectorConstruction::SetCheckOverlaps(G4bool checkOverlaps)
     fCheckOverlaps = checkOverlaps;
 }  
 
-void DetectorConstruction::SetPresamplerWidth(G4double width)
+
+void DetectorConstruction::CalculateGeometry(void)
 {
-    SetPresamplerGeometry(width, fPsmGemLength);
-    G4cout << "Set new presampler width " << fPresamplerWidth/mm << " mm" << G4endl;
+    auto world_wall = Cfg.world_size_z/2;
+    auto gem_half_width = GEM->GetWidth()/2.0;
+    fGEMPosition = G4ThreeVector(0, 0, world_wall - gem_half_width - Cfg.gem_world_distance);
+    fConverterPosition = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.converter_gem_distance + Cfg.converter_width/2.0);
+    fFlangePosition = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.flange_gem_distance + Cfg.flange_width/2.0);
+    fMirrorPosition = fFlangePosition - G4ThreeVector(0, 0, Cfg.flange_width/2.0 + Cfg.mirror_flange_distance + Cfg.mirror_width/2.0);
+
+    fInteractionPointPosition  = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.photon_flight_length);
+
+    //the length of vacuum chamber includes the flange
+    fVacuumChamberLength =  ((Cfg.flange_width/2.0 + fFlangePosition.z()) -  (-Cfg.world_size_z/2.0));
+    auto vacuum_chamber_pos =  0.5*((Cfg.flange_width/2.0 + fFlangePosition.z()) +  (-Cfg.world_size_z/2.0));
+    fVacuumChamberPosition  = G4ThreeVector(0,0, vacuum_chamber_pos);
+    fSensBeforeConverterPosition =  fConverterPosition - G4ThreeVector(0,0, Cfg.converter_width/2.0  + Cfg.sens_before_converter_width/2.0);
 }
 
-void DetectorConstruction::SetPsmGemLength(G4double length)
+void DetectorConstruction::UpdateGeometry(void)
 {
-    SetPresamplerGeometry(fPresamplerWidth, length);
-    G4cout << "Set new distance from presampler to GEM " << fPsmGemLength/mm << " mm" << G4endl;
-}
+    CalculateGeometry();
 
-void DetectorConstruction::SetPresamplerGeometry(G4double width, G4double distance_to_gem)
-{
-    G4Tubs * solid = (G4Tubs*)fLogicPresampler->GetSolid();
-    Cfg.psm_width=width/mm;
-    Cfg.psm_gem_length=distance_to_gem/mm;
-    fPresamplerWidth=width; //configure new width
-    fPsmGemLength=distance_to_gem; //configure new distance from presampler to gem
-    G4ThreeVector position(0, 0, -fPresamplerWidth / 2.0 - fPsmGemLength + Cfg.air_length); //set new position
-    //open geometry for modification
     G4GeometryManager * geometry=G4GeometryManager::GetInstance();
-    geometry->OpenGeometry(fPresampler);
-    //set new width
-    solid->SetZHalfLength(fPresamplerWidth/2.0);
-    //set new position
-    fPresampler->SetTranslation(position);
-    //close geometry
-    geometry->CloseGeometry(fPresampler);
+    //GEM detector
+    geometry->OpenGeometry(fGem);
+    fGem->SetTranslation(fGEMPosition);
+    geometry->CloseGeometry(fGem);
 
-    //airsens position before presampler
-    position = position + G4ThreeVector(0,0,-fPresamplerWidth/2.0 - fAirSensWidth/2.0);
-    geometry->OpenGeometry(fAirSens);
-    fAirSens->SetTranslation(position);
-    geometry->CloseGeometry(fAirSens);
+    fVol["Converter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.converter_width, fConverterPosition);
+    fVol["SensBeforeConverter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.sens_before_converter_width, fSensBeforeConverterPosition);
+    fVol["VacuumChamber"].update_geometry(Cfg.vacuum_chamber_size,Cfg.vacuum_chamber_size, fVacuumChamberLength, fVacuumChamberPosition);
+    fVol["Flange"].update_geometry(Cfg.vacuum_chamber_size, Cfg.vacuum_chamber_size, Cfg.flange_width, fFlangePosition);
+    fVol["Mirror"].update_geometry(Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, fMirrorPosition);
+    
+}
+
+
+void DetectorConstruction::MakeVolume 
+        ( 
+             std::string name, 
+             G4Material * material,
+             int shape,
+             double size_x, 
+             double size_y, 
+             double size_z, 
+             std::string mother_name,
+             G4ThreeVector position,
+             G4RotationMatrix * rotation_matrix,
+             int copy_number
+        )
+{
+    auto & volume = fVol[name]; //create new VolumeItem with empty volumes
+    G4VSolid * solid =nullptr;
+    switch (shape)
+    {
+        case BOX:
+            solid = (G4VSolid*) new G4Box
+                ( 
+                 name.c_str(), 
+                 size_x/2.0, 
+                 size_y/2.0, 
+                 size_z/2.0
+                );
+            break;
+        case TUBE:
+            solid = (G4VSolid*) new G4Tubs
+                (
+                 name.c_str(),
+                 0,
+                 size_x/2.0,
+                 size_z/2.0,
+                 0*deg,
+                 360*deg
+                );
+            break;
+    };
+    volume.solid.reset (solid);
+    volume.shape = shape;
+    //Create world logical volume
+    volume.logic.reset
+        (
+         new G4LogicalVolume
+         (
+          volume.solid.get(), 
+          material,  //All world has air
+          name.c_str()
+         )
+        ); 
+
+    G4LogicalVolume * mother_volume = mother_name == "" ? nullptr : fVol[mother_name].logic.get();
+    //Must place the World Physical volume unrotated at (0,0,0).
+    volume.phys.reset
+        (
+         new G4PVPlacement
+         (
+          rotation_matrix,               // no rotation
+          position,        // at (0,0,0)
+          volume.logic.get(),    // its logical volume
+          name.c_str(),         // its name
+          mother_volume,        // its mother  volume
+          false,           // no boolean operations
+          copy_number,               // copy number
+          fCheckOverlaps   // checking overlaps 
+         )
+        ); 
+}
+
+void DetectorConstruction::VolumeItem_t::update_geometry(double size_x, double size_y, double size_z, G4ThreeVector pos)
+{
+    G4GeometryManager * geometry=G4GeometryManager::GetInstance();
+    geometry->OpenGeometry(phys.get());
+    switch (shape)
+    {
+        case BOX:
+            {
+                G4Box * box = (G4Box*)(solid.get());
+                box->SetZHalfLength(size_z/2.0);
+                box->SetXHalfLength(size_x/2.0);
+                box->SetYHalfLength(size_y/2.0);
+            }
+            break;
+        case TUBE:
+            {
+                G4Tubs * tube = (G4Tubs*)(solid.get());
+                tube->SetOuterRadius(size_x/2.0);
+                tube->SetZHalfLength(size_z/2.0);
+            }
+            break;
+    }
+    phys->SetTranslation(pos);
+    geometry->CloseGeometry(phys.get());
 }
