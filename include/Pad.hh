@@ -94,8 +94,8 @@ class VariableSquarePad : public BasePad
 {
   double fHighSensWidthX=64; //high sensetive region width in x
   double fHighSensWidthY=20; //high sensitive region width in y
-  double fRoughScaleX=2;
-  double fRoughScaleY=2;
+  double fRoughSizeX=2;
+  double fRoughSizeY=2;
   enum { FINE_PAD=0, ROUGH_PAD=1};
   public:
     VariableSquarePad(void) : BasePad()
@@ -108,8 +108,8 @@ class VariableSquarePad : public BasePad
       double ay = Cfg.pad_ysize;
       fHighSensWidthX = Cfg.pad_high_sens_xwidth;
       fHighSensWidthY = Cfg.pad_high_sens_ywidth;
-      fRoughScaleX = Cfg.pad_rough_xscale;
-      fRoughScaleY = Cfg.pad_rough_yscale;
+      fRoughSizeX = Cfg.pad_rough_size_x;
+      fRoughSizeY = Cfg.pad_rough_size_y;
       if(fabs(X) <= fHighSensWidthX*0.5 && fabs(Y)<=fHighSensWidthY*0.5)
       {
         fxsize=ax;
@@ -118,8 +118,8 @@ class VariableSquarePad : public BasePad
       }
       else
       {
-        fxsize=ax*fRoughScaleX;
-        fysize=ay*fRoughScaleY;
+        fxsize=fRoughSizeX;
+        fysize=fRoughSizeY;
         fpad_type = ROUGH_PAD;
       }
       farea=fxsize*fysize;

@@ -43,16 +43,9 @@ class G4Material;
 class G4UserLimits;
 
 class DetectorMessenger;
-class MagneticField;
 class GEMSensitiveDetector;
 
 #include "GEMDetector.hh"
-/// Detector construction class to define materials and geometry.
-///
-/// In addition a transverse uniform magnetic field is defined in
-/// SetMagField() method which can be activated via a command
-/// defined in the DetectorMessenger class. 
-
 
 class DetectorConstruction : public G4VUserDetectorConstruction
 {
@@ -71,8 +64,15 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     static DetectorConstruction * Instance();
 
     //G4double presampler_front_position;
-    G4double GetPadZ(void) const { return fPadZPosition; }
-    G4double GetFrontZ(void) const { return -fPresamplerWidth-fPsmGemLength; }
+    const G4ThreeVector  & GetGEMFrontPosition(void) const 
+    { 
+        return  fGEMFrontPosition;
+    }
+
+    const G4ThreeVector  & GetInteractionPointPosition(void) const 
+    { 
+        return  fInteractionPointPosition;
+    }
 
   private:
     // methods
@@ -80,11 +80,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* DefineVolumes();
 
     std::unique_ptr<GEMDetector> GEM;
-    G4VPhysicalVolume * fGem;
-    //std::unique_ptr<GEMSensitiveDetector> fGEMSensitiveDetector;
-    GEMSensitiveDetector * fGEMSensitiveDetector;
-
-    //G4LogicalVolume* worldLV;
+    G4VPhysicalVolume * fGem  = nullptr;
+    GEMSensitiveDetector * fGEMSensitiveDetector  = nullptr;
     
     struct VolumeItem_t
     {
@@ -93,36 +90,28 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         std::shared_ptr<G4LogicalVolume> logic;
         std::shared_ptr<G4VPhysicalVolume> phys;
         void update_geometry(double size_x, double size_y, double size_z, G4ThreeVector pos);
+        void open_geometry(void);
+        void close_geometry(void);
     };
 
     std::map<std::string, VolumeItem_t> fVol; //list of all volumes
 
-    G4Material *     fConverterMaterial;
+    G4Material *     fConverterMaterial = nullptr;
 
-    //G4LogicalVolume*    fLogicConverter;
-    //G4VPhysicalVolume*  fConverter; //physical volume of the presampler
-
-    //G4LogicalVolume*    fLogicAirSens;
-    //G4VPhysicalVolume*  fAirSens; //physical volume of the presampler
-
-    G4UserLimits* fStepLimit;            // pointer to user step limits
+    G4UserLimits* fStepLimit = nullptr;            // pointer to user step limits
 
     DetectorMessenger*  fMessenger;   // messenger
-    MagneticField*      fMagField;     // magnetic field
-
     
-    G4bool  fCheckOverlaps; // option to activate checking of volumes overlaps 
+    G4bool  fCheckOverlaps  = false; // option to activate checking of volumes overlaps 
     static DetectorConstruction * fgInstance;
-
-    G4double fPresamplerWidth;
-    G4double fAirSensWidth;
-    G4double fPsmGemLength;
-    G4double fPadZPosition; //Z position of pad plate
 
     G4double fVacuumChamberLength; 
 
     //new infrastructure
     G4ThreeVector fGEMPosition;
+    G4ThreeVector fGEMFrontPosition;
+    G4ThreeVector fGEMPadPosition;
+
     G4ThreeVector fConverterPosition;
     G4ThreeVector fFlangePosition;
     G4ThreeVector fMirrorPosition;

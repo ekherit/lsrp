@@ -32,9 +32,11 @@
 #include "ROOTManager.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "Config.h"
+#include "DetectorConstruction.hh"
 
 #include "G4Run.hh"
 #include "G4RunManager.hh"
+
 
 #include <ibn/valer.h>
 
@@ -60,6 +62,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
 
+  DetectorConstruction::Instance()->UpdateGeometry();
   PrimaryGeneratorAction::Instance()->Init();
 }
 

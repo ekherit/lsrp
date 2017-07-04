@@ -191,101 +191,29 @@ void variate_agnle(ibn::phys::compton & C, double dx , double dy)
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
-  int eventID=anEvent->GetEventID();
-  switch(Cfg.test_beam)
-  {
-    case 1:
-      fParticleGun->SetParticleDefinition(fElectron);
-      fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-      fParticleGun->SetParticleEnergy(400*MeV);
-      fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, Cfg.converter_width*mm+Cfg.converter_gem_distance*mm));
-      fParticleGun->GeneratePrimaryVertex(anEvent);
-      {
-        GeneratorEvent gevent;;
-        gevent.x = 0;
-        gevent.y = 0;
-        gevent.z = 0;
-        gevent.E = 400;
-        ROOTManager::Instance()->event.gen.push_back(gevent);
-      }
-      return;
-    case 2:
-      fParticleGun->SetParticleDefinition(fGamma);
-      fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-      fParticleGun->SetParticleEnergy(50*MeV);
-      fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, -10*m));
-      fParticleGun->GeneratePrimaryVertex(anEvent);
-      {
-        GeneratorEvent gevent;;
-        gevent.x = 0;
-        gevent.y = 0;
-        gevent.z = 0;
-        gevent.E = 50;
-        ROOTManager::Instance()->event.gen.push_back(gevent);
-      }
-    case 3:
-      fParticleGun->SetParticleDefinition(fGamma);
-      fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-      fParticleGun->SetParticleEnergy(400*MeV);
-      G4double x = (G4UniformRand()-0.5)*Cfg.converter_size;
-      G4double y = (G4UniformRand()-0.5)*Cfg.converter_size;
-      G4double z = DetectorConstruction::Instance()->GetFrontZ();
-      fParticleGun->SetParticlePosition(G4ThreeVector(x, y, z));
-      fParticleGun->GeneratePrimaryVertex(anEvent);
-      {
-        GeneratorEvent gevent;;
-        gevent.x = x;
-        gevent.y = y;
-        gevent.z = z;
-        gevent.E = 400;
-        ROOTManager::Instance()->event.gen.push_back(gevent);
-      }
-      return;
-  }
+  long eventID=anEvent->GetEventID();
   fParticleGun->SetParticleDefinition(fGamma);
   // This function is called at the begining of event
   fPolarization = 2.0*(eventID%2)-1.0; //calculate polarization
   fCompton->SetPhotonPolarization(fPolarization);
   //G4cout << fPhotonNumber << G4endl;
   fRealPhotonNumber = CLHEP::RandPoissonQ::shoot(fPhotonNumber);
-  for(unsigned i=0;i<fRealPhotonNumber;i++)
+  auto & IP =  DetectorConstruction::Instance()->GetInteractionPointPosition();
+  for(int i=0;i<fRealPhotonNumber;i++)
   {
     //generate compton backscattering
     fCompton->generate([](double xmin, double xmax) { return (xmax-xmin)*G4UniformRand()+xmin; },fThetaMax);
     variate_agnle(*fCompton,fSigmaX,fSigmaY); 
-
-    //fCompton->kx =fabs(fCompton->kx);
-    //calculate position
-    G4double z = -19.5 * m;    //DetectorConstruction::Instance()->GetFrontZ();
-    G4double x = 0;          //fCompton->kx/fCompton->kz*(fFlightLength+z);
-    G4double y = 0;          //fCompton->ky/fCompton->kz*(fFlightLength+z);
-
     G4ThreeVector k(fCompton->kx, fCompton->ky, fCompton->kz);
-    //G4ThreeVector k(0, 0, 1);
-    
-
-    //Configurate the particle gun
     fParticleGun->SetParticleEnergy(fCompton->E*MeV);
-    //fParticleGun->SetParticleEnergy(400*MeV);
-
-    //set position
-    fParticleGun->SetParticlePosition(G4ThreeVector(x, y, z));
-    //fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, -14.5*m));
-    //fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, -0.5*m));
-
-    //set direction
+    fParticleGun->SetParticlePosition(IP);
     fParticleGun->SetParticleMomentumDirection(k);
-
-    //generate primary vertex
     fParticleGun->GeneratePrimaryVertex(anEvent);
-
-    // Fill generator event
     GeneratorEvent gevent= makeGeneratorEvent(*fCompton);
-    gevent.x = x/mm;
-    gevent.y = y/mm;
-    gevent.z = z/mm;
+    gevent.x = IP.x()/mm;
+    gevent.y = IP.y()/mm;
+    gevent.z = IP.z()/mm;
     gevent.npad=0;
-
     ROOTManager::Instance()->event.gen.push_back(gevent);
   }
 }

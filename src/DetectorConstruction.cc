@@ -50,45 +50,29 @@
 
 #include "G4UserLimits.hh"
 
-#include "G4VisAttributes.hh"
-#include "G4Colour.hh"
+//#include "G4VisAttributes.hh"
+//#include "G4Colour.hh"
 
-//#include "G4SystemOfUnits.hh"
-
-//#include "G4ios.hh"
-
-//------------------------------------------------------------------------- 
-
-DetectorConstruction * DetectorConstruction::fgInstance = 0;
+DetectorConstruction * DetectorConstruction::fgInstance = nullptr;
 
 DetectorConstruction* DetectorConstruction::Instance(void)
 {
+    if( fgInstance == nullptr ) new DetectorConstruction();
     return fgInstance;
 }
  
-DetectorConstruction::DetectorConstruction()
-: 
-  //fLogicConverter(nullptr),
-  fConverterMaterial(nullptr), 
-  fStepLimit(nullptr),
-  fCheckOverlaps(true)
+DetectorConstruction::DetectorConstruction()  
 {
-  fMessenger = new DetectorMessenger(this);
-  fMagField  = new MagneticField();
-
-  //fNbOfChambers = 1;
-  //fLogicChamber = new G4LogicalVolume*[fNbOfChambers];
   fgInstance = this;
+  fMessenger = DetectorMessenger::Instance();
 }
 
 //------------------------------------------------------------------------- 
  
 DetectorConstruction::~DetectorConstruction()
 {
-    //delete [] fLogicChamber; 
-    delete fMagField;
     delete fStepLimit;
-    delete fMessenger;
+    //delete fMessenger;
 }
 
 //------------------------------------------------------------------------- 
@@ -148,7 +132,8 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 
     MakeVolume("World",G4Material::GetMaterial("G4_AIR"), BOX, Cfg.world_size_x, Cfg.world_size_y, Cfg.world_size_z);
     MakeVolume("VacuumChamber",mater("G4_Galactic"), TUBE, Cfg.vacuum_chamber_size, 0, fVacuumChamberLength, "World", fVacuumChamberPosition);
-    MakeVolume("Flange",mater("G4_STAINLESS-STEEL"), TUBE, Cfg.vacuum_chamber_size, 0, Cfg.flange_width, "VacuumChamber", fFlangePosition);
+    MakeVolume("Flange",mater("G4_STAINLESS-STEEL"), TUBE, Cfg.vacuum_chamber_size, 0, Cfg.flange_width, "VacuumChamber", fFlangePosition - fVacuumChamberPosition);
+    std::cout << "The positions  vac. cham z =" << fVacuumChamberPosition.z() + fVacuumChamberLength/2.0 << " flange z = " <<  fFlangePosition.z() << std::endl;
 
   
     //------------------------------------------------------------------------- 
@@ -193,9 +178,8 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   
     G4RotationMatrix *rm = new G4RotationMatrix;
     rm->rotateX(-45*deg);		// rotation      
-    MakeVolume("Mirror",mirror_mat, BOX, Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, "VacuumChamber", fMirrorPosition, rm);
+    MakeVolume("Mirror",mirror_mat, BOX, Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, "VacuumChamber", fMirrorPosition - fVacuumChamberPosition, rm);
     MakeVolume("Converter", fConverterMaterial, BOX, Cfg.converter_size, Cfg.converter_size,Cfg.converter_width, "World", fConverterPosition);
-
     MakeVolume("SensBeforeConverter", G4Material::GetMaterial("G4_AIR"), BOX, Cfg.converter_size, Cfg.converter_size, 1*mm,"World", fSensBeforeConverterPosition, nullptr, 666);
   
   //-------------------------------------------------------------------------
@@ -213,27 +197,26 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
         fCheckOverlaps
     );
 
-    fPadZPosition = GEM->GetPadZ() + fGEMPosition.z();
     // Visualization attributes
 
-    G4VisAttributes* boxVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));
-    G4VisAttributes* chamberVisAtt = new G4VisAttributes(G4Colour(1.0,1.0,0.0));
+    //G4VisAttributes* boxVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));
+    //G4VisAttributes* chamberVisAtt = new G4VisAttributes(G4Colour(1.0,1.0,0.0));
 
-    fVol["World"].logic -> SetVisAttributes(boxVisAtt);
-    fVol["Converter"].logic->SetVisAttributes(boxVisAtt);
-    GEM->GetLogicalVolume()->SetVisAttributes(boxVisAtt);
+    //fVol["World"].logic -> SetVisAttributes(boxVisAtt);
+    //fVol["Converter"].logic->SetVisAttributes(boxVisAtt);
+    //GEM->GetLogicalVolume()->SetVisAttributes(boxVisAtt);
 
     // Sensitive detectors
     G4String trackerChamberSDname = "slrp/GEMSD";
     fGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
-    fGEMSensitiveDetector->SetPadZ(fPadZPosition);
+    fGEMSensitiveDetector->SetPadZ(fGEMPadPosition.z());
     G4SDManager::GetSDMpointer()->AddNewDetector(fGEMSensitiveDetector);
     GEM->GetDriftVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
     GEM->GetTransferVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
     //fLogicPresampler->SetSensitiveDetector(fGEMSensitiveDetector);
     //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
     //GEM->SetUserLimits(new G4UserLimits(0.1*mm));
-    GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
+    //GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
     fVol["SensBeforeConverter"].logic->SetSensitiveDetector(fGEMSensitiveDetector);
     fVol["SensBeforeConverter"].logic->SetUserLimits(new G4UserLimits(1*mm));
 
@@ -253,38 +236,60 @@ void DetectorConstruction::SetCheckOverlaps(G4bool checkOverlaps)
 
 void DetectorConstruction::CalculateGeometry(void)
 {
+    std::cout << "Calculate geometry" << std::endl;
+    std::vector<double> ysizes{Cfg.world_size_y, Cfg.vacuum_chamber_size,Cfg.mirror_size_y,Cfg.converter_size, Cfg.gem_size_y};
+    std::vector<double> xsizes{Cfg.world_size_x, Cfg.vacuum_chamber_size,Cfg.mirror_size_x,Cfg.converter_size, Cfg.gem_size_x};
+    //calculate world xy size:
+    Cfg.world_size_y = *std::max_element(ysizes.begin(), ysizes.end());
+    Cfg.world_size_x = *std::max_element(xsizes.begin(), xsizes.end());
+    Cfg.world_size_z =  GEM->GetWidth() + 2*Cfg.gem_world_distance + Cfg.photon_flight_length;
     auto world_wall = Cfg.world_size_z/2;
     auto gem_half_width = GEM->GetWidth()/2.0;
     fGEMPosition = G4ThreeVector(0, 0, world_wall - gem_half_width - Cfg.gem_world_distance);
+    fGEMFrontPosition  = fGEMPosition - G4ThreeVector(0, 0, gem_half_width);
+    fGEMPadPosition = G4ThreeVector(0,0,GEM->GetPadZ()) + fGEMPosition;
+    if (fGEMSensitiveDetector != nullptr) fGEMSensitiveDetector->SetPadZ(fGEMPadPosition.z());
+    std::cout << "GEM: z = " <<  fGEMPosition.z() << "  width = " <<  GEM->GetWidth() << std::endl;
     fConverterPosition = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.converter_gem_distance + Cfg.converter_width/2.0);
+    std::cout  << "Converter: z = " << fConverterPosition.z() << " width = "  <<  Cfg.converter_width << std::endl;
     fFlangePosition = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.flange_gem_distance + Cfg.flange_width/2.0);
+    std::cout  << "Flange: z = " << fFlangePosition.z() << " width = "  <<  Cfg.flange_width << std::endl;
     fMirrorPosition = fFlangePosition - G4ThreeVector(0, 0, Cfg.flange_width/2.0 + Cfg.mirror_flange_distance + Cfg.mirror_width/2.0);
-
+    std::cout  << "Mirror: z = " << fMirrorPosition.z() << " width = "  <<  Cfg.mirror_width << std::endl;
     fInteractionPointPosition  = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.photon_flight_length);
 
     //the length of vacuum chamber includes the flange
+    std::cout << "half world " << Cfg.world_size_z/2.0 << std::endl;
+    std::cout << "vacuum ch. right = " << Cfg.flange_width/2.0 + fFlangePosition.z() << std::endl;
+    std::cout << "vacuum ch. left = " <<  - Cfg.world_size_z/2.0 << std::endl;
     fVacuumChamberLength =  ((Cfg.flange_width/2.0 + fFlangePosition.z()) -  (-Cfg.world_size_z/2.0));
     auto vacuum_chamber_pos =  0.5*((Cfg.flange_width/2.0 + fFlangePosition.z()) +  (-Cfg.world_size_z/2.0));
     fVacuumChamberPosition  = G4ThreeVector(0,0, vacuum_chamber_pos);
+    std::cout  << "VacuumChamber: z = " << fVacuumChamberPosition.z() << " width = "  <<  fVacuumChamberLength << std::endl;
     fSensBeforeConverterPosition =  fConverterPosition - G4ThreeVector(0,0, Cfg.converter_width/2.0  + Cfg.sens_before_converter_width/2.0);
+    std::cout  << "SensBeforeConverter: z = " << fSensBeforeConverterPosition.z() << " width = "  <<  Cfg.sens_before_converter_width;
 }
 
 void DetectorConstruction::UpdateGeometry(void)
 {
     CalculateGeometry();
+    fCheckOverlaps = false;
+    for (auto & p : fVol) p.second.open_geometry();
 
     G4GeometryManager * geometry=G4GeometryManager::GetInstance();
     //GEM detector
     geometry->OpenGeometry(fGem);
     fGem->SetTranslation(fGEMPosition);
-    geometry->CloseGeometry(fGem);
 
+    fVol["World"].update_geometry(Cfg.world_size_x,Cfg.world_size_y, Cfg.world_size_z, {0,0,0});
     fVol["Converter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.converter_width, fConverterPosition);
     fVol["SensBeforeConverter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.sens_before_converter_width, fSensBeforeConverterPosition);
     fVol["VacuumChamber"].update_geometry(Cfg.vacuum_chamber_size,Cfg.vacuum_chamber_size, fVacuumChamberLength, fVacuumChamberPosition);
-    fVol["Flange"].update_geometry(Cfg.vacuum_chamber_size, Cfg.vacuum_chamber_size, Cfg.flange_width, fFlangePosition);
-    fVol["Mirror"].update_geometry(Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, fMirrorPosition);
-    
+    fVol["Flange"].update_geometry(Cfg.vacuum_chamber_size, Cfg.vacuum_chamber_size, Cfg.flange_width, fFlangePosition-fVacuumChamberPosition);
+    fVol["Mirror"].update_geometry(Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, fMirrorPosition-fVacuumChamberPosition);
+    for (auto & p : fVol) p.second.close_geometry();
+    geometry->CloseGeometry(fGem);
+    fCheckOverlaps = true;
 }
 
 
@@ -358,10 +363,20 @@ void DetectorConstruction::MakeVolume
         ); 
 }
 
-void DetectorConstruction::VolumeItem_t::update_geometry(double size_x, double size_y, double size_z, G4ThreeVector pos)
+void DetectorConstruction::VolumeItem_t::open_geometry(void)
 {
     G4GeometryManager * geometry=G4GeometryManager::GetInstance();
     geometry->OpenGeometry(phys.get());
+}
+
+void DetectorConstruction::VolumeItem_t::close_geometry(void)
+{
+    G4GeometryManager * geometry=G4GeometryManager::GetInstance();
+    geometry->CloseGeometry(phys.get());
+}
+
+void DetectorConstruction::VolumeItem_t::update_geometry(double size_x, double size_y, double size_z, G4ThreeVector pos)
+{
     switch (shape)
     {
         case BOX:
@@ -381,5 +396,4 @@ void DetectorConstruction::VolumeItem_t::update_geometry(double size_x, double s
             break;
     }
     phys->SetTranslation(pos);
-    geometry->CloseGeometry(phys.get());
 }
