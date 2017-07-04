@@ -62,84 +62,52 @@ DetectorMessenger::DetectorMessenger(void)
   fDirectory.reset(new G4UIdirectory("/lsrp/"));
   fDirectory->SetGuidance("UI commands for Laser Polarimeter Simulation");
 
-  fLaserDirectory.reset(new G4UIdirectory("/lsrp/laser/"));
-  fLaserDirectory->SetGuidance("Laser parameters");
-
-  fBeamDirectory.reset(new G4UIdirectory("/lsrp/beam/"));
-  fBeamDirectory->SetGuidance("Beam parameters");
-
-  fDetectorDirectory.reset(new G4UIdirectory("/lsrp/det/"));
-  fDetectorDirectory->SetGuidance("Detector parameters");
-
-  fPadDirectory.reset(new G4UIdirectory("/lsrp/det/pad/"));
-  fPadDirectory->SetGuidance("GEM pad parameters");
-
   fRootFileCmd.reset(new G4UIcmdWithAString("/lsrp/RootFile",this));
   fRootFileCmd->SetGuidance("Select output ROOT file");
   fRootFileCmd->SetParameterName("choice",false);
   fRootFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  fPhotonNumberCmd.reset(new G4UIcmdWithAnInteger("/lsrp/PhotonNumber",this));
-  fPhotonNumberCmd->SetGuidance("Set photon number per pulse");
-  fPhotonNumberCmd->SetParameterName("level",false);
-  fPhotonNumberCmd->SetDefaultValue(1);
-
-  auto setCmd  = [this](auto & CmdPtr, double & par, std::string dir, std::string title, std::string name, std::string unit)
-  {
-      CmdPtr.reset(new G4UIcmdWithADoubleAndUnit((dir+"/"+name).c_str(), this));
-      CmdPtr->SetGuidance(title.c_str());
-      CmdPtr->SetParameterName(name.c_str(), false);
-      CmdPtr->SetUnitCategory(unit.c_str());
-      CmdPtr->AvailableForStates(G4State_Idle);
-      fMap[static_cast<G4UIcommand*>(CmdPtr.get())] = & par;
-  };
-
-  AddCmdDouble(test_parameter, "/lsrp/TestParameter"," This is the test parameter", "Length");
+  AddCmdDouble(Cfg.photon_number, "/lsrp/PhotonNumberPerPulse","Number of photons per pulse", "");
   AddCmdDouble(Cfg.step_max, "/lsrp/StepMax","Miximum allowed step", "Length");
-  setCmd(fStepMaxCmd,Cfg.step_max,   "/lsrp",, "stepMax","Length");
+  AddCmdDouble(Cfg.pad_size,   "/lsrp/GEM/pad/Size","Size of the pad", "Length");
+  AddCmdDouble(Cfg.pad_xsize, "/lsrp/GEM/pad/SizeX","X size of the pad", "Length");
+  AddCmdDouble(Cfg.pad_ysize, "/lsrp/GEM/pad/SizeY","Y size of the pad", "Length");
+  AddCmdDouble(Cfg.pad_rough_size_x, "/lsrp/GEM/pad/RoughSizeX","Big pad size x","Length");
+  AddCmdDouble(Cfg.pad_rough_size_y, "/lsrp/GEM/pad/RoughSizeY","Big pad size y", "Length");
+  AddCmdDouble(Cfg.pad_high_sens_xwidth, "/lsrp/GEM/HighSensSizeX","X High sensitive width", "Length");
+  AddCmdDouble(Cfg.pad_high_sens_ywidth, "/lsrp/GEM/HighSensSizeY","Y High sensitive width","Length");
+  AddCmdDouble(Cfg.beam.sigmaX, "/lsrp/beam/SigmaX","Beam X angular spread", "Angle");
+  AddCmdDouble(Cfg.beam.sigmaY, "/lsrp/beam/SigmaY","Beam Y angular spread", "Angle");
+  AddCmdDouble(Cfg.beam.I, "/lsrp/beam/Current","Beam current", "Electric current");
+  AddCmdDouble(Cfg.beam.E, "/lsrp/beam/Energy","Beam energy", "Energy");
+  AddCmdDouble(Cfg.laser.lambda, "/lsrp/laser/WaveLength","Laser wave length", "Length");
+  AddCmdDouble(Cfg.laser.pulse_energy, "/lsrp/laser/PulseEnergy","Laser pulse energy", "Energy");
+  AddCmdDouble(Cfg.laser.pulse_time, "/lsrp/laser/PulseTime","Laser pulse time", "Time");
+  AddCmdDouble(Cfg.laser.frequency, "/lsrp/laser/PulseFrequency","Laser pulse frequency", "Frequency");
+  AddCmdDouble(Cfg.laser.pulse_size, "/lsrp/laser/PulseSize","Laser pulse size", "Length");
 
-  setCmd(fPadSizeCmd,Cfg.pad_size,   "/lsrp/GEM/pad","Size of the pad", "Size","Length");
-  setCmd(fPadSizeXCmd,Cfg.pad_xsize, "/lsrp/GEM/pad","X size of the pad", "SizeX","Length");
-  setCmd(fPadSizeYCmd,Cfg.pad_ysize, "/lsrp/GEM/pad","Y size of the pad", "SizeY","Length");
-  setCmd(fRoughSizeXCmd,Cfg.pad_rough_size_x, "/lsrp/GEM/pad","Big pad size x", "RoughSizeX","Length");
-  setCmd(fRoughSizeYCmd,Cfg.pad_rough_size_y, "/lsrp/GEM/pad","Big pad size y", "RoughSizeY","Length");
-  setCmd(fHighSensWidthXCmd,Cfg.pad_high_sens_xwidth, "/lsrp/GEM","X High sensitive width", "HighSensSizeX","Length");
-  setCmd(fHighSensWidthYCmd,Cfg.pad_high_sens_ywidth, "/lsrp/GEM","Y High sensitive width", "HighSensSizeY","Length");
+  AddCmdDouble(Cfg.world_size_x, "/lsrp/World/SizeX","World size x", "Length");
+  AddCmdDouble(Cfg.world_size_y, "/lsrp/World/SizeY","World size y", "Length");
+  AddCmdDouble(Cfg.world_size_z, "/lsrp/World/SizeZ","World size z", "Length");
 
-  setCmd(fBeamSigmaXCmd,Cfg.beam.sigmaX, "/lsrp/beam","Beam X angular spread", "SigmaX","Angle");
-  setCmd(fBeamSigmaYCmd,Cfg.beam.sigmaY, "/lsrp/beam","Beam Y angular spread", "SigmaY","Angle");
-  setCmd(fBeamCurrentCmd,Cfg.beam.I, "/lsrp/beam","Beam current", "Current","Electric current");
-  setCmd(fBeamEnergyCmd,Cfg.beam.E, "/lsrp/beam","Beam energy", "Energy","Energy");
+  AddCmdDouble(Cfg.world_size_x, "/lsrp/GEM/SizeX","GEM size x", "Length");
+  AddCmdDouble(Cfg.world_size_x, "/lsrp/GEM/SizeY","GEM size y", "Length");
+  AddCmdDouble(Cfg.gem_world_distance, "/lsrp/GEM/DistanceToWorldEdge","GEM-world distance", "Length");
 
-  setCmd(fLaserWaveLengthCmd,Cfg.laser.lambda, "/lsrp/laser","Laser wave length", "WaveLength","Length");
-  setCmd(fLaserPulseEnergyCmd,Cfg.laser.pulse_energy, "/lsrp/laser","Laser pulse energy", "PulseEnergy","Energy");
-  setCmd(fLaserPulseTimeCmd,Cfg.laser.pulse_time, "/lsrp/laser","Laser pulse time", "PulseTime","Time");
-  setCmd(fLaserFrequencyCmd,Cfg.laser.frequency, "/lsrp/laser","Laser pulse frequency", "PulseFrequency","Frequency");
-  setCmd(fLaserPulseSizeCmd,Cfg.laser.pulse_size, "/lsrp/laser","Laser pulse size", "PulseSize","Length");
+  AddCmdDouble(Cfg.converter_width, "/lsrp/Converter/Width","Converter width", "Length");
+  AddCmdDouble(Cfg.converter_size,   "/lsrp/Converter/Size","Converter size (x,y)", "Length");
 
-  setCmd(fWorldSizeX,Cfg.world_size_x, "/lsrp/World","World size x", "SizeX","Length");
-  setCmd(fWorldSizeY,Cfg.world_size_y, "/lsrp/World","World size y", "SizeY","Length");
-  setCmd(fWorldSizeZ,Cfg.world_size_z, "/lsrp/World","World size z", "SizeZ","Length");
+  AddCmdDouble(Cfg.converter_gem_distance, "/lsrp/Converter/DistanceToGEM","Converter - GEM distance", "Length");
 
-  setCmd(fWorldSizeX,Cfg.world_size_x, "/lsrp/GEM","GEM size x", "SizeX","Length");
-  setCmd(fWorldSizeX,Cfg.world_size_x, "/lsrp/GEM","GEM size y", "SizeY","Length");
-  setCmd(fGEMWorldDistance, Cfg.gem_world_distance, "/lsrp/GEM","GEM-world distance", "DistanceToWorldEdge","Length");
+  AddCmdDouble(Cfg.flange_gem_distance, "/lsrp/Flange/DistanceToGEM","The distance from flange to GEM detector", "Length");
+  AddCmdDouble(Cfg.flange_width, "/lsrp/Flange/Width","Flange width", "Length");
 
-  setCmd(fConverterWidth,Cfg.converter_width, "/lsrp/Converter","Converter width", "Width","Length");
-  setCmd(fConverterSize,Cfg.converter_size,   "/lsrp/Converter","Converter size (x,y)", "Size","Length");
-
-  setCmd(fConverterGEMDistance,Cfg.converter_gem_distance, "/lsrp/Converter","Converter - GEM distance", "DistanceToGEM","Length");
-
-  setCmd(fFlangeGEMDistance, Cfg.flange_gem_distance, "/lsrp/Flange","The distance from flange to GEM detector", "DistanceToGEM","Length");
-  setCmd(fFlangeWidth, Cfg.flange_width, "/lsrp/Flange","Flange width", "Width","Length");
-
-  setCmd(fMirrorFlangeDistance, Cfg.mirror_flange_distance, "/lsrp","Mirror - flange distance", "MirrorFlangeDistance","Length");
-  setCmd(fMirrorWidth, Cfg.mirror_width, "/lsrp/Mirror","Mirror width",   "Width","Length");
-  setCmd(fMirrorSizeX, Cfg.mirror_size_x, "/lsrp/Mirror","Mirror size x", "SizeX","Length");
-  setCmd(fMirrorSizeY, Cfg.mirror_size_y, "/lsrp/Mirror","Mirror size y", "SizeY","Length");
-  setCmd(fVacuumChamberSize, Cfg.vacuum_chamber_size, "/lsrp/VacuumChamber","Vacuum chamber size", "Size","Length");
-  setCmd(fPhotonFlightLength, Cfg.photon_flight_length, "/lsrp","Photon Flight length", "PhotonFlightLength","Length");
-
+  AddCmdDouble(Cfg.mirror_flange_distance, "/lsrp/MirrorFlangeDistance","Mirror - flange distance", "Length");
+  AddCmdDouble(Cfg.mirror_width, "/lsrp/Mirror/Width","Mirror width",   "Length");
+  AddCmdDouble(Cfg.mirror_size_x, "/lsrp/Mirror/SizeX","Mirror size x", "Length");
+  AddCmdDouble(Cfg.mirror_size_y, "/lsrp/Mirror/SizeY","Mirror size y", "Length");
+  AddCmdDouble(Cfg.vacuum_chamber_size, "/lsrp/VacuumChamber/Size","Vacuum chamber size", "Length");
+  AddCmdDouble(Cfg.photon_flight_length, "/lsrp/PhotonFlightLength","Photon Flight length", "Length");
 }
 
 
@@ -152,34 +120,12 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
     auto p = fCmdMapDouble.find(command);
     if (  p!=fCmdMapDouble.end() ) 
     {
-        std::cout << "FIND TEST COMMAND: " << std::endl;
         *p->second.data = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
-        std::cout << "newValue = " << newValue << " " << *p->second.data << std::endl;
+        std::cout << "newValue = " << newValue << " " << *p->second.data << "  for name = " << p->second.name << std::endl;
     }
   }
   catch(...)
   {
-  }
-  try
-  {
-    auto p = fMap.find(command);
-    if (  p!=fMap.end() ) 
-    {
-        *p->second = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
-    }
-  }
-  catch(...)
-  {
-  }
-
-  if( command == fStepMaxCmd.get() )
-  {
-      DetectorConstruction::Instance()->SetMaxStep(Cfg.step_max);
-  }   
-
-  if(command == fPhotonNumberCmd.get())
-  {
-    Cfg.photon_number = fPhotonNumberCmd->GetNewIntValue(newValue);
   }
 
   if( command == fRootFileCmd.get() )
@@ -202,7 +148,7 @@ void DetectorMessenger::AddCmdDouble(double & par, const std::string & name, con
             std::make_pair<G4UIcommand*,  CmdItem_t<double> > 
             (
                 static_cast<G4UIcommand*>(command),
-                {std::unique_ptr<G4UIcommand>(command), &par}
+                {std::unique_ptr<G4UIcommand>(command), &par, name}
             )
         ); 
 }

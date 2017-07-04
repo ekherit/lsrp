@@ -54,75 +54,20 @@ class DetectorMessenger: public G4UImessenger
     
   private:
     static DetectorMessenger * fgInstance;
-    //DetectorConstruction*  fDetectorConstruction;
-
-    std::unique_ptr<G4UIdirectory>    fLaserDirectory;
-    std::unique_ptr<G4UIdirectory>    fBeamDirectory;
-    std::unique_ptr<G4UIdirectory>    fDetectorDirectory;
-    std::unique_ptr<G4UIdirectory>    fPadDirectory;
-
-    std::unique_ptr<G4UIcmdWithADoubleAndUnit> fStepMaxCmd;
-    std::unique_ptr<G4UIcmdWithAnInteger> fPhotonNumberCmd;
     std::unique_ptr<G4UIcmdWithAString>   fRootFileCmd;
-
-
-
-    //std::unique_ptr<G4UIdirectory>    fDirectory;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fGEMSizeX;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fGEMSizeY;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeXCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPadSizeYCmd;
-
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fWorldSizeX;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fWorldSizeY;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fWorldSizeZ;
-
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fGEMWorldDistance;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fConverterWidth;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fConverterGEMDistance;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fConverterSize;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fFlangeGEMDistance;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fFlangeWidth;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fMirrorFlangeDistance;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fPhotonFlightLength;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fVacuumChamberSize;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fMirrorSizeX;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fMirrorSizeY;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fMirrorWidth;
-
-
-
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fHighSensWidthXCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fHighSensWidthYCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fRoughSizeXCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fRoughSizeYCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamSigmaYCmd; //vertical angular spread at 1.55 GeV
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamSigmaXCmd; //radial angular spread at 1.55 GeV
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamCurrentCmd; //mA
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fBeamEnergyCmd; 
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserWaveLengthCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserPulseEnergyCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserPulseTimeCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserFrequencyCmd;
-    //std::unique_ptr<G4UIcmdWithADoubleAndUnit> fLaserPulseSizeCmd;
-
-    std::map<G4UIcommand*, double *> fMap; //id of the Cmd is connected with the variable disired to set
+    std::unique_ptr<G4UIdirectory>    fDirectory;
 
     template<typename DataType> 
     struct CmdItem_t
     {
         std::unique_ptr<G4UIcommand>  command;
-        //G4UIcommand *  command;
         DataType * data;
+        std::string name;
     };
 
-    std::map<G4UIcommand*,  CmdItem_t <double> > fCmdMapDouble;
+    std::map<G4UIcommand*,  CmdItem_t <double> > fCmdMapDouble; //continer with the G4UIcommands
 
     void AddCmdDouble(double & par, const std::string & name, const std::string & title, const std::string & unit);
 
 };
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 #endif

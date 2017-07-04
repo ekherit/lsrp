@@ -38,7 +38,7 @@ const G4double mkrad = 1e-6*radian;
 
 struct Config_t
 {
-	unsigned photon_number=0; //number of photons in one pulse
+	double photon_number=0; //number of photons in one pulse
 
 	//geometry
     double world_size_x = 0.1*m;
