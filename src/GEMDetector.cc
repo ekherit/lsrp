@@ -19,6 +19,7 @@
 #include "GEMDetector.hh"
 #include "G4Tubs.hh"
 #include "G4UserLimits.hh"
+#include "G4GeometryManager.hh"
 #include "Config.h"
 
 #include "G4SystemOfUnits.hh"
@@ -33,6 +34,9 @@ GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double 
   Cu     = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
   G4Tubs * KaptonSV = new G4Tubs("Kapton",0,fRadius, fWidth/2.,0.*deg,360.*deg);
   G4Tubs * CuprumSV = new G4Tubs("Cuprum",0,fRadius, fCuprumWidth/2.,0.*deg,360.*deg);
+
+  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(KaptonSV));
+  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(CuprumSV));
   //define logical volume for kapton
   LV.reset(new G4LogicalVolume(KaptonSV, kapton,"Kapton"));
   //define cuprum
@@ -40,7 +44,7 @@ GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double 
   //place logical cuprum inside logical kapton
   for(int i=0;i<2;i++)
   {
-    new G4PVPlacement(0, //no rotation
+    auto pv = new G4PVPlacement(0, //no rotation
         G4ThreeVector(0,0,(2*i-1)*(fKaptonWidth+fCuprumWidth)/2.0), //position
         CuprumLV,
         "Cuprum", //the name
@@ -48,8 +52,37 @@ GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double 
         false, //no boolen operations
         i, //copy number
         true); //check overlaps
+    PhysicalVolumeListList.emplace_back(std::unique_ptr<G4VPhysicalVolume>(pv));
   }
 }
+
+void GEMDetector::AmplificationCascade::open_geometry(void)
+{
+    G4GeometryManager * geometry=G4GeometryManager::GetInstance();
+    for(auto & pv : PhysicalVolumeListList)
+    {
+        geometry->OpenGeometry(pv.get());
+    }
+}
+
+void GEMDetector::AmplificationCascade::close_geometry(void)
+{
+    G4GeometryManager * geometry=G4GeometryManager::GetInstance();
+    for(auto & pv : PhysicalVolumeListList)
+    {
+        geometry->CloseGeometry(pv.get());
+    }
+}
+
+void GEMDetector::AmplificationCascade::update_geometry(double size)
+{
+    for(auto & p : SolidVolumeListList)
+    {
+        G4Tubs * sv = static_cast<G4Tubs*>( p.get());
+        sv->SetOuterRadius(size/2.0);
+    }
+}
+
 
 
 G4Material * EpoxyMaterial(void)
@@ -103,14 +136,18 @@ GEMDetector::GEMDetector(void)
     + fInductionLength + fPadWidth*2;
 
   G4Tubs * solid_volume = new G4Tubs("GEM",0,fRadius, fGEMWidth/2.,0.*deg,360.*deg);
+  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(solid_volume));
   Ar = G4NistManager::Instance()->FindOrBuildMaterial("G4_Ar");
   LV.reset(new G4LogicalVolume(solid_volume, Ar,"GEM"));
 
   //describe corpus which is made from stef
   G4Tubs * StefSV = new G4Tubs("STEF",0.,fRadius,fStefWidth/2.,0.*deg,360.*deg);
+  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(StefSV));
   G4LogicalVolume * stefLV = new G4LogicalVolume(StefSV, StefMaterial(),"Stef");
   fStefVolume = stefLV;
   //place front stef
+  PhysicalVolumeListList.emplace_back ( 
+          std::unique_ptr<G4VPhysicalVolume>(
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,-fGEMWidth/2.0+fStefWidth/2.0), //position
       stefLV,
@@ -118,8 +155,11 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       0, //copy number
-      fCheckOverlaps); //check overlaps
+      fCheckOverlaps) //check overlaps
+  ));
   //place back stef
+  PhysicalVolumeListList.emplace_back ( 
+          std::unique_ptr<G4VPhysicalVolume>(
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,+fGEMWidth/2.0-fPadWidth-fStefWidth/2.0), //position
       stefLV,
@@ -127,13 +167,17 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       1, //copy number
-      fCheckOverlaps); //check overlaps
+      fCheckOverlaps) //check overlaps
+  ));
 
   //create pad and back electrondes
   G4Tubs * PadSV = new G4Tubs("Pads",0.,fRadius,fPadWidth/2.,0.*deg,360.*deg);
+  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(PadSV));
   G4Material * Cu = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
   G4LogicalVolume * padLV = new G4LogicalVolume(PadSV, Cu,"Pad");
   fPadZposition = fGEMWidth/2.0-fPadWidth-fStefWidth-fPadWidth/2.0;
+  PhysicalVolumeListList.emplace_back ( 
+          std::unique_ptr<G4VPhysicalVolume>(
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,fPadZposition), //position
       padLV,
@@ -141,7 +185,10 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       0, //copy number
-      fCheckOverlaps); //check overlaps
+      fCheckOverlaps) //check overlaps
+  ));
+  PhysicalVolumeListList.emplace_back ( 
+          std::unique_ptr<G4VPhysicalVolume>(
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,fGEMWidth/2.0-fPadWidth/2.0), //position
       padLV,
@@ -149,11 +196,16 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       1, //copy number
-      fCheckOverlaps); //check overlaps
+      fCheckOverlaps) //check overlaps
+  ));
 
   //describe drift region
   G4Tubs * DriftSV = new G4Tubs("Drift",0.,fRadius,fDriftLength/2.0,0.*deg,360.*deg);
+  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(DriftSV));
   fDriftVolume.reset(new G4LogicalVolume(DriftSV, Ar,"DriftVolume"));
+
+  PhysicalVolumeListList.emplace_back ( 
+          std::unique_ptr<G4VPhysicalVolume>(
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,-fGEMWidth/2.0+fStefWidth+fDriftLength/2.0), //position
       fDriftVolume.get(),
@@ -161,30 +213,38 @@ GEMDetector::GEMDetector(void)
       LV.get(), //mother logical volume
       false, //no boolen operations
       0, //copy number
-      fCheckOverlaps); //check overlaps
+      fCheckOverlaps) //check overlaps
+  ));
 
   //Describe amplification cascade
   fAmplCascade.reset(new AmplificationCascade(2*fRadius, fKaptonWidth, fCuprumWidth));
   for(int i=0;i<fCascadeNumber; i++)
   {
     G4double z0 = -fGEMWidth/2.0+fStefWidth+fDriftLength;
-    new G4PVPlacement(0, //no rotation
-        G4ThreeVector(0,0,z0 + fCascadeWidth/2. + i*(fCascadeWidth+fTransferLength)), //position
-        fAmplCascade->GetLogicalVolume(),
-        "AmplificationCascadeVolume", //the name
-        LV.get(), //mother logical volume
-        false, //no boolen operations
-        i, //copy number
-        fCheckOverlaps); //check overlaps
+      PhysicalVolumeListList.emplace_back ( 
+              std::unique_ptr<G4VPhysicalVolume>(
+            new G4PVPlacement(0, //no rotation
+                G4ThreeVector(0,0,z0 + fCascadeWidth/2. + i*(fCascadeWidth+fTransferLength)), //position
+                fAmplCascade->GetLogicalVolume(),
+                "AmplificationCascadeVolume", //the name
+                LV.get(), //mother logical volume
+                false, //no boolen operations
+                i, //copy number
+                fCheckOverlaps)//check overlaps
+
+            ));   
   }
 
   //describe TransfereVolume
   G4Tubs * TransferSV = new G4Tubs("Transfere",0.,fRadius,fTransferLength/2.0,0.*deg,360.*deg);
+  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(TransferSV));
   fTransferVolume.reset(new G4LogicalVolume(TransferSV, Ar,"TransfereVolume"));
   for(int i=0;i<fCascadeNumber-1;i++)
   {
     G4double z0 = -fGEMWidth/2.0+fStefWidth+fDriftLength+fCascadeWidth;
     std::string name = "TransfereVolume"+boost::lexical_cast<std::string>(i+1);
+    PhysicalVolumeListList.emplace_back ( 
+            std::unique_ptr<G4VPhysicalVolume>(
     new G4PVPlacement(0, //no rotation
         G4ThreeVector(0,0,z0 + fTransferLength/2. + i*(fCascadeWidth + fTransferLength)), //position
         fTransferVolume.get(),
@@ -193,7 +253,8 @@ GEMDetector::GEMDetector(void)
         LV.get(), //mother logical volume
         false, //no boolen operations
         i+1, //copy number //zero is for DriftVolume
-        fCheckOverlaps); //check overlaps
+        fCheckOverlaps) //check overlaps
+    ));
   }
   PrintGeometry();
 }
@@ -202,6 +263,40 @@ void GEMDetector::SetUserLimits(G4UserLimits * user_limits)
 {
   fDriftVolume->SetUserLimits(user_limits);
   fTransferVolume->SetUserLimits(user_limits);
+}
+
+
+void GEMDetector::open_geometry(void)
+{
+    G4GeometryManager * geometry=G4GeometryManager::GetInstance();
+    for(auto & pv : PhysicalVolumeListList)
+    {
+        geometry->OpenGeometry(pv.get());
+    }
+    fAmplCascade->open_geometry();
+}
+
+void GEMDetector::update_geometry(double size)
+{
+    for(auto & p : SolidVolumeListList)
+    {
+        G4Tubs * sv = static_cast<G4Tubs*>( p.get());
+        sv->SetOuterRadius(size/2.0);
+    }
+    fAmplCascade->update_geometry(size);
+    fSizeY = size;
+    fSizeX = size;
+    PrintGeometry();
+}
+
+void GEMDetector::close_geometry(void)
+{
+    G4GeometryManager * geometry=G4GeometryManager::GetInstance();
+    for(auto & pv : PhysicalVolumeListList)
+    {
+        geometry->CloseGeometry(pv.get());
+    }
+    fAmplCascade->close_geometry();
 }
 
 void GEMDetector::PrintGeometry(void)

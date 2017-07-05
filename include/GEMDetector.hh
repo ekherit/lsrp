@@ -20,6 +20,7 @@
 #define IBN_LSRP_GEM_H
 #include <memory>
 #include <vector>
+#include <list>
 #include "G4LogicalVolume.hh"
 #include "G4NistManager.hh"
 #include "G4Tubs.hh"
@@ -54,15 +55,22 @@ class GEMDetector
     G4Material * kapton;
     G4Material * Cu;
     std::unique_ptr<G4LogicalVolume>  LV;
+    std::list<std::unique_ptr<G4VSolid>>  SolidVolumeListList;
+    std::list<std::unique_ptr<G4VPhysicalVolume>>  PhysicalVolumeListList;
     public:
     G4LogicalVolume * GetLogicalVolume(void) { return LV.get(); }
     AmplificationCascade(G4double size, G4double kapton_width=50e-6*CLHEP::m, G4double cuprum_width=5e-6*CLHEP::m);
     G4double GetWidth(void) const { return fKaptonWidth+2*fCuprumWidth;}
     G4double GetKaptonWidth(void) const { return fKaptonWidth; }
     G4double GetCuprumWidth(void) const { return fCuprumWidth; }
+    void open_geometry(void);
+    void update_geometry(double size);
+    void close_geometry(void);
   };
   std::unique_ptr<AmplificationCascade> fAmplCascade;
   std::unique_ptr<G4LogicalVolume> fTransferVolume;
+  std::list<std::unique_ptr<G4VSolid>>  SolidVolumeListList;
+  std::list<std::unique_ptr<G4VPhysicalVolume>>  PhysicalVolumeListList;
   G4Material * Ar;
   public:
     GEMDetector(void);
@@ -76,6 +84,10 @@ class GEMDetector
     G4double GetPadZ(void) const {return fPadZposition;}
     bool fCheckOverlaps=true;
     void SetUserLimits(G4UserLimits * );
+
+    void open_geometry(void);
+    void update_geometry(double size);
+    void close_geometry(void);
 };
 
 #endif

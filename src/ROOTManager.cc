@@ -16,8 +16,11 @@
  * =====================================================================================
  */
 
+#include <TSystem.h>
 #include "ROOTManager.hh"
 #include "Config.h"
+
+#include <stdio.h>
 
 ROOTManager * ROOTManager::fgInstance = 0;
 
@@ -29,25 +32,46 @@ ROOTManager* ROOTManager::Instance(void)
 
 ROOTManager::ROOTManager(void)
 {
-  SetRootFile(Cfg.output_file.c_str());
+  SetRootFile(Cfg.output_file.c_str()); //set default ROOT file
 }
 
 ROOTManager::~ROOTManager()
 {
+  CleanOldFilesAndTree();
 }
 
 void ROOTManager::SetRootFile(const char * root_file_name)
 {
+  CleanOldFilesAndTree();
+  std::cout << "Set new ROOT file " << root_file_name << std::endl;
   Cfg.output_file = root_file_name;
-  if(tree) tree->Write(); //save tree
-  //tree will be deleted while destroing TFile
-  file.reset(new TFile(Cfg.output_file.c_str(),"RECREATE"));
+  file = new TFile(Cfg.output_file.c_str(),"RECREATE");
   InitTree();
+}
+
+void ROOTManager::CleanOldFilesAndTree(void)
+{
+  if(file != nullptr ) 
+  {
+      auto events_in_tree  = tree != nullptr  ? tree->GetEntries() : 0;
+      file->Close();
+      //tree will automatically be deleted while destroing TFile no need to delete tree manually ??? strange
+      delete file;
+      if(events_in_tree == 0)  //Remove file with no events this works
+      {
+        remove(Cfg.output_file.c_str());
+      }
+  }
 }
 
 void ROOTManager::InitTree(void)
 {
   tree = new TTree("lsrp","Laser polarimeter simulation");
   tree->Branch("event",&event);
+}
+
+void ROOTManager::Write(void)
+{
+    if(tree) tree->Write();
 }
 

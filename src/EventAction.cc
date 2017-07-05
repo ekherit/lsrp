@@ -249,9 +249,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
   }
   Revent.asym2 = Revent.P*(nup-ndown)/(nup+ndown);
 
-
-
-  RM->tree->Fill();
+  if(RM->tree != nullptr) RM->tree->Fill();
 
   // periodic printing
 

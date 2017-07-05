@@ -9,25 +9,26 @@
 /hits/verbose 0
 #/random/setSeeds 1 2
 
+/lsrp/RootFile test.root
 
-#/lsrp/RootFile f2kHz_300sec_l2mm_100mkJ_12mmPb.root
-/lsrp/RootFile tmp.root
-/lsrp/PhotonFlightLength 42 m
+/lsrp/PhotonFlightLength 31 m
 /lsrp/beam/Energy  4.100 GeV
 /lsrp/beam/SigmaY  20 mkrad
 /lsrp/beam/SigmaX  100 mkrad
-/lsrp/beam/Current 5.0 milliampere
+/lsrp/beam/Current 1.0 milliampere
 
 /lsrp/laser/WaveLength 0.527 micrometer
-/lsrp/laser/Frequency 2 kHz
+/lsrp/laser/PulseFrequency 1.945 kHz
 /lsrp/laser/PulseEnergy 100 mkJ
-/lsrp/laser/PulseTime 6  nanosecond
+/lsrp/laser/PulseTime 9  nanosecond
+/lsrp/laser/PulseSize 1  mm
 
-/lsrp/ConverterWidth 12 mm
-/lsrp/ConverterGEMDistance 2 mm
-/lsrp/det/pad/SizeX 1 mm
-/lsrp/det/pad/SizeY 1 mm
-/lsrp/det/pad/HighSensWidthX 1000 mm
-/lsrp/det/pad/HighSensWidthY 1000 mm
+/lsrp/GEM/Size  50 cm
+/lsrp/Converter/Size  50 cm
+/lsrp/Converter/Width 12 mm
+/lsrp/Converter/DistanceToGEM 2 mm
 
-/run/beamOn 50000
+/lsrp/Flange/Width 0.5 mm
+/lsrp/Flange/DistanceToGEM 20 m
+
+/run/beamOn 20000

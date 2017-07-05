@@ -237,8 +237,8 @@ void DetectorConstruction::SetCheckOverlaps(G4bool checkOverlaps)
 void DetectorConstruction::CalculateGeometry(void)
 {
     std::cout << "Calculate geometry" << std::endl;
-    std::vector<double> ysizes{Cfg.world_size_y, Cfg.vacuum_chamber_size,Cfg.mirror_size_y,Cfg.converter_size, Cfg.gem_size_y};
-    std::vector<double> xsizes{Cfg.world_size_x, Cfg.vacuum_chamber_size,Cfg.mirror_size_x,Cfg.converter_size, Cfg.gem_size_x};
+    std::vector<double> ysizes{Cfg.world_size_y, Cfg.vacuum_chamber_size,Cfg.mirror_size_y,Cfg.converter_size, Cfg.gem_size_y, Cfg.gem_size};
+    std::vector<double> xsizes{Cfg.world_size_x, Cfg.vacuum_chamber_size,Cfg.mirror_size_x,Cfg.converter_size, Cfg.gem_size_x, Cfg.gem_size};
     //calculate world xy size:
     Cfg.world_size_y = *std::max_element(ysizes.begin(), ysizes.end());
     Cfg.world_size_x = *std::max_element(xsizes.begin(), xsizes.end());
@@ -267,7 +267,7 @@ void DetectorConstruction::CalculateGeometry(void)
     fVacuumChamberPosition  = G4ThreeVector(0,0, vacuum_chamber_pos);
     std::cout  << "VacuumChamber: z = " << fVacuumChamberPosition.z() << " width = "  <<  fVacuumChamberLength << std::endl;
     fSensBeforeConverterPosition =  fConverterPosition - G4ThreeVector(0,0, Cfg.converter_width/2.0  + Cfg.sens_before_converter_width/2.0);
-    std::cout  << "SensBeforeConverter: z = " << fSensBeforeConverterPosition.z() << " width = "  <<  Cfg.sens_before_converter_width;
+    std::cout  << "SensBeforeConverter: z = " << fSensBeforeConverterPosition.z() << " width = "  <<  Cfg.sens_before_converter_width << std::endl;;
 }
 
 void DetectorConstruction::UpdateGeometry(void)
@@ -275,11 +275,13 @@ void DetectorConstruction::UpdateGeometry(void)
     CalculateGeometry();
     fCheckOverlaps = false;
     for (auto & p : fVol) p.second.open_geometry();
+    GEM->open_geometry();
 
-    G4GeometryManager * geometry=G4GeometryManager::GetInstance();
-    //GEM detector
-    geometry->OpenGeometry(fGem);
+    //G4GeometryManager * geometry=G4GeometryManager::GetInstance();
+    ////GEM detector
+    //geometry->OpenGeometry(fGem);
     fGem->SetTranslation(fGEMPosition);
+    GEM->update_geometry(Cfg.gem_size);
 
     fVol["World"].update_geometry(Cfg.world_size_x,Cfg.world_size_y, Cfg.world_size_z, {0,0,0});
     fVol["Converter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.converter_width, fConverterPosition);
@@ -288,7 +290,8 @@ void DetectorConstruction::UpdateGeometry(void)
     fVol["Flange"].update_geometry(Cfg.vacuum_chamber_size, Cfg.vacuum_chamber_size, Cfg.flange_width, fFlangePosition-fVacuumChamberPosition);
     fVol["Mirror"].update_geometry(Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, fMirrorPosition-fVacuumChamberPosition);
     for (auto & p : fVol) p.second.close_geometry();
-    geometry->CloseGeometry(fGem);
+    //geometry->CloseGeometry(fGem);
+    GEM->close_geometry();
     fCheckOverlaps = true;
 }
 

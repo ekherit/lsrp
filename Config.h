@@ -46,6 +46,7 @@ struct Config_t
     double world_size_z = 100*m;
     double gem_world_distance = 10*cm; //the position of GEM from right (z>0) edge of the world
 	double gem_width; //gem width  will calculated from GEM
+    double gem_size = 50*cm; //gem size
 	double gem_size_x=50*cm; //xy size of the gem in mm 
 	double gem_size_y=50*cm; //xy size of the gem in mm 
 	double converter_gem_distance=3*mm; //distance between converter and GEM detector
@@ -70,7 +71,7 @@ struct Config_t
 	double pad_xsize = 1*mm;  //x size of signe pad in mm
 	double pad_ysize = 1*mm;  //y size of signe pad in mm
 	unsigned gem_cascade_number; //number of amplification cascades 3
-	std::string output_file; //output file name
+	std::string output_file = "tmp.root"; //output file name
 	unsigned test_beam = 0;
 	unsigned drift_spread;
 	unsigned long seed;

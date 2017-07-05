@@ -31,15 +31,16 @@ class ROOTManager
 {
   public:
     static ROOTManager* Instance(void);
-    std::unique_ptr<TFile> file;
-    //std::unique_ptr<TTree> tree;
-    TTree* tree=0;
+    TFile* file = nullptr;
+    TTree* tree= nullptr;
     RootEvent event;
     void SetRootFile(const char * file="");
+    ~ROOTManager(); 
+    void Write(void);
   private:
     ROOTManager(void); 
+    void CleanOldFilesAndTree(void);
     void InitTree(void);
-    ~ROOTManager(); 
     static ROOTManager* fgInstance;
 };
 

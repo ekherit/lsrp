@@ -90,8 +90,9 @@ DetectorMessenger::DetectorMessenger(void)
   AddCmdDouble(Cfg.world_size_y, "/lsrp/World/SizeY","World size y", "Length");
   AddCmdDouble(Cfg.world_size_z, "/lsrp/World/SizeZ","World size z", "Length");
 
-  AddCmdDouble(Cfg.world_size_x, "/lsrp/GEM/SizeX","GEM size x", "Length");
-  AddCmdDouble(Cfg.world_size_x, "/lsrp/GEM/SizeY","GEM size y", "Length");
+  AddCmdDouble(Cfg.gem_size, "/lsrp/GEM/Size","GEM size", "Length");
+  AddCmdDouble(Cfg.gem_size_x, "/lsrp/GEM/SizeX","GEM size x", "Length");
+  AddCmdDouble(Cfg.gem_size_x, "/lsrp/GEM/SizeY","GEM size y", "Length");
   AddCmdDouble(Cfg.gem_world_distance, "/lsrp/GEM/DistanceToWorldEdge","GEM-world distance", "Length");
 
   AddCmdDouble(Cfg.converter_width, "/lsrp/Converter/Width","Converter width", "Length");
