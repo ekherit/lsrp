@@ -6,7 +6,7 @@
 name := lsrp
 G4TARGET := $(name)
 G4EXLIB := true
-CPPFLAGS := -fPIC -std=c++11 `root-config --cflags` -I./  -I$(WORKDIR) -Wno-unused-variable -Wno-shadow
+CPPFLAGS := -fPIC -std=c++1y `root-config --cflags` -I./  -I$(WORKDIR) -Wno-unused-variable -Wno-shadow
 LDFLAGS :=  `root-config --libs`  \
 			-lboost_program_options \
 		#	-lMinuit  \
