@@ -66,8 +66,10 @@ class DetectorMessenger: public G4UImessenger
     };
 
     std::map<G4UIcommand*,  CmdItem_t <double> > fCmdMapDouble; //continer with the G4UIcommands
+    std::map<G4UIcommand*,  CmdItem_t <std::string> > fCmdMapString; //continer with the G4UIcommands
 
     void AddCmdDouble(double & par, const std::string & name, const std::string & title, const std::string & unit);
+    void AddCmdString(std::string & par, const std::string & name, const std::string & title);
 
 };
 #endif

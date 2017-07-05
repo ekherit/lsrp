@@ -62,6 +62,11 @@ struct Config_t
 	double photon_flight_length=25*m; //Photon flight length in mm
     double vacuum_chamber_size = 10*cm; 
 
+    std::string converter_material = "G4_Pb";
+    std::string mirror_material    = "quartz" ;
+    std::string world_material     = "G4_AIR";
+    std::string flange_material    = "G4_STAINLESS-STEEL";
+
     double sens_before_converter_width = 1*mm;
 
     double step_max=1000*mm; //Max allowed step

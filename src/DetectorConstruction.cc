@@ -91,17 +91,35 @@ void DetectorConstruction::DefineMaterials()
 {
     // Material definition 
 
-    G4NistManager* nistManager = G4NistManager::Instance();
+    //G4NistManager* nistManager = G4NistManager::Instance();
 
-    G4bool fromIsotopes = false;
+    //G4bool fromIsotopes = false;
 
     // Air defined using NIST Manager
-    nistManager->FindOrBuildMaterial("G4_AIR", fromIsotopes);
+    //nistManager->FindOrBuildMaterial("G4_AIR", fromIsotopes);
   
     // Lead defined using NIST Manager
-    fConverterMaterial  = nistManager->FindOrBuildMaterial("G4_Pb", fromIsotopes);
-    nistManager->FindOrBuildMaterial("G4_Cu", fromIsotopes);
-    nistManager->FindOrBuildMaterial("G4_KAPTON", fromIsotopes);
+    fConverterMaterial  = nistManager->FindOrBuildMaterial("G4_Pb");
+    nistManager->FindOrBuildMaterial("G4_Cu");
+    nistManager->FindOrBuildMaterial("G4_KAPTON");
+    //create the  quartz material
+    {
+
+        G4String name, symbol;             // a=mass of a mole;
+        G4double a, z, density;            // z=mean number of protons;  
+        G4int ncomponents, natoms; 
+
+        a = 28.09*g/mole;  
+        G4Element* elSi = new G4Element(name="Silicon", symbol="Si", z=14., a);  // create Si
+
+        a = 16.00*g/mole;
+        G4Element* elO  = new G4Element(name="Oxygen"  ,symbol="O" , z= 8., a);  // create O
+
+        density = 2.200*g/cm3;
+        G4Material* SiO2 = new G4Material(name="quartz", density, ncomponents=2); // create quartz
+        SiO2->AddElement(elSi, natoms=1);
+        SiO2->AddElement(elO , natoms=2);
+    }
   
     // Print materials
     G4cout << *(G4Material::GetMaterialTable()) << G4endl;
@@ -120,19 +138,21 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     // World
     //-------------------------------------------------------------------------
   
-    G4Material* air  = G4Material::GetMaterial("G4_AIR");
+    //G4Material* air  = G4Material::GetMaterial("G4_AIR");
+
+    //G4Material * world_material = nistManager->FindOrBuildMaterial(Cfg.world_material);
 
 
-    G4NistManager* nistManager = G4NistManager::Instance();
-    auto mater = [nistManager](const char * mat_name)
+    //G4NistManager* nistManager = G4NistManager::Instance();
+    auto mater = [this](const std::string & mat_name)
     {
-        return nistManager->FindOrBuildMaterial(mat_name);
+        return nistManager->FindOrBuildMaterial(mat_name.c_str());
     };
 
 
-    MakeVolume("World",G4Material::GetMaterial("G4_AIR"), BOX, Cfg.world_size_x, Cfg.world_size_y, Cfg.world_size_z);
+    MakeVolume("World",mater(Cfg.world_material), BOX, Cfg.world_size_x, Cfg.world_size_y, Cfg.world_size_z);
     MakeVolume("VacuumChamber",mater("G4_Galactic"), TUBE, Cfg.vacuum_chamber_size, 0, fVacuumChamberLength, "World", fVacuumChamberPosition);
-    MakeVolume("Flange",mater("G4_STAINLESS-STEEL"), TUBE, Cfg.vacuum_chamber_size, 0, Cfg.flange_width, "VacuumChamber", fFlangePosition - fVacuumChamberPosition);
+    MakeVolume("Flange",mater(Cfg.flange_material), TUBE, Cfg.vacuum_chamber_size, 0, Cfg.flange_width, "VacuumChamber", fFlangePosition - fVacuumChamberPosition);
     std::cout << "The positions  vac. cham z =" << fVacuumChamberPosition.z() + fVacuumChamberLength/2.0 << " flange z = " <<  fFlangePosition.z() << std::endl;
 
   
@@ -141,46 +161,35 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     // SiO2 or Cu
     //-------------------------------------------------------------------------
   
-    int mirror_type = 1; // 1 - SiO2 , 2 - Cu
-    G4Material* mirror_mat;
+    //int mirror_type = 1; // 1 - SiO2 , 2 - Cu
+    ////G4Material* mirror_mat;
   
-    switch(mirror_type)
-    {
-        case 1:
-        {
-            Cfg.mirror_width = 0.5 * cm;
-      
-            G4String name, symbol;             // a=mass of a mole;
-            G4double a, z, density;            // z=mean number of protons;  
-            G4int ncomponents, natoms; 
-  
-            a = 28.09*g/mole;  
-            G4Element* elSi = new G4Element(name="Silicon", symbol="Si", z=14., a);  // create Si
+    //switch(mirror_type)
+    //{
+    //    case 1:
+    //    {
+    //        Cfg.mirror_width = 0.5 * cm;
+    //  
 
-            a = 16.00*g/mole;
-            G4Element* elO  = new G4Element(name="Oxygen"  ,symbol="O" , z= 8., a);  // create O
+    //        //mirror_mat = nistManager->FindOrBuildMaterial("quartz");
+    //    } break;
+    //    case 2:
+    //    {
+    //        Cfg.mirror_width = 1 * cm; 
+    //        //mirror_mat = nistManager->FindOrBuildMaterial("G4_Cu");
+    //    } break;
+    //}
 
-            density = 2.200*g/cm3;
-            G4Material* SiO2 = new G4Material(name="quartz", density, ncomponents=2); // create quartz
-            SiO2->AddElement(elSi, natoms=1);
-            SiO2->AddElement(elO , natoms=2);
+    //mirror_mat = nistManager->FindOrBuildMaterial(mater(Cfg.mirror_material));
 
-            mirror_mat = nistManager->FindOrBuildMaterial("quartz");
-        } break;
-        case 2:
-        {
-            Cfg.mirror_width = 1 * cm; 
-            mirror_mat = nistManager->FindOrBuildMaterial("G4_Cu");
-        } break;
-    }
 
 
   
     G4RotationMatrix *rm = new G4RotationMatrix;
     rm->rotateX(-45*deg);		// rotation      
-    MakeVolume("Mirror",mirror_mat, BOX, Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, "VacuumChamber", fMirrorPosition - fVacuumChamberPosition, rm);
-    MakeVolume("Converter", fConverterMaterial, BOX, Cfg.converter_size, Cfg.converter_size,Cfg.converter_width, "World", fConverterPosition);
-    MakeVolume("SensBeforeConverter", G4Material::GetMaterial("G4_AIR"), BOX, Cfg.converter_size, Cfg.converter_size, 1*mm,"World", fSensBeforeConverterPosition, nullptr, 666);
+    MakeVolume("Mirror",mater(Cfg.mirror_material), BOX, Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, "VacuumChamber", fMirrorPosition - fVacuumChamberPosition, rm);
+    MakeVolume("Converter", mater(Cfg.converter_material), BOX, Cfg.converter_size, Cfg.converter_size,Cfg.converter_width, "World", fConverterPosition);
+    MakeVolume("SensBeforeConverter",  mater(Cfg.world_material), BOX, Cfg.converter_size, Cfg.converter_size, 1*mm,"World", fSensBeforeConverterPosition, nullptr, 666);
   
   //-------------------------------------------------------------------------
   // GEM
@@ -284,11 +293,16 @@ void DetectorConstruction::UpdateGeometry(void)
     GEM->update_geometry(Cfg.gem_size);
 
     fVol["World"].update_geometry(Cfg.world_size_x,Cfg.world_size_y, Cfg.world_size_z, {0,0,0});
+    fVol["World"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.world_material.c_str()));
     fVol["Converter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.converter_width, fConverterPosition);
+    fVol["Converter"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.converter_material.c_str()));
     fVol["SensBeforeConverter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.sens_before_converter_width, fSensBeforeConverterPosition);
+    fVol["SensBeforeConverter"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.world_material.c_str()));
     fVol["VacuumChamber"].update_geometry(Cfg.vacuum_chamber_size,Cfg.vacuum_chamber_size, fVacuumChamberLength, fVacuumChamberPosition);
     fVol["Flange"].update_geometry(Cfg.vacuum_chamber_size, Cfg.vacuum_chamber_size, Cfg.flange_width, fFlangePosition-fVacuumChamberPosition);
+    fVol["Flange"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.flange_material.c_str()));
     fVol["Mirror"].update_geometry(Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, fMirrorPosition-fVacuumChamberPosition);
+    fVol["Mirror"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.mirror_material.c_str()));
     for (auto & p : fVol) p.second.close_geometry();
     //geometry->CloseGeometry(fGem);
     GEM->close_geometry();

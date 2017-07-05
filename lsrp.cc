@@ -103,8 +103,6 @@ int main(int argc,char** argv)
 
   // Choose the Random engine
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
-  //set seed
-  //if(!opt.count("seed")) Cfg.seed=time(0);
 
   G4cout << "Set random seed to " << Cfg.seed << G4endl;
   CLHEP::HepRandom::setTheSeed(Cfg.seed);
@@ -154,8 +152,6 @@ int main(int argc,char** argv)
   delete runManager;
 #endif
 
-  delete  ROOTManager::Instance();
+  delete  ROOTManager::Instance(); //in order to remove TFile before ROOT garbage collection start
   return 0;
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....

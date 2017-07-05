@@ -13,7 +13,7 @@
 
 /lsrp/PhotonFlightLength 31 m
 /lsrp/beam/Energy  4.100 GeV
-/lsrp/beam/SigmaY  20 mkrad
+/lsrp/beam/SigmaY  50 mkrad
 /lsrp/beam/SigmaX  100 mkrad
 /lsrp/beam/Current 1.0 milliampere
 
@@ -24,11 +24,21 @@
 /lsrp/laser/PulseSize 1  mm
 
 /lsrp/GEM/Size  50 cm
+
 /lsrp/Converter/Size  50 cm
 /lsrp/Converter/Width 12 mm
-/lsrp/Converter/DistanceToGEM 2 mm
+/lsrp/Converter/DistanceToGEM 10 mm
+/lsrp/Converter/Material G4_Pb
 
 /lsrp/Flange/Width 0.5 mm
 /lsrp/Flange/DistanceToGEM 20 m
+
+/lsrp/World/Material G4_AIR
+
+/lsrp/Flange/Material G4_STAINLESS-STEEL
+
+#define Mirror
+/lsrp/Mirror/Material quartz  #or G4_Cu
+/lsrp/Mirror/Width    5 mm  #or 10 mm for G4_cu
 
 /run/beamOn 20000

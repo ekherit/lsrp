@@ -109,6 +109,11 @@ DetectorMessenger::DetectorMessenger(void)
   AddCmdDouble(Cfg.mirror_size_y, "/lsrp/Mirror/SizeY","Mirror size y", "Length");
   AddCmdDouble(Cfg.vacuum_chamber_size, "/lsrp/VacuumChamber/Size","Vacuum chamber size", "Length");
   AddCmdDouble(Cfg.photon_flight_length, "/lsrp/PhotonFlightLength","Photon Flight length", "Length");
+
+  AddCmdString(Cfg.world_material, "/lsrp/World/Material","World material");
+  AddCmdString(Cfg.converter_material, "/lsrp/Converter/Material","Converter material");
+  AddCmdString(Cfg.mirror_material, "/lsrp/Mirror/Material","Mirror material");
+  AddCmdString(Cfg.flange_material, "/lsrp/Flange/Material","Flange material");
 }
 
 
@@ -122,6 +127,19 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
     if (  p!=fCmdMapDouble.end() ) 
     {
         *p->second.data = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
+        std::cout << "newValue = " << newValue << " " << *p->second.data << "  for name = " << p->second.name << std::endl;
+    }
+  }
+  catch(...)
+  {
+  }
+
+  try
+  {
+    auto p = fCmdMapString.find(command);
+    if (  p!=fCmdMapString.end() ) 
+    {
+        *p->second.data = newValue;
         std::cout << "newValue = " << newValue << " " << *p->second.data << "  for name = " << p->second.name << std::endl;
     }
   }
@@ -153,3 +171,24 @@ void DetectorMessenger::AddCmdDouble(double & par, const std::string & name, con
             )
         ); 
 }
+
+void DetectorMessenger::AddCmdString(std::string & par, const std::string & name, const std::string & title)
+{
+    auto command = new G4UIcmdWithAString(name.c_str(), this); //create a command
+    command->SetGuidance(title.c_str()); //set description
+    std::vector<std::string> nms;
+    boost::split(nms,name,boost::is_any_of("/")); //find parameter name (without dirs)
+    command->SetParameterName(nms.back().c_str(), false); //set parameter name
+    //command->SetUnitCategory(unit.c_str()); //set units
+    command->AvailableForStates(G4State_Idle); //???
+    fCmdMapString.emplace //register in the list of known command
+        (
+            std::make_pair<G4UIcommand*,  CmdItem_t<std::string> > 
+            (
+                static_cast<G4UIcommand*>(command),
+                {std::unique_ptr<G4UIcommand>(command), &par, name}
+            )
+        ); 
+}
+
+

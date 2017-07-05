@@ -82,6 +82,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     std::unique_ptr<GEMDetector> GEM;
     G4VPhysicalVolume * fGem  = nullptr;
     GEMSensitiveDetector * fGEMSensitiveDetector  = nullptr;
+
+    G4NistManager* nistManager = G4NistManager::Instance();
     
     struct VolumeItem_t
     {
