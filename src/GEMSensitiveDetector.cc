@@ -176,7 +176,8 @@ G4double GEMSensitiveDetector::GetAmplification(int volume_id)
 
 void GEMSensitiveDetector::EndOfEvent(G4HCofThisEvent*)
 {
-  if ( verboseLevel>1 ) { 
+  if ( verboseLevel>1 )
+  { 
      G4int nofHits = fHitsCollection->entries();
      G4cout << "\n-------->Hits Collection: in this event they are " << nofHits 
             << " hits in the tracker chambers: " << G4endl;

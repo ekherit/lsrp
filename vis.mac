@@ -65,9 +65,5 @@
 
 # Грани
 /vis/geometry/set/forceAuxEdgeVisible VacuumChamber 0 true
-
-/lsrp/Mirror/Material quartz  #or G4_Cu
-/lsrp/Mirror/Width 5 mm
-/lsrp/beam/y 10 cm
 /run/beamOn 2
 

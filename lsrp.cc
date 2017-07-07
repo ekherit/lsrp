@@ -6,8 +6,6 @@
 #include "TrackingAction.hh"
 #include "ROOTManager.hh"
 
-//#include "G4StepLimiterBuilder.hh"
-
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 #include "FTFP_BERT.hh"
@@ -62,7 +60,6 @@ void clean_argc_argv(int * ARGC, char ** ARGV, boost::program_options::variables
     ARGV[i] = argv[i];
   }
 }
-
 int main(int argc,char** argv)
 {
   namespace po=boost::program_options;

@@ -108,3 +108,16 @@ void proceed (const char * prefix, const char * cut = "")
     }
     g->Draw("a*");
 }
+
+void proceed2 (const char * prefix, const char * cut = "")
+{
+    TGraphErrors * g = new TGraphErrors;
+
+    for(int i=0;i<8;i++)
+    {
+        char buf[1024];
+        sprintf(buf,"%d.root",i);
+        add_to_graph(g,i,buf,cut);
+    }
+    g->Draw("a*");
+}

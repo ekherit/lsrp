@@ -148,6 +148,8 @@ void DetectorMessenger::AddCmdDouble(double & par, const std::string & name, con
     command->SetParameterName(nms.back().c_str(), false); //set parameter name
     command->SetUnitCategory(unit.c_str()); //set units
     command->AvailableForStates(G4State_Idle); //???
+    //emplace effectively construct object in the heep at the map avoiding 
+    //temporary variable and copying
     fCmdMapDouble.emplace //register in the list of known command
         (
             std::make_pair<G4UIcommand*,  CmdItem_t<double> > 
