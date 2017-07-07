@@ -60,12 +60,13 @@ struct Config_t
     double mirror_size_x = 10*cm; //The mirror size x
     double mirror_size_y = 10*cm; //The mirror size y
 	double photon_flight_length=25*m; //Photon flight length in mm
-    double vacuum_chamber_size = 10*cm; 
+    double vacuum_chamber_size = 20*cm; 
 
     std::string converter_material = "G4_Pb";
     std::string mirror_material    = "quartz" ;
     std::string world_material     = "G4_AIR";
     std::string flange_material    = "G4_STAINLESS-STEEL";
+    std::string vacuum_chamber_material = "G4_Galactic";
 
     double sens_before_converter_width = 1*mm;
 
@@ -93,6 +94,7 @@ struct Config_t
 		double sigmaY=21.2*mkrad;
 		double sigmaX=104*mkrad;
 		double revolution_frequency=818.924*kHz; //Hz
+        double x = 0*mm,y =0*mm; //bunch position x and y
 	} beam;
 
 	struct

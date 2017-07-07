@@ -138,12 +138,6 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
     // World
     //-------------------------------------------------------------------------
   
-    //G4Material* air  = G4Material::GetMaterial("G4_AIR");
-
-    //G4Material * world_material = nistManager->FindOrBuildMaterial(Cfg.world_material);
-
-
-    //G4NistManager* nistManager = G4NistManager::Instance();
     auto mater = [this](const std::string & mat_name)
     {
         return nistManager->FindOrBuildMaterial(mat_name.c_str());
@@ -151,42 +145,12 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 
 
     MakeVolume("World",mater(Cfg.world_material), BOX, Cfg.world_size_x, Cfg.world_size_y, Cfg.world_size_z);
-    MakeVolume("VacuumChamber",mater("G4_Galactic"), TUBE, Cfg.vacuum_chamber_size, 0, fVacuumChamberLength, "World", fVacuumChamberPosition);
+    MakeVolume("VacuumChamber",mater(Cfg.vacuum_chamber_material), TUBE, Cfg.vacuum_chamber_size, 0, fVacuumChamberLength, "World", fVacuumChamberPosition);
     MakeVolume("Flange",mater(Cfg.flange_material), TUBE, Cfg.vacuum_chamber_size, 0, Cfg.flange_width, "VacuumChamber", fFlangePosition - fVacuumChamberPosition);
     std::cout << "The positions  vac. cham z =" << fVacuumChamberPosition.z() + fVacuumChamberLength/2.0 << " flange z = " <<  fFlangePosition.z() << std::endl;
-
-  
-    //------------------------------------------------------------------------- 
-    // Mirror
-    // SiO2 or Cu
-    //-------------------------------------------------------------------------
-  
-    //int mirror_type = 1; // 1 - SiO2 , 2 - Cu
-    ////G4Material* mirror_mat;
-  
-    //switch(mirror_type)
-    //{
-    //    case 1:
-    //    {
-    //        Cfg.mirror_width = 0.5 * cm;
-    //  
-
-    //        //mirror_mat = nistManager->FindOrBuildMaterial("quartz");
-    //    } break;
-    //    case 2:
-    //    {
-    //        Cfg.mirror_width = 1 * cm; 
-    //        //mirror_mat = nistManager->FindOrBuildMaterial("G4_Cu");
-    //    } break;
-    //}
-
-    //mirror_mat = nistManager->FindOrBuildMaterial(mater(Cfg.mirror_material));
-
-
-
   
     G4RotationMatrix *rm = new G4RotationMatrix;
-    rm->rotateX(-45*deg);		// rotation      
+    rm->rotateY(45*deg);		// rotation      
     MakeVolume("Mirror",mater(Cfg.mirror_material), BOX, Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, "VacuumChamber", fMirrorPosition - fVacuumChamberPosition, rm);
     MakeVolume("Converter", mater(Cfg.converter_material), BOX, Cfg.converter_size, Cfg.converter_size,Cfg.converter_width, "World", fConverterPosition);
     MakeVolume("SensBeforeConverter",  mater(Cfg.world_material), BOX, Cfg.converter_size, Cfg.converter_size, 1*mm,"World", fSensBeforeConverterPosition, nullptr, 666);
@@ -205,15 +169,6 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
         0,
         fCheckOverlaps
     );
-
-    // Visualization attributes
-
-    //G4VisAttributes* boxVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));
-    //G4VisAttributes* chamberVisAtt = new G4VisAttributes(G4Colour(1.0,1.0,0.0));
-
-    //fVol["World"].logic -> SetVisAttributes(boxVisAtt);
-    //fVol["Converter"].logic->SetVisAttributes(boxVisAtt);
-    //GEM->GetLogicalVolume()->SetVisAttributes(boxVisAtt);
 
     // Sensitive detectors
     G4String trackerChamberSDname = "slrp/GEMSD";
@@ -265,7 +220,7 @@ void DetectorConstruction::CalculateGeometry(void)
     std::cout  << "Flange: z = " << fFlangePosition.z() << " width = "  <<  Cfg.flange_width << std::endl;
     fMirrorPosition = fFlangePosition - G4ThreeVector(0, 0, Cfg.flange_width/2.0 + Cfg.mirror_flange_distance + Cfg.mirror_width/2.0);
     std::cout  << "Mirror: z = " << fMirrorPosition.z() << " width = "  <<  Cfg.mirror_width << std::endl;
-    fInteractionPointPosition  = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.photon_flight_length);
+    fInteractionPointPosition  = fGEMPosition + G4ThreeVector(Cfg.beam.x, Cfg.beam.y, - (gem_half_width + Cfg.photon_flight_length));
 
     //the length of vacuum chamber includes the flange
     std::cout << "half world " << Cfg.world_size_z/2.0 << std::endl;

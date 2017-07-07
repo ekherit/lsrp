@@ -27,13 +27,14 @@
 
 /lsrp/Converter/Size  50 cm
 /lsrp/Converter/Width 12 mm
-/lsrp/Converter/DistanceToGEM 10 mm
+/lsrp/Converter/DistanceToGEM 20 mm
 /lsrp/Converter/Material G4_Pb
 
 /lsrp/Flange/Width 0.5 mm
 /lsrp/Flange/DistanceToGEM 20 m
 
 /lsrp/World/Material G4_AIR
+#/lsrp/World/Material G4_AIR
 
 /lsrp/Flange/Material G4_STAINLESS-STEEL
 
@@ -41,4 +42,4 @@
 /lsrp/Mirror/Material quartz  #or G4_Cu
 /lsrp/Mirror/Width    5 mm  #or 10 mm for G4_cu
 
-/run/beamOn 20000
+/run/beamOn 100

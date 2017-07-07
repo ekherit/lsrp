@@ -80,6 +80,8 @@ DetectorMessenger::DetectorMessenger(void)
   AddCmdDouble(Cfg.beam.sigmaY, "/lsrp/beam/SigmaY","Beam Y angular spread", "Angle");
   AddCmdDouble(Cfg.beam.I, "/lsrp/beam/Current","Beam current", "Electric current");
   AddCmdDouble(Cfg.beam.E, "/lsrp/beam/Energy","Beam energy", "Energy");
+  AddCmdDouble(Cfg.beam.x, "/lsrp/beam/x","Bunch X positon", "Length");
+  AddCmdDouble(Cfg.beam.y, "/lsrp/beam/y","Bunch Y positon", "Length");
   AddCmdDouble(Cfg.laser.lambda, "/lsrp/laser/WaveLength","Laser wave length", "Length");
   AddCmdDouble(Cfg.laser.pulse_energy, "/lsrp/laser/PulseEnergy","Laser pulse energy", "Energy");
   AddCmdDouble(Cfg.laser.pulse_time, "/lsrp/laser/PulseTime","Laser pulse time", "Time");
@@ -114,6 +116,7 @@ DetectorMessenger::DetectorMessenger(void)
   AddCmdString(Cfg.converter_material, "/lsrp/Converter/Material","Converter material");
   AddCmdString(Cfg.mirror_material, "/lsrp/Mirror/Material","Mirror material");
   AddCmdString(Cfg.flange_material, "/lsrp/Flange/Material","Flange material");
+  AddCmdString(Cfg.vacuum_chamber_material, "/lsrp/VacuumChamber/Material","Vacuum chamber material");
 }
 
 

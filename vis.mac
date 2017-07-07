@@ -55,15 +55,19 @@
 /vis/scene/add/line -0.5 0.5 0 0.5 -0.5 0 m 
 
 # Цвета 
+/vis/geometry/set/colour World       1 gray 
 /vis/geometry/set/colour GEM       1 yellow
-/vis/geometry/set/colour Converter 1 red
-/vis/geometry/set/colour VacuumChamber 1 blue
-/vis/geometry/set/colour Flange    1 green
+/vis/geometry/set/colour Converter 1 blue 
+/vis/geometry/set/colour VacuumChamber 1 black
+/vis/geometry/set/colour Flange    1 blue
 /vis/geometry/set/colour Mirror    1 yellow
 /vis/geometry/set/colour SensBeforeConverter 1 blue
 
 # Грани
 /vis/geometry/set/forceAuxEdgeVisible VacuumChamber 0 true
 
+/lsrp/Mirror/Material quartz  #or G4_Cu
+/lsrp/Mirror/Width 5 mm
+/lsrp/beam/y 10 cm
 /run/beamOn 2
 
