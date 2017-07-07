@@ -38,6 +38,7 @@ class ROOTManager
     ~ROOTManager(); 
     void Write(void);
   private:
+    std::string filename="";
     ROOTManager(void); 
     void CleanOldFilesAndTree(void);
     void InitTree(void);

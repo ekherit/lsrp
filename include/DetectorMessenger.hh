@@ -32,6 +32,7 @@
 #define DetectorMessenger_h 1
 
 #include <memory>
+#include <typeinfo>
 
 #include "globals.hh"
 #include "G4UImessenger.hh"
@@ -54,7 +55,6 @@ class DetectorMessenger: public G4UImessenger
     
   private:
     static DetectorMessenger * fgInstance;
-    std::unique_ptr<G4UIcmdWithAString>   fRootFileCmd;
     std::unique_ptr<G4UIdirectory>    fDirectory;
 
     template<typename DataType> 
@@ -65,11 +65,10 @@ class DetectorMessenger: public G4UImessenger
         std::string name;
     };
 
-    std::map<G4UIcommand*,  CmdItem_t <double> > fCmdMapDouble; //continer with the G4UIcommands
+    std::map<G4UIcommand*,  CmdItem_t <double> >      fCmdMapDouble; //continer with the G4UIcommands
     std::map<G4UIcommand*,  CmdItem_t <std::string> > fCmdMapString; //continer with the G4UIcommands
 
     void AddCmdDouble(double & par, const std::string & name, const std::string & title, const std::string & unit);
     void AddCmdString(std::string & par, const std::string & name, const std::string & title);
-
 };
 #endif

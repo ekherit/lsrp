@@ -32,7 +32,7 @@ ROOTManager* ROOTManager::Instance(void)
 
 ROOTManager::ROOTManager(void)
 {
-  SetRootFile(Cfg.output_file.c_str()); //set default ROOT file
+  SetRootFile(Cfg.root_file.c_str()); //set default ROOT file
 }
 
 ROOTManager::~ROOTManager()
@@ -44,8 +44,8 @@ void ROOTManager::SetRootFile(const char * root_file_name)
 {
   CleanOldFilesAndTree();
   std::cout << "Set new ROOT file " << root_file_name << std::endl;
-  Cfg.output_file = root_file_name;
-  file = new TFile(Cfg.output_file.c_str(),"RECREATE");
+  filename = root_file_name;
+  file = new TFile(filename.c_str(),"RECREATE");
   InitTree();
 }
 
@@ -59,7 +59,7 @@ void ROOTManager::CleanOldFilesAndTree(void)
       delete file;
       if(events_in_tree == 0)  //Remove file with no events this works
       {
-        remove(Cfg.output_file.c_str());
+        remove(filename.c_str());
       }
   }
 }

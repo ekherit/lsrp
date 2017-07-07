@@ -62,7 +62,9 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
 
-  DetectorConstruction::Instance()->UpdateGeometry();
+  ///Before new run we have to update output file and detector geometry
+  ROOTManager::Instance()->SetRootFile(Cfg.root_file.c_str());
+  DetectorConstruction::Instance()->UpdateGeometry(); 
   PrimaryGeneratorAction::Instance()->Init();
 }
 

@@ -77,7 +77,7 @@ struct Config_t
 	double pad_xsize = 1*mm;  //x size of signe pad in mm
 	double pad_ysize = 1*mm;  //y size of signe pad in mm
 	unsigned gem_cascade_number; //number of amplification cascades 3
-	std::string output_file = "tmp.root"; //output file name
+	std::string root_file = "tmp.root"; //output file name
 	unsigned test_beam = 0;
 	unsigned drift_spread;
 	unsigned long seed;

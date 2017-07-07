@@ -54,69 +54,65 @@ DetectorMessenger* DetectorMessenger::Instance(void)
 }
  
 double test_parameter;
-DetectorMessenger::DetectorMessenger(void)
- : G4UImessenger()
+DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
 {
   fgInstance = this;
   DefineUnits();
   fDirectory.reset(new G4UIdirectory("/lsrp/"));
   fDirectory->SetGuidance("UI commands for Laser Polarimeter Simulation");
 
-  fRootFileCmd.reset(new G4UIcmdWithAString("/lsrp/RootFile",this));
-  fRootFileCmd->SetGuidance("Select output ROOT file");
-  fRootFileCmd->SetParameterName("choice",false);
-  fRootFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+  AddCmdString(Cfg.root_file, "/lsrp/RootFile"  , "ROOT file with simulation result");
 
-  AddCmdDouble(Cfg.photon_number, "/lsrp/PhotonNumberPerPulse","Number of photons per pulse", "");
-  AddCmdDouble(Cfg.step_max, "/lsrp/StepMax","Miximum allowed step", "Length");
-  AddCmdDouble(Cfg.pad_size,   "/lsrp/GEM/pad/Size","Size of the pad", "Length");
-  AddCmdDouble(Cfg.pad_xsize, "/lsrp/GEM/pad/SizeX","X size of the pad", "Length");
-  AddCmdDouble(Cfg.pad_ysize, "/lsrp/GEM/pad/SizeY","Y size of the pad", "Length");
-  AddCmdDouble(Cfg.pad_rough_size_x, "/lsrp/GEM/pad/RoughSizeX","Big pad size x","Length");
-  AddCmdDouble(Cfg.pad_rough_size_y, "/lsrp/GEM/pad/RoughSizeY","Big pad size y", "Length");
-  AddCmdDouble(Cfg.pad_high_sens_xwidth, "/lsrp/GEM/HighSensSizeX","X High sensitive width", "Length");
-  AddCmdDouble(Cfg.pad_high_sens_ywidth, "/lsrp/GEM/HighSensSizeY","Y High sensitive width","Length");
-  AddCmdDouble(Cfg.beam.sigmaX, "/lsrp/beam/SigmaX","Beam X angular spread", "Angle");
-  AddCmdDouble(Cfg.beam.sigmaY, "/lsrp/beam/SigmaY","Beam Y angular spread", "Angle");
-  AddCmdDouble(Cfg.beam.I, "/lsrp/beam/Current","Beam current", "Electric current");
-  AddCmdDouble(Cfg.beam.E, "/lsrp/beam/Energy","Beam energy", "Energy");
-  AddCmdDouble(Cfg.beam.x, "/lsrp/beam/x","Bunch X positon", "Length");
-  AddCmdDouble(Cfg.beam.y, "/lsrp/beam/y","Bunch Y positon", "Length");
-  AddCmdDouble(Cfg.laser.lambda, "/lsrp/laser/WaveLength","Laser wave length", "Length");
-  AddCmdDouble(Cfg.laser.pulse_energy, "/lsrp/laser/PulseEnergy","Laser pulse energy", "Energy");
-  AddCmdDouble(Cfg.laser.pulse_time, "/lsrp/laser/PulseTime","Laser pulse time", "Time");
-  AddCmdDouble(Cfg.laser.frequency, "/lsrp/laser/PulseFrequency","Laser pulse frequency", "Frequency");
-  AddCmdDouble(Cfg.laser.pulse_size, "/lsrp/laser/PulseSize","Laser pulse size", "Length");
+  AddCmdDouble(Cfg.photon_number           , "/lsrp/PhotonNumberPerPulse"    , "Number of photons per pulse"              , "");
+  AddCmdDouble(Cfg.step_max                , "/lsrp/StepMax"                 , "Miximum allowed step"                     , "Length");
+  AddCmdDouble(Cfg.pad_size                , "/lsrp/GEM/pad/Size"            , "Size of the pad"                          , "Length");
+  AddCmdDouble(Cfg.pad_xsize               , "/lsrp/GEM/pad/SizeX"           , "X size of the pad"                        , "Length");
+  AddCmdDouble(Cfg.pad_ysize               , "/lsrp/GEM/pad/SizeY"           , "Y size of the pad"                        , "Length");
+  AddCmdDouble(Cfg.pad_rough_size_x        , "/lsrp/GEM/pad/RoughSizeX"      , "Big pad size x"                           , "Length");
+  AddCmdDouble(Cfg.pad_rough_size_y        , "/lsrp/GEM/pad/RoughSizeY"      , "Big pad size y"                           , "Length");
+  AddCmdDouble(Cfg.pad_high_sens_xwidth    , "/lsrp/GEM/HighSensSizeX"       , "X High sensitive width"                   , "Length");
+  AddCmdDouble(Cfg.pad_high_sens_ywidth    , "/lsrp/GEM/HighSensSizeY"       , "Y High sensitive width"                   , "Length");
+  AddCmdDouble(Cfg.beam.sigmaX             , "/lsrp/beam/SigmaX"             , "Beam X angular spread"                    , "Angle");
+  AddCmdDouble(Cfg.beam.sigmaY             , "/lsrp/beam/SigmaY"             , "Beam Y angular spread"                    , "Angle");
+  AddCmdDouble(Cfg.beam.I                  , "/lsrp/beam/Current"            , "Beam current"                             , "Electric current");
+  AddCmdDouble(Cfg.beam.E                  , "/lsrp/beam/Energy"             , "Beam energy"                              , "Energy");
+  AddCmdDouble(Cfg.beam.x                  , "/lsrp/beam/x"                  , "Bunch X positon"                          , "Length");
+  AddCmdDouble(Cfg.beam.y                  , "/lsrp/beam/y"                  , "Bunch Y positon"                          , "Length");
+  AddCmdDouble(Cfg.laser.lambda            , "/lsrp/laser/WaveLength"        , "Laser wave length"                        , "Length");
+  AddCmdDouble(Cfg.laser.pulse_energy      , "/lsrp/laser/PulseEnergy"       , "Laser pulse energy"                       , "Energy");
+  AddCmdDouble(Cfg.laser.pulse_time        , "/lsrp/laser/PulseTime"         , "Laser pulse time"                         , "Time");
+  AddCmdDouble(Cfg.laser.frequency         , "/lsrp/laser/PulseFrequency"    , "Laser pulse frequency"                    , "Frequency");
+  AddCmdDouble(Cfg.laser.pulse_size        , "/lsrp/laser/PulseSize"         , "Laser pulse size"                         , "Length");
 
-  AddCmdDouble(Cfg.world_size_x, "/lsrp/World/SizeX","World size x", "Length");
-  AddCmdDouble(Cfg.world_size_y, "/lsrp/World/SizeY","World size y", "Length");
-  AddCmdDouble(Cfg.world_size_z, "/lsrp/World/SizeZ","World size z", "Length");
+  AddCmdDouble(Cfg.world_size_x            , "/lsrp/World/SizeX"             , "World size x"                             , "Length");
+  AddCmdDouble(Cfg.world_size_y            , "/lsrp/World/SizeY"             , "World size y"                             , "Length");
+  AddCmdDouble(Cfg.world_size_z            , "/lsrp/World/SizeZ"             , "World size z"                             , "Length");
 
-  AddCmdDouble(Cfg.gem_size, "/lsrp/GEM/Size","GEM size", "Length");
-  AddCmdDouble(Cfg.gem_size_x, "/lsrp/GEM/SizeX","GEM size x", "Length");
-  AddCmdDouble(Cfg.gem_size_x, "/lsrp/GEM/SizeY","GEM size y", "Length");
-  AddCmdDouble(Cfg.gem_world_distance, "/lsrp/GEM/DistanceToWorldEdge","GEM-world distance", "Length");
+  AddCmdDouble(Cfg.gem_size                , "/lsrp/GEM/Size"                , "GEM size"                                 , "Length");
+  AddCmdDouble(Cfg.gem_size_x              , "/lsrp/GEM/SizeX"               , "GEM size x"                               , "Length");
+  AddCmdDouble(Cfg.gem_size_x              , "/lsrp/GEM/SizeY"               , "GEM size y"                               , "Length");
+  AddCmdDouble(Cfg.gem_world_distance      , "/lsrp/GEM/DistanceToWorldEdge" , "GEM-world distance"                       , "Length");
 
-  AddCmdDouble(Cfg.converter_width, "/lsrp/Converter/Width","Converter width", "Length");
-  AddCmdDouble(Cfg.converter_size,   "/lsrp/Converter/Size","Converter size (x,y)", "Length");
+  AddCmdDouble(Cfg.converter_width         , "/lsrp/Converter/Width"         , "Converter width"                          , "Length");
+  AddCmdDouble(Cfg.converter_size          , "/lsrp/Converter/Size"          , "Converter size (x  , y)"                  , "Length");
 
-  AddCmdDouble(Cfg.converter_gem_distance, "/lsrp/Converter/DistanceToGEM","Converter - GEM distance", "Length");
+  AddCmdDouble(Cfg.converter_gem_distance  , "/lsrp/Converter/DistanceToGEM" , "Converter - GEM distance"                 , "Length");
 
-  AddCmdDouble(Cfg.flange_gem_distance, "/lsrp/Flange/DistanceToGEM","The distance from flange to GEM detector", "Length");
-  AddCmdDouble(Cfg.flange_width, "/lsrp/Flange/Width","Flange width", "Length");
+  AddCmdDouble(Cfg.flange_gem_distance     , "/lsrp/Flange/DistanceToGEM"    , "The distance from flange to GEM detector" , "Length");
+  AddCmdDouble(Cfg.flange_width            , "/lsrp/Flange/Width"            , "Flange width"                             , "Length");
 
-  AddCmdDouble(Cfg.mirror_flange_distance, "/lsrp/MirrorFlangeDistance","Mirror - flange distance", "Length");
-  AddCmdDouble(Cfg.mirror_width, "/lsrp/Mirror/Width","Mirror width",   "Length");
-  AddCmdDouble(Cfg.mirror_size_x, "/lsrp/Mirror/SizeX","Mirror size x", "Length");
-  AddCmdDouble(Cfg.mirror_size_y, "/lsrp/Mirror/SizeY","Mirror size y", "Length");
-  AddCmdDouble(Cfg.vacuum_chamber_size, "/lsrp/VacuumChamber/Size","Vacuum chamber size", "Length");
-  AddCmdDouble(Cfg.photon_flight_length, "/lsrp/PhotonFlightLength","Photon Flight length", "Length");
+  AddCmdDouble(Cfg.mirror_flange_distance  , "/lsrp/MirrorFlangeDistance"    , "Mirror - flange distance"                 , "Length");
+  AddCmdDouble(Cfg.mirror_width            , "/lsrp/Mirror/Width"            , "Mirror width"                             , "Length");
+  AddCmdDouble(Cfg.mirror_size_x           , "/lsrp/Mirror/SizeX"            , "Mirror size x"                            , "Length");
+  AddCmdDouble(Cfg.mirror_size_y           , "/lsrp/Mirror/SizeY"            , "Mirror size y"                            , "Length");
+  AddCmdDouble(Cfg.vacuum_chamber_size     , "/lsrp/VacuumChamber/Size"      , "Vacuum chamber size"                      , "Length");
+  AddCmdDouble(Cfg.photon_flight_length    , "/lsrp/PhotonFlightLength"      , "Photon Flight length"                     , "Length");
 
-  AddCmdString(Cfg.world_material, "/lsrp/World/Material","World material");
-  AddCmdString(Cfg.converter_material, "/lsrp/Converter/Material","Converter material");
-  AddCmdString(Cfg.mirror_material, "/lsrp/Mirror/Material","Mirror material");
-  AddCmdString(Cfg.flange_material, "/lsrp/Flange/Material","Flange material");
-  AddCmdString(Cfg.vacuum_chamber_material, "/lsrp/VacuumChamber/Material","Vacuum chamber material");
+  AddCmdString(Cfg.world_material          , "/lsrp/World/Material"          , "World material");
+  AddCmdString(Cfg.converter_material      , "/lsrp/Converter/Material"      , "Converter material");
+  AddCmdString(Cfg.mirror_material         , "/lsrp/Mirror/Material"         , "Mirror material");
+  AddCmdString(Cfg.flange_material         , "/lsrp/Flange/Material"         , "Flange material");
+  AddCmdString(Cfg.vacuum_chamber_material , "/lsrp/VacuumChamber/Material"  , "Vacuum chamber material");
 }
 
 
@@ -130,7 +126,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
     if (  p!=fCmdMapDouble.end() ) 
     {
         *p->second.data = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
-        std::cout << "newValue = " << newValue << " " << *p->second.data << "  for name = " << p->second.name << std::endl;
+        std::cout << command->GetCommandPath() << " = " <<  *p->second.data << " (" << newValue << ")\n";
     }
   }
   catch(...)
@@ -143,16 +139,11 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
     if (  p!=fCmdMapString.end() ) 
     {
         *p->second.data = newValue;
-        std::cout << "newValue = " << newValue << " " << *p->second.data << "  for name = " << p->second.name << std::endl;
+        std::cout << command->GetCommandPath() << " = " <<  *p->second.data << " (" << newValue << ")\n";
     }
   }
   catch(...)
   {
-  }
-
-  if( command == fRootFileCmd.get() )
-  { 
-    ROOTManager::Instance()->SetRootFile(newValue);
   }
 }
 
@@ -182,7 +173,6 @@ void DetectorMessenger::AddCmdString(std::string & par, const std::string & name
     std::vector<std::string> nms;
     boost::split(nms,name,boost::is_any_of("/")); //find parameter name (without dirs)
     command->SetParameterName(nms.back().c_str(), false); //set parameter name
-    //command->SetUnitCategory(unit.c_str()); //set units
     command->AvailableForStates(G4State_Idle); //???
     fCmdMapString.emplace //register in the list of known command
         (
@@ -193,5 +183,3 @@ void DetectorMessenger::AddCmdString(std::string & par, const std::string & name
             )
         ); 
 }
-
-
