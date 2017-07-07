@@ -120,30 +120,22 @@ DetectorMessenger::~DetectorMessenger() { }
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 {
-  try
   {
     auto p = fCmdMapDouble.find(command);
     if (  p!=fCmdMapDouble.end() ) 
     {
-        *p->second.data = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
-        std::cout << command->GetCommandPath() << " = " <<  *p->second.data << " (" << newValue << ")\n";
+      *p->second.data = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
+      std::cout << command->GetCommandPath() << " = " <<  *p->second.data << " (" << newValue << ")\n";
     }
   }
-  catch(...)
-  {
-  }
 
-  try
   {
     auto p = fCmdMapString.find(command);
     if (  p!=fCmdMapString.end() ) 
     {
-        *p->second.data = newValue;
-        std::cout << command->GetCommandPath() << " = " <<  *p->second.data << " (" << newValue << ")\n";
+      *p->second.data = newValue;
+      std::cout << command->GetCommandPath() << " = " <<  *p->second.data << " (" << newValue << ")\n";
     }
-  }
-  catch(...)
-  {
   }
 }
 
