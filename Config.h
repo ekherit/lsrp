@@ -80,7 +80,7 @@ struct Config_t
 	std::string root_file = "tmp.root"; //output file name
 	unsigned test_beam = 0;
 	unsigned drift_spread;
-	unsigned long seed;
+	unsigned long seed=0;
 	unsigned long run;
 	double pad_high_sens_xwidth=64;
 	double pad_high_sens_ywidth=20;

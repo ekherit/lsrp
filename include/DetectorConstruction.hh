@@ -87,7 +87,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     
     struct VolumeItem_t
     {
-        int shape;
+        int shape;//box or tube
         std::shared_ptr<G4VSolid> solid;
         std::shared_ptr<G4LogicalVolume> logic;
         std::shared_ptr<G4VPhysicalVolume> phys;

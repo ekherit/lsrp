@@ -113,7 +113,7 @@ void proceed2 (const char * prefix, const char * cut = "")
 {
     TGraphErrors * g = new TGraphErrors;
 
-    for(int i=0;i<8;i++)
+    for(int i=0;i<26;i++)
     {
         char buf[1024];
         sprintf(buf,"%d.root",i);

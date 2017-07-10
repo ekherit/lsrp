@@ -46,7 +46,7 @@
 GEMSensitiveDetector::GEMSensitiveDetector(const G4String& name,
                          const G4String& hitsCollectionName) 
  : G4VSensitiveDetector(name),
-   fHitsCollection(NULL)
+   fHitsCollection(nullptr)
 {
   collectionName.insert(hitsCollectionName);
 }
@@ -54,20 +54,18 @@ GEMSensitiveDetector::GEMSensitiveDetector(const G4String& name,
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 GEMSensitiveDetector::~GEMSensitiveDetector() 
-{}
+{
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void GEMSensitiveDetector::Initialize(G4HCofThisEvent* hce)
 {
   // Create hits collection
-
   fHitsCollection = new GEMHitsCollection(SensitiveDetectorName, collectionName[0]); 
 
   // Add this collection in hce
-
-  G4int hcID 
-    = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
+  G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
   hce->AddHitsCollection( hcID, fHitsCollection ); 
 }
 
@@ -123,7 +121,6 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   newHit->SetMomentum(track->GetVertexMomentumDirection());
   if(newHit->GetVolumeID()==666  && newHit->GetMomentum().z() < 0 ) return false;
   
-  //G4cout << r.x() << " " << r.y() << " " << r.z() <<  " VolumeID = " << newHit->GetVolumeID()<< G4endl;
   if(newHit->GetVolumeID()!=666 && edep > 0)
   {
 	  newHit->FindPad();
@@ -150,14 +147,12 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 	  }
 	  newHit->SetPads(pad_list);
   }
-  //std::cout << "initial pad: " << newHit->GetPad().x() << "," << newHit->GetPad().y() << std::endl;
-  //for(auto & p : newHit->GetPads())
-  //{
-  //  std::cout << "               " << p.x() << "," << p.y() << " frac: " << setprecision(3) << p.charge/newHit->GetPad().charge*100 << std::endl;
-  //}
 
+  /*  
+   *  As I have seen in the G4THitCoolections code. Hit Collection is realized through the vector.  
+   *  It delete it's content in destructor. So I dont need to delete GEMHit by myself
+   */
   fHitsCollection->insert( newHit );
-  //newHit->Print();
   return true;
 }
 

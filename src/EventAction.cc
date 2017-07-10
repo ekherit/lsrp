@@ -73,9 +73,6 @@ void EventAction::BeginOfEventAction(const G4Event* event)
 
 void EventAction::EndOfEventAction(const G4Event* event)
 {
-  // print per event (modulo n)
-  //G4cout << "EndofEventAction:" << G4endl;
-
   G4int eventID = event->GetEventID();
   if ( eventID % fPrintModulo == 0)
     G4cout << "---> End of event: " << eventID << G4endl;
@@ -97,10 +94,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
   Revent.gen.resize(Revent.nphot);
   Revent.Eb = PGA->fBeamEnergy;
   Revent.P = PGA->fPolarization;
-//G4cout << "Before hc->GetSIze()" << G4endl;
   Revent.nhit = hc->GetSize();
   Revent.hit.resize(hc->GetSize());
-//G4cout << "After hc->GetSize() = " << hc->GetSize() << G4endl;
 
   for(unsigned i=0; i< hc->GetSize();i++)
   {
@@ -153,14 +148,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
     //pad_list.erase(++fPads.begin(), fPads.end());
     fPads.push_back(pad_list.front());
   }
-	
-
-
-
-  //fPads.sort(); //fPads.global pad list
-  //sort by charge
-  //fPads.sort([](const Pad & p1, const Pad & p2){return p1.charge < p2.charge; });
-  //fPads.erase(++fPads.begin(), fPads.end());
 
   Revent.npad = fPads.size();
   Revent.pad.resize(fPads.size());
@@ -185,11 +172,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
     {
       epad.x = p.x() + p.xsize()*(G4UniformRand()-0.5);
       epad.y = p.y() + p.ysize()*(G4UniformRand()-0.5);
-      //epad.x = p.x() + p.xsize()*(G4UniformRand());
-      //epad.y = p.y() + p.ysize()*(G4UniformRand());
-      //std::cout << "fPads: spread: "<< p.x()<<","<<p.y()<<","<<p.type()<< " " << epad.x << "," << epad.y  << std::endl;
-      //Pad newpad(epad.x, epad.y);
-      //std::cout << "newpad: " << newpad.x() << " " << newpad.y() << " " << newpad.type() << std::endl;
     } while (Pad(epad.x, epad.y) != p);
     epad.r = ibn::rho(epad.x,epad.y);
     //variate amplification
@@ -275,7 +257,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
     G4cout<< G4endl;
   }
   Revent.clear();
-  //G4cout << "End end of event action" << G4endl;
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

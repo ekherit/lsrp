@@ -25,6 +25,7 @@
 
 #include <regex>
 #include <cstring>
+#include <ctime>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 Config_t Cfg;
@@ -66,6 +67,7 @@ int main(int argc,char** argv)
   po::options_description opt_desc("Allowed options");
   opt_desc.add_options()
     ("help", "Print this help")
+    ("seed",po::value<unsigned long>(&Cfg.seed),"Seed of the engine")
     ;
   po::positional_options_description pos;
   //pos.add("output",-1);
@@ -100,13 +102,11 @@ int main(int argc,char** argv)
 
   // Choose the Random engine
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
-
+  if(Cfg.seed==0) Cfg.seed = time(0);
   G4cout << "Set random seed to " << Cfg.seed << G4endl;
   CLHEP::HepRandom::setTheSeed(Cfg.seed);
   
   // Construct the default run manager
-  
-
   G4RunManager * runManager = new G4RunManager;
 
   auto detector_construction = new DetectorConstruction();
