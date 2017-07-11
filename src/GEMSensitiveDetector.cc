@@ -55,6 +55,7 @@ GEMSensitiveDetector::GEMSensitiveDetector(const G4String& name,
 
 GEMSensitiveDetector::~GEMSensitiveDetector() 
 {
+  std::cout <<"GEMSensitiveDetector::~GEMSensitiveDetector " << std::endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -119,7 +120,11 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   newHit->SetEdep(edep);
   newHit->SetPos(r);
   newHit->SetMomentum(track->GetVertexMomentumDirection());
-  if(newHit->GetVolumeID()==666  && newHit->GetMomentum().z() < 0 ) return false;
+  if(newHit->GetVolumeID()==666  && newHit->GetMomentum().z() < 0 ) 
+  {
+    delete newHit;
+    return false;
+  }
   
   if(newHit->GetVolumeID()!=666 && edep > 0)
   {
@@ -178,6 +183,7 @@ void GEMSensitiveDetector::EndOfEvent(G4HCofThisEvent*)
             << " hits in the tracker chambers: " << G4endl;
      for ( G4int i=0; i<nofHits; i++ ) (*fHitsCollection)[i]->Print();
   }
+  //delete fHitsCollection;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
