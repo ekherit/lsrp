@@ -53,14 +53,14 @@ void ROOTManager::CleanOldFilesAndTree(void)
 {
   if(file != nullptr ) 
   {
-      auto events_in_tree  = tree != nullptr  ? tree->GetEntries() : 0;
-      file->Close();
-      //tree will automatically be deleted while destroing TFile no need to delete tree manually ??? strange
-      delete file;
-      if(events_in_tree == 0)  //Remove file with no events this works
-      {
-        remove(filename.c_str());
-      }
+    auto events_in_tree  = tree != nullptr  ? tree->GetEntries() : 0;
+    file->Close();
+    //tree will automatically be deleted while destroing TFile no need to delete tree manually ??? strange
+    delete file;
+    if(events_in_tree == 0)  //Remove file with zero number of events
+    {
+      remove(filename.c_str());
+    }
   }
 }
 

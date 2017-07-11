@@ -122,6 +122,11 @@ void DetectorConstruction::DefineMaterials()
 
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
+  //for(int i=0;i<10;i++)
+  //std::cout << "###################################################" << std::endl;
+  //std::cout << "                    IN DEFINE VOLUMES " << std::endl;
+  //for(int i=0;i<10;i++)
+  //std::cout << "###################################################" << std::endl;
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(Cfg.world_size_z);
   GEM.reset(new GEMDetector);
   CalculateGeometry();

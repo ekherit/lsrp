@@ -67,6 +67,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
   ROOTManager::Instance()->SetRootFile(Cfg.root_file.c_str());
   DetectorConstruction::Instance()->UpdateGeometry(); 
   PrimaryGeneratorAction::Instance()->Init();
+  print_memory_usage(aRun->GetRunID());
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -79,11 +80,10 @@ ibn::valer<double> get_epsilon(Long64_t N1, Long64_t N2)
   return eps;
 }
 
-void RunAction::EndOfRunAction(const G4Run* aRun)
+void RunAction::EndOfRunAction(const G4Run*)
 {
   auto RM = ROOTManager::Instance();
   if(RM->tree !=nullptr) RM->tree->Write();
-  print_memory_usage(aRun->GetRunID());
   //Long64_t Nup0 = RM->gen_tree->GetEntries("y>0&&P>0") + RM->gen_tree->GetEntries("y<0&&P<0");
   //Long64_t Ndown0 = RM->gen_tree->GetEntries("y<0&&P>0")+ RM->gen_tree->GetEntries("y>0&&P<0");
   //ibn::valer<double> eps0 = get_epsilon(Nup0,Ndown0);

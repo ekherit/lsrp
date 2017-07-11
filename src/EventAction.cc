@@ -62,11 +62,12 @@ EventAction::~EventAction()
 void EventAction::BeginOfEventAction(const G4Event* event)
 {  
   fPads.clear();
-  G4int eventID = event->GetEventID();
-  if ( eventID % fPrintModulo == 0) { 
-    G4cout << "\n---> Begin of event: " << eventID << G4endl;
-    CLHEP::HepRandom::showEngineStatus();
-  }
+  //G4int eventID = event->GetEventID();
+  //if ( eventID % fPrintModulo == 0) 
+  //{ 
+  //  G4cout << "\n---> Begin of event: " << eventID << G4endl;
+  //  CLHEP::HepRandom::showEngineStatus();
+  //}
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -74,8 +75,8 @@ void EventAction::BeginOfEventAction(const G4Event* event)
 void EventAction::EndOfEventAction(const G4Event* event)
 {
   G4int eventID = event->GetEventID();
-  if ( eventID % fPrintModulo == 0)
-    G4cout << "---> End of event: " << eventID << G4endl;
+  //if ( eventID % fPrintModulo == 0)
+  //  G4cout << "---> End of event: " << eventID << G4endl;
 
   G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
   std::list<int> phot_list; //list of registered photons
