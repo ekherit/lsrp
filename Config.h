@@ -106,6 +106,12 @@ struct Config_t
 		double frequency=4*kHz; //laser frequency, Hz
 		double focus_length=15*cm; //laser focuse length
 	} laser;
+
+  struct
+  {
+    std::string file; //the name of ROOT file to save
+    std::string auto_generate_root_files = "no";
+  } root;
 };
 extern  Config_t Cfg;
 

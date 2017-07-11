@@ -37,6 +37,7 @@
 #include "G4Run.hh"
 #include "G4RunManager.hh"
 
+#include <boost/filesystem.hpp>
 
 #include <ibn/valer.h>
 #include "Utils.h"
@@ -64,7 +65,19 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
 
   /////Before new run we have to update output file and detector geometry
-  ROOTManager::Instance()->SetRootFile(Cfg.root_file.c_str());
+  std::string file_prefix = Cfg.root_file;
+  namespace  fs = boost::filesystem;
+  fs::path path(Cfg.root_file.c_str());
+  if ( Cfg.root.auto_generate_root_files == "yes" ) 
+  {
+    auto file = path.stem();
+    char suffix[128];
+    sprintf(suffix,"-%03ld",Cfg.run);
+    file+=suffix;
+    file+=".root";
+    path = file;
+  }
+  ROOTManager::Instance()->SetRootFile(path.c_str());
   DetectorConstruction::Instance()->UpdateGeometry(); 
   PrimaryGeneratorAction::Instance()->Init();
   print_memory_usage(aRun->GetRunID());

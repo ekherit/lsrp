@@ -102,7 +102,7 @@ int main(int argc,char** argv)
 
   std::ofstream mem_usage("mem_usage.txt");
   time_t begin_time = time(0);
-  mem_usage << "lsrp begintiem (" << begin_time << ") " << ctime(&begin_time); 
+  mem_usage << "lsrp begintime (" << begin_time << ") " << ctime(&begin_time); 
   mem_usage.close();
   // Choose the Random engine
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);

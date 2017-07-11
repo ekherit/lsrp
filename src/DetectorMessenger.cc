@@ -62,6 +62,7 @@ DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
   fDirectory->SetGuidance("UI commands for Laser Polarimeter Simulation");
 
   AddCmdString(Cfg.root_file, "/lsrp/RootFile"  , "ROOT file with simulation result");
+  AddCmdString(Cfg.root.auto_generate_root_files, "/lsrp/AutoRootFile"  , "Automaticaly create root file number with newnumber");
 
   AddCmdDouble(Cfg.photon_number           , "/lsrp/PhotonNumberPerPulse"    , "Number of photons per pulse"              , "");
   AddCmdDouble(Cfg.step_max                , "/lsrp/StepMax"                 , "Miximum allowed step"                     , "Length");

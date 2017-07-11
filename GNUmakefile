@@ -9,6 +9,7 @@ G4EXLIB := true
 CPPFLAGS := -fPIC -std=c++1y `root-config --cflags` -I./  -I$(WORKDIR) -Wno-unused-variable -Wno-shadow
 LDFLAGS :=  `root-config --libs`  \
 			-lboost_program_options \
+			-lboost_filesystem \
 		#	-lMinuit  \
 
 ifndef G4INSTALL
