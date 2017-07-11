@@ -100,10 +100,13 @@ int main(int argc,char** argv)
     cout << i << ": " << argv[i] << endl;
   }
 
+  std::ofstream mem_usage("mem_usage.txt");
+  time_t begin_time = time(0);
+  mem_usage << "lsrp begintiem (" << begin_time << ") " << ctime(&begin_time); 
   // Choose the Random engine
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
-  if(Cfg.seed==0) Cfg.seed = time(0);
-  G4cout << "Set random seed to " << Cfg.seed << G4endl;
+  if(Cfg.seed==0) Cfg.seed = begin_time;
+  G4cout << "Random seed: " << Cfg.seed << G4endl;
   CLHEP::HepRandom::setTheSeed(Cfg.seed);
   
   // Construct the default run manager
