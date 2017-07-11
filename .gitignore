@@ -12,5 +12,6 @@ nohup.out
 *.o
 *.so
 *.macro
+tags
 
 /data
