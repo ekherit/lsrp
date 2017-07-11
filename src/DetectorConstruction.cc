@@ -32,7 +32,6 @@
 
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"
-#include "MagneticField.hh"
 #include "GEMSensitiveDetector.hh"
 
 #include "G4Material.hh"
