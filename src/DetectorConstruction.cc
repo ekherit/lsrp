@@ -143,15 +143,15 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 
 
   MakeVolume("World",mater(Cfg.world_material), BOX, Cfg.world_size_x, Cfg.world_size_y, Cfg.world_size_z);
-  MakeVolume("VacuumChamber",mater(Cfg.vacuum_chamber_material), TUBE, Cfg.vacuum_chamber_size, 0, fVacuumChamberLength, "World", fVacuumChamberPosition);
-  MakeVolume("Flange",mater(Cfg.flange_material), TUBE, Cfg.vacuum_chamber_size, 0, Cfg.flange_width, "VacuumChamber", fFlangePosition - fVacuumChamberPosition);
+  MakeVolume("VacuumChamber",mater(Cfg.vacuum_chamber_material), TUBE, Cfg.flange.size, 0, fVacuumChamberLength, "World", fVacuumChamberPosition);
+  MakeVolume("Flange",mater(Cfg.flange.material), TUBE, Cfg.flange.size, 0, Cfg.flange.width, "VacuumChamber", fFlangePosition - fVacuumChamberPosition);
   std::cout << "The positions  vac. cham z =" << fVacuumChamberPosition.z() + fVacuumChamberLength/2.0 << " flange z = " <<  fFlangePosition.z() << std::endl;
 
   G4RotationMatrix *rm = new G4RotationMatrix;
   rm->rotateY(45*deg);		// rotation      
-  MakeVolume("Mirror",mater(Cfg.mirror_material), BOX, Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, "VacuumChamber", fMirrorPosition - fVacuumChamberPosition, rm);
-  MakeVolume("Converter", mater(Cfg.converter_material), BOX, Cfg.converter_size, Cfg.converter_size,Cfg.converter_width, "World", fConverterPosition);
-  MakeVolume("SensBeforeConverter",  mater(Cfg.world_material), BOX, Cfg.converter_size, Cfg.converter_size, 1*mm,"World", fSensBeforeConverterPosition, nullptr, 666);
+  MakeVolume("Mirror",mater(Cfg.mirror.material), BOX, Cfg.mirror.size_x, Cfg.mirror.size_y, Cfg.mirror.width, "VacuumChamber", fMirrorPosition - fVacuumChamberPosition, rm);
+  MakeVolume("Converter", mater(Cfg.converter.material), BOX, Cfg.converter.size, Cfg.converter.size,Cfg.converter.width, "World", fConverterPosition);
+  MakeVolume("SensBeforeConverter",  mater(Cfg.world_material), BOX, Cfg.converter.size, Cfg.converter.size, 1*mm,"World", fSensBeforeConverterPosition, nullptr, 666);
 
   //-------------------------------------------------------------------------
   // GEM
@@ -199,8 +199,8 @@ void DetectorConstruction::SetCheckOverlaps(G4bool checkOverlaps)
 void DetectorConstruction::CalculateGeometry(void)
 {
   std::cout << "Calculate geometry" << std::endl;
-  std::vector<double> ysizes{Cfg.world_size_y, Cfg.vacuum_chamber_size,Cfg.mirror_size_y,Cfg.converter_size, Cfg.gem_size_y, Cfg.gem_size};
-  std::vector<double> xsizes{Cfg.world_size_x, Cfg.vacuum_chamber_size,Cfg.mirror_size_x,Cfg.converter_size, Cfg.gem_size_x, Cfg.gem_size};
+  std::vector<double> ysizes{Cfg.world_size_y, Cfg.flange.size,Cfg.mirror.size_y,Cfg.converter.size, Cfg.gem.size_y, Cfg.gem.size};
+  std::vector<double> xsizes{Cfg.world_size_x, Cfg.flange.size,Cfg.mirror.size_x,Cfg.converter.size, Cfg.gem.size_x, Cfg.gem.size};
   //calculate world xy size:
   Cfg.world_size_y = *std::max_element(ysizes.begin(), ysizes.end());
   Cfg.world_size_x = *std::max_element(xsizes.begin(), xsizes.end());
@@ -212,23 +212,23 @@ void DetectorConstruction::CalculateGeometry(void)
   fGEMPadPosition = G4ThreeVector(0,0,GEM->GetPadZ()) + fGEMPosition;
   if (fGEMSensitiveDetector != nullptr) fGEMSensitiveDetector->SetPadZ(fGEMPadPosition.z());
   std::cout << "GEM: z = " <<  fGEMPosition.z() << "  width = " <<  GEM->GetWidth() << std::endl;
-  fConverterPosition = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.converter_gem_distance + Cfg.converter_width/2.0);
-  std::cout  << "Converter: z = " << fConverterPosition.z() << " width = "  <<  Cfg.converter_width << std::endl;
-  fFlangePosition = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.flange_gem_distance + Cfg.flange_width/2.0);
-  std::cout  << "Flange: z = " << fFlangePosition.z() << " width = "  <<  Cfg.flange_width << std::endl;
-  fMirrorPosition = fFlangePosition - G4ThreeVector(0, 0, Cfg.flange_width/2.0 + Cfg.mirror_flange_distance + Cfg.mirror_width/2.0);
-  std::cout  << "Mirror: z = " << fMirrorPosition.z() << " width = "  <<  Cfg.mirror_width << std::endl;
+  fConverterPosition = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.converter_gem_distance + Cfg.converter.width/2.0);
+  std::cout  << "Converter: z = " << fConverterPosition.z() << " width = "  <<  Cfg.converter.width << std::endl;
+  fFlangePosition = fGEMPosition - G4ThreeVector(0, 0, gem_half_width + Cfg.flange_gem_distance + Cfg.flange.width/2.0);
+  std::cout  << "Flange: z = " << fFlangePosition.z() << " width = "  <<  Cfg.flange.width << std::endl;
+  fMirrorPosition = fFlangePosition - G4ThreeVector(0, 0, Cfg.flange.width/2.0 + Cfg.mirror_flange_distance + Cfg.mirror.width/2.0);
+  std::cout  << "Mirror: z = " << fMirrorPosition.z() << " width = "  <<  Cfg.mirror.width << std::endl;
   fInteractionPointPosition  = fGEMPosition + G4ThreeVector(Cfg.beam.x, Cfg.beam.y, - (gem_half_width + Cfg.photon_flight_length));
 
   //the length of vacuum chamber includes the flange
   std::cout << "half world " << Cfg.world_size_z/2.0 << std::endl;
-  std::cout << "vacuum ch. right = " << Cfg.flange_width/2.0 + fFlangePosition.z() << std::endl;
+  std::cout << "vacuum ch. right = " << Cfg.flange.width/2.0 + fFlangePosition.z() << std::endl;
   std::cout << "vacuum ch. left = " <<  - Cfg.world_size_z/2.0 << std::endl;
-  fVacuumChamberLength =  ((Cfg.flange_width/2.0 + fFlangePosition.z()) -  (-Cfg.world_size_z/2.0));
-  auto vacuum_chamber_pos =  0.5*((Cfg.flange_width/2.0 + fFlangePosition.z()) +  (-Cfg.world_size_z/2.0));
+  fVacuumChamberLength =  ((Cfg.flange.width/2.0 + fFlangePosition.z()) -  (-Cfg.world_size_z/2.0));
+  auto vacuum_chamber_pos =  0.5*((Cfg.flange.width/2.0 + fFlangePosition.z()) +  (-Cfg.world_size_z/2.0));
   fVacuumChamberPosition  = G4ThreeVector(0,0, vacuum_chamber_pos);
   std::cout  << "VacuumChamber: z = " << fVacuumChamberPosition.z() << " width = "  <<  fVacuumChamberLength << std::endl;
-  fSensBeforeConverterPosition =  fConverterPosition - G4ThreeVector(0,0, Cfg.converter_width/2.0  + Cfg.sens_before_converter_width/2.0);
+  fSensBeforeConverterPosition =  fConverterPosition - G4ThreeVector(0,0, Cfg.converter.width/2.0  + Cfg.sens_before_converter_width/2.0);
   std::cout  << "SensBeforeConverter: z = " << fSensBeforeConverterPosition.z() << " width = "  <<  Cfg.sens_before_converter_width << std::endl;;
 }
 
@@ -239,19 +239,19 @@ void DetectorConstruction::UpdateGeometry(void)
   for (auto & p : fVol) p.second.open_geometry();
   GEM->open_geometry();
   fGem->SetTranslation(fGEMPosition);
-  GEM->update_geometry(Cfg.gem_size);
+  GEM->update_geometry(Cfg.gem.size);
 
   fVol["World"].update_geometry(Cfg.world_size_x,Cfg.world_size_y, Cfg.world_size_z, {0,0,0});
   fVol["World"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.world_material.c_str()));
-  fVol["Converter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.converter_width, fConverterPosition);
-  fVol["Converter"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.converter_material.c_str()));
-  fVol["SensBeforeConverter"].update_geometry(Cfg.converter_size,Cfg.converter_size, Cfg.sens_before_converter_width, fSensBeforeConverterPosition);
+  fVol["Converter"].update_geometry(Cfg.converter.size,Cfg.converter.size, Cfg.converter.width, fConverterPosition);
+  fVol["Converter"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.converter.material.c_str()));
+  fVol["SensBeforeConverter"].update_geometry(Cfg.converter.size,Cfg.converter.size, Cfg.sens_before_converter_width, fSensBeforeConverterPosition);
   fVol["SensBeforeConverter"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.world_material.c_str()));
-  fVol["VacuumChamber"].update_geometry(Cfg.vacuum_chamber_size,Cfg.vacuum_chamber_size, fVacuumChamberLength, fVacuumChamberPosition);
-  fVol["Flange"].update_geometry(Cfg.vacuum_chamber_size, Cfg.vacuum_chamber_size, Cfg.flange_width, fFlangePosition-fVacuumChamberPosition);
-  fVol["Flange"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.flange_material.c_str()));
-  fVol["Mirror"].update_geometry(Cfg.mirror_size_x, Cfg.mirror_size_y, Cfg.mirror_width, fMirrorPosition-fVacuumChamberPosition);
-  fVol["Mirror"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.mirror_material.c_str()));
+  fVol["VacuumChamber"].update_geometry(Cfg.flange.size,Cfg.flange.size, fVacuumChamberLength, fVacuumChamberPosition);
+  fVol["Flange"].update_geometry(Cfg.flange.size, Cfg.flange.size, Cfg.flange.width, fFlangePosition-fVacuumChamberPosition);
+  fVol["Flange"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.flange.material.c_str()));
+  fVol["Mirror"].update_geometry(Cfg.mirror.size_x, Cfg.mirror.size_y, Cfg.mirror.width, fMirrorPosition-fVacuumChamberPosition);
+  fVol["Mirror"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.mirror.material.c_str()));
   for (auto & p : fVol) p.second.close_geometry();
   GEM->close_geometry();
   fCheckOverlaps = true;

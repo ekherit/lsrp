@@ -132,7 +132,7 @@ void PrimaryGeneratorAction::Init(void)
   //Ymax should be smaller than detector size in order to supress outside world volume hit
   fFlightLength = Cfg.photon_flight_length;
   G4cout << "Photon flight length: " << fFlightLength/m << " m" << G4endl;
-  G4double Ymax = 0.49*(Cfg.converter_size*mm/2.);
+  G4double Ymax = 0.49*(Cfg.converter.size*mm/2.);
   G4cout << "\tYmax = " << fFlightLength*fThetaMax/cm << " cm" << G4endl;
   fThetaMax = Ymax/fFlightLength;
   G4cout << "\tfThetaMax = " << fThetaMax/mrad << " mrad"  << G4endl;

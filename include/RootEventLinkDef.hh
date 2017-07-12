@@ -21,5 +21,6 @@
 #pragma link C++ class GeneratorEvent+;
 #pragma link C++ class HitEvent+;
 #pragma link C++ class PadEvent+;
+#pragma link C++ class Config+;
 #endif
 

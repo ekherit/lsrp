@@ -66,13 +66,13 @@ DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
 
   AddCmdDouble(Cfg.photon_number           , "/lsrp/PhotonNumberPerPulse"    , "Number of photons per pulse"              , "");
   AddCmdDouble(Cfg.step_max                , "/lsrp/StepMax"                 , "Miximum allowed step"                     , "Length");
-  AddCmdDouble(Cfg.pad_size                , "/lsrp/GEM/pad/Size"            , "Size of the pad"                          , "Length");
-  AddCmdDouble(Cfg.pad_xsize               , "/lsrp/GEM/pad/SizeX"           , "X size of the pad"                        , "Length");
-  AddCmdDouble(Cfg.pad_ysize               , "/lsrp/GEM/pad/SizeY"           , "Y size of the pad"                        , "Length");
-  AddCmdDouble(Cfg.pad_rough_size_x        , "/lsrp/GEM/pad/RoughSizeX"      , "Big pad size x"                           , "Length");
-  AddCmdDouble(Cfg.pad_rough_size_y        , "/lsrp/GEM/pad/RoughSizeY"      , "Big pad size y"                           , "Length");
-  AddCmdDouble(Cfg.pad_high_sens_xwidth    , "/lsrp/GEM/HighSensSizeX"       , "X High sensitive width"                   , "Length");
-  AddCmdDouble(Cfg.pad_high_sens_ywidth    , "/lsrp/GEM/HighSensSizeY"       , "Y High sensitive width"                   , "Length");
+  AddCmdDouble(Cfg.gem.pad.size                , "/lsrp/GEM/pad/Size"            , "Size of the pad"                          , "Length");
+  AddCmdDouble(Cfg.gem.pad.size_x              , "/lsrp/GEM/pad/SizeX"           , "X size of the pad"                        , "Length");
+  AddCmdDouble(Cfg.gem.pad.size_y              , "/lsrp/GEM/pad/SizeY"           , "Y size of the pad"                        , "Length");
+  AddCmdDouble(Cfg.gem.pad.rough_size_x        , "/lsrp/GEM/pad/RoughSizeX"      , "Big pad size x"                           , "Length");
+  AddCmdDouble(Cfg.gem.pad.rough_size_y        , "/lsrp/GEM/pad/RoughSizeY"      , "Big pad size y"                           , "Length");
+  AddCmdDouble(Cfg.gem.high_sens_size_x   , "/lsrp/GEM/HighSensSizeX"       , "X High sensitive width"                   , "Length");
+  AddCmdDouble(Cfg.gem.high_sens_size_y    , "/lsrp/GEM/HighSensSizeY"       , "Y High sensitive width"                   , "Length");
   AddCmdDouble(Cfg.beam.sigmaX             , "/lsrp/beam/SigmaX"             , "Beam X angular spread"                    , "Angle");
   AddCmdDouble(Cfg.beam.sigmaY             , "/lsrp/beam/SigmaY"             , "Beam Y angular spread"                    , "Angle");
   AddCmdDouble(Cfg.beam.I                  , "/lsrp/beam/Current"            , "Beam current"                             , "Electric current");
@@ -89,30 +89,30 @@ DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
   AddCmdDouble(Cfg.world_size_y            , "/lsrp/World/SizeY"             , "World size y"                             , "Length");
   AddCmdDouble(Cfg.world_size_z            , "/lsrp/World/SizeZ"             , "World size z"                             , "Length");
 
-  AddCmdDouble(Cfg.gem_size                , "/lsrp/GEM/Size"                , "GEM size"                                 , "Length");
-  AddCmdDouble(Cfg.gem_size_x              , "/lsrp/GEM/SizeX"               , "GEM size x"                               , "Length");
-  AddCmdDouble(Cfg.gem_size_x              , "/lsrp/GEM/SizeY"               , "GEM size y"                               , "Length");
+  AddCmdDouble(Cfg.gem.size                , "/lsrp/GEM/Size"                , "GEM size"                                 , "Length");
+  AddCmdDouble(Cfg.gem.size_x              , "/lsrp/GEM/SizeX"               , "GEM size x"                               , "Length");
+  AddCmdDouble(Cfg.gem.size_x              , "/lsrp/GEM/SizeY"               , "GEM size y"                               , "Length");
   AddCmdDouble(Cfg.gem_world_distance      , "/lsrp/GEM/DistanceToWorldEdge" , "GEM-world distance"                       , "Length");
 
-  AddCmdDouble(Cfg.converter_width         , "/lsrp/Converter/Width"         , "Converter width"                          , "Length");
-  AddCmdDouble(Cfg.converter_size          , "/lsrp/Converter/Size"          , "Converter size (x  , y)"                  , "Length");
+  AddCmdDouble(Cfg.converter.width         , "/lsrp/Converter/Width"         , "Converter width"                          , "Length");
+  AddCmdDouble(Cfg.converter.size          , "/lsrp/Converter/Size"          , "Converter size (x  , y)"                  , "Length");
 
   AddCmdDouble(Cfg.converter_gem_distance  , "/lsrp/Converter/DistanceToGEM" , "Converter - GEM distance"                 , "Length");
 
   AddCmdDouble(Cfg.flange_gem_distance     , "/lsrp/Flange/DistanceToGEM"    , "The distance from flange to GEM detector" , "Length");
-  AddCmdDouble(Cfg.flange_width            , "/lsrp/Flange/Width"            , "Flange width"                             , "Length");
+  AddCmdDouble(Cfg.flange.width            , "/lsrp/Flange/Width"            , "Flange width"                             , "Length");
 
   AddCmdDouble(Cfg.mirror_flange_distance  , "/lsrp/MirrorFlangeDistance"    , "Mirror - flange distance"                 , "Length");
-  AddCmdDouble(Cfg.mirror_width            , "/lsrp/Mirror/Width"            , "Mirror width"                             , "Length");
-  AddCmdDouble(Cfg.mirror_size_x           , "/lsrp/Mirror/SizeX"            , "Mirror size x"                            , "Length");
-  AddCmdDouble(Cfg.mirror_size_y           , "/lsrp/Mirror/SizeY"            , "Mirror size y"                            , "Length");
-  AddCmdDouble(Cfg.vacuum_chamber_size     , "/lsrp/VacuumChamber/Size"      , "Vacuum chamber size"                      , "Length");
+  AddCmdDouble(Cfg.mirror.width            , "/lsrp/Mirror/Width"            , "Mirror width"                             , "Length");
+  AddCmdDouble(Cfg.mirror.size_x           , "/lsrp/Mirror/SizeX"            , "Mirror size x"                            , "Length");
+  AddCmdDouble(Cfg.mirror.size_y           , "/lsrp/Mirror/SizeY"            , "Mirror size y"                            , "Length");
+  AddCmdDouble(Cfg.flange.size     , "/lsrp/VacuumChamber/Size"      , "Vacuum chamber size"                      , "Length");
   AddCmdDouble(Cfg.photon_flight_length    , "/lsrp/PhotonFlightLength"      , "Photon Flight length"                     , "Length");
 
   AddCmdString(Cfg.world_material          , "/lsrp/World/Material"          , "World material");
-  AddCmdString(Cfg.converter_material      , "/lsrp/Converter/Material"      , "Converter material");
-  AddCmdString(Cfg.mirror_material         , "/lsrp/Mirror/Material"         , "Mirror material");
-  AddCmdString(Cfg.flange_material         , "/lsrp/Flange/Material"         , "Flange material");
+  AddCmdString(Cfg.converter.material      , "/lsrp/Converter/Material"      , "Converter material");
+  AddCmdString(Cfg.mirror.material         , "/lsrp/Mirror/Material"         , "Mirror material");
+  AddCmdString(Cfg.flange.material         , "/lsrp/Flange/Material"         , "Flange material");
   AddCmdString(Cfg.vacuum_chamber_material , "/lsrp/VacuumChamber/Material"  , "Vacuum chamber material");
 }
 

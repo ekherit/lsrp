@@ -119,12 +119,12 @@ G4Material * StefMaterial(void)
 GEMDetector::GEMDetector(void)
 {
   //describe main size
-  fSizeX = Cfg.gem_size_x;
-  fSizeY = Cfg.gem_size_y;
+  fSizeX = Cfg.gem.size_x;
+  fSizeY = Cfg.gem.size_y;
   fRadius = std::max(fSizeX, fSizeY)/2.0;
   fStefWidth=1.5*mm;
   fDriftLength = 3*mm;
-  fCascadeNumber=Cfg.gem_cascade_number; //should be 3
+  fCascadeNumber=Cfg.gem.cascade_number; //should be 3
   fKaptonWidth = 50*um;
   fCuprumWidth = 5*um;
   fCascadeWidth = fKaptonWidth+fCuprumWidth*2;

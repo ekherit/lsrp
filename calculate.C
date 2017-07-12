@@ -90,34 +90,41 @@ void add_to_graph (TGraphErrors *g, double d, const char * file, const char * cu
 }
 
 
-void proceed (const char * prefix, const char * cut = "")
+TGraphErrors * proceed (const char * prefix, int begin=0, int end=100, const char * cut="")
 {
     TGraphErrors * g = new TGraphErrors;
-
-    std::vector<std::string> names = {
-"r0.root","r10.root","r11.root","r12.root","r13.root","r14.root","r15.root","r16.root","r17.root","r18.root","r19.root","r1.root","r20.root","r22.root","r24.root","r26.root","r28.root","r2.root","r30.root","r35.root","r3.root","r40.root","r45.root","r4.root","r50.root","r55.root","r5.root","r6.root","r7.root","r8.root","r9.root"};
-    //for(int i=0;i<20;i++)
-    for(auto & n : names)
+    char buf[1024]; 
+    for ( i = begin; i <= end; i += 1 ) 
     {
-        //char buf[1024];
-        double x;
-        //sprintf(buf,"r%d.root",i);
-        sscanf(n.c_str(), "r%lf.root",&x);
-        
-        add_to_graph(g,x,n.c_str(),cut);
-    }
-    g->Draw("a*");
-}
-
-void proceed2 (const char * prefix, const char * cut = "")
-{
-    TGraphErrors * g = new TGraphErrors;
-
-    for(int i=0;i<26;i++)
-    {
-        char buf[1024];
-        sprintf(buf,"%d.root",i);
+      sprintf(buf, "%s%d.root", prefix, i);
+      if(gSystem->AccessPathName(buf) == 0)
+      {
+        std::cout << buf << std::endl;
         add_to_graph(g,i,buf,cut);
+      }
     }
-    g->Draw("a*");
+    g->Draw("ap");
+    g->GetXaxis()->SetTitle("converter - GEM distance (mm)");
+    g->GetXaxis()->SetDecimals();
+    g->GetXaxis()->SetTitleOffset(1.2);
+    g->GetYaxis()->SetRangeUser(0,0.2);
+    g->GetYaxis()->SetTitle("#Delta <y>/PV (mm)");
+    g->SetTitle("E=4.1 GeV, L_{IP}=31 m, L_{air}=20 m, quarz mirror 5 mm, GEM size 50 cm");
+    g->SetMarkerStyle(21);
+    g->Fit("pol1");
+    gStyle->SetOptFit();
+    return g;
 }
+
+//void proceed2 (const char * prefix, const char * cut = "")
+//{
+//    TGraphErrors * g = new TGraphErrors;
+//
+//    for(int i=0;i<26;i++)
+//    {
+//        char buf[1024];
+//        sprintf(buf,"%d.root",i);
+//        add_to_graph(g,i,buf,cut);
+//    }
+//    g->Draw("a*");
+//}

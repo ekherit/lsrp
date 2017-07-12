@@ -131,7 +131,7 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 	  newHit->FindPad();
 	  newHit->SetCharge(charge*GetAmplification(newHit->GetVolumeID()));
 	  std::list<Pad> pad_list;
-	  if(Cfg.drift_spread)
+	  if(Cfg.gem.drift_spread)
 	  {
 		  // calculate drift length
 		  G4double  drift_length = fPadZPosition - r.z();
@@ -163,8 +163,8 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 
 G4double GEMSensitiveDetector::GetAmplification(int volume_id)
 {
-  double K0 = Cfg.gem_amplification; //maximum amplification coeff
-  double Nc = Cfg.gem_cascade_number; //number amplif cascades
+  double K0 = Cfg.gem.amplification; //maximum amplification coeff
+  double Nc = Cfg.gem.cascade_number; //number amplif cascades
   double K =  pow(K0, (Nc-volume_id)/Nc);
   return K;
 }

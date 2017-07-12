@@ -66,7 +66,7 @@ class SquarePad : public BasePad
     }
 
 
-    SquarePad(double X, double Y, double q=0) : BasePad(Cfg.pad_xsize, Cfg.pad_ysize)
+    SquarePad(double X, double Y, double q=0) : BasePad(Cfg.gem.pad.size_x, Cfg.gem.pad.size_y)
     {
       charge=q;
       FindIndex(X,Y);
@@ -104,12 +104,12 @@ class VariableSquarePad : public BasePad
 
     VariableSquarePad(double X, double Y, double q=0)
     {
-      double ax = Cfg.pad_xsize;
-      double ay = Cfg.pad_ysize;
-      fHighSensWidthX = Cfg.pad_high_sens_xwidth;
-      fHighSensWidthY = Cfg.pad_high_sens_ywidth;
-      fRoughSizeX = Cfg.pad_rough_size_x;
-      fRoughSizeY = Cfg.pad_rough_size_y;
+      double ax = Cfg.gem.pad.size_x;
+      double ay = Cfg.gem.pad.size_y;
+      fHighSensWidthX = Cfg.gem.high_sens_size_x;
+      fHighSensWidthY = Cfg.gem.high_sens_size_y;
+      fRoughSizeX = Cfg.gem.pad.rough_size_x;
+      fRoughSizeY = Cfg.gem.pad.rough_size_y;
       if(fabs(X) <= fHighSensWidthX*0.5 && fabs(Y)<=fHighSensWidthY*0.5)
       {
         fxsize=ax;
@@ -154,7 +154,7 @@ class HexPad : public BasePad
   {
   }
 
-  HexPad(double X, double Y) : BasePad(Cfg.pad_xsize, Cfg.pad_ysize)
+  HexPad(double X, double Y) : BasePad(Cfg.gem.pad.size_x, Cfg.gem.pad.size_y)
   {
     FindIndex(X,Y);
   }

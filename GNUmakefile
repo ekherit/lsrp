@@ -1,8 +1,3 @@
-# $Id: GNUmakefile,v 1.2 2000-10-19 12:22:10 stanaka Exp $
-# --------------------------------------------------------------
-# GNUmakefile for examples module.  Gabriele Cosmo, 06/04/98.
-# --------------------------------------------------------------
-
 name := lsrp
 G4TARGET := $(name)
 G4EXLIB := true
@@ -21,21 +16,33 @@ endif
 
 TARGET = RootEvent
 
-all: lib$(TARGET).so lib bin 
+all: lib$(TARGET).so lib bin  libConfig.so
 
 
-lib$(TARGET).so : $(TARGET).o $(TARGET)Dict.o
-		g++ -o $@ -shared -fPIC  $^ $(LDFLAGS) 
+lib$(TARGET).so : $(TARGET).o $(TARGET)Dict.o 
+		g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
 
-$(TARGET).o : src/$(TARGET).cc
+
+RootEvent.o : src/RootEvent.cc
 		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
 
-$(TARGET)Dict.o : src/$(TARGET)Dict.cc
+RootEventDict.o : src/RootEventDict.cc
 		g++ -o $@ -I/$(G4INCLUDE) $(CPPFLAGS)  -c $< 
 
-src/$(TARGET)Dict.cc : include/$(TARGET).hh include/$(TARGET)LinkDef.hh
+src/RootEventDict.cc :  include/RootEvent.hh include/RootEventLinkDef.hh
 		rootcling -f $@ -I$(G4INCLUDE) -c $^
 
+libConfig.so : Config.o  ConfigDict.o 
+		g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
+
+Config.o : src/Config.cc
+		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
+
+ConfigDict.o : src/ConfigDict.cc
+		g++ -o $@ -I/$(G4INCLUDE) $(CPPFLAGS)  -c $< 
+
+src/ConfigDict.cc :  include/Config.h include/ConfigLinkDef.hh
+		rootcling -f $@ -I$(G4INCLUDE) -c $^
 
 
 myclean :

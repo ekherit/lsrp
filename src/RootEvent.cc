@@ -18,6 +18,7 @@
 
 #include "RootEvent.hh"
 #include <ibn/phys/compton.h>
+#include "Config.h"
 
 ClassImp(RootEvent)
 
