@@ -269,6 +269,11 @@ GEMDetector::GEMDetector(void)
   PrintGeometry();
 }
 
+GEMDetector::~GEMDetector(void)
+{
+  std::cout << "~GEMDetector " << std::endl;
+}
+
 void GEMDetector::SetUserLimits(G4UserLimits * user_limits)
 {
   fDriftVolume->SetUserLimits(user_limits);

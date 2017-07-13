@@ -139,11 +139,11 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   fGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
   fGEMSensitiveDetector->SetPadZ(fGEMPadPosition.z());
   G4SDManager::GetSDMpointer()->AddNewDetector(fGEMSensitiveDetector);
-  //GEM->GetDriftVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
+  GEM->GetDriftVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
   GEM->GetTransferVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
   //fLogicPresampler->SetSensitiveDetector(fGEMSensitiveDetector);
   //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
-  //GEM->SetUserLimits(new G4UserLimits(0.1*mm));
+  GEM->SetUserLimits(new G4UserLimits(0.1*mm));
   //GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
   //fVol["SensBeforeConverter"].logic->SetSensitiveDetector(fGEMSensitiveDetector);
   //fVol["SensBeforeConverter"].logic->SetUserLimits(new G4UserLimits(1*mm));
@@ -206,6 +206,7 @@ void DetectorConstruction::UpdateGeometry(void)
   GEM->open_geometry();
   fGem->SetTranslation(fGEMPosition);
   GEM->update_geometry(Cfg.gem.size);
+  //GEM->GetLogicalVolume().logic->SetUserLimits(new G4UserLimits(std::min(Cfg.converter.step, Cfg.converter.width*0.5)));
 
   fVol["World"].update_geometry(Cfg.world_size_x,Cfg.world_size_y, Cfg.world_size_z, {0,0,0});
   fVol["World"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.world_material.c_str()));
@@ -219,8 +220,10 @@ void DetectorConstruction::UpdateGeometry(void)
   fVol["Flange"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.flange.material.c_str()));
   fVol["Mirror"].update_geometry(Cfg.mirror.size_x, Cfg.mirror.size_y, Cfg.mirror.width, fMirrorPosition-fVacuumChamberPosition);
   fVol["Mirror"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.mirror.material.c_str()));
-  for (auto & p : fVol) p.second.close_geometry();
-  GEM->close_geometry();
+  //WARNING, code commented below supress the message at the end of the program
+  //that deleting volume while geometry is closed
+  //for (auto & p : fVol) p.second.close_geometry();
+  //GEM->close_geometry();
   fCheckOverlaps = true;
 }
 

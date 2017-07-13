@@ -41,7 +41,7 @@ class GEMDetector
   G4double fKaptonWidth = 50*um; //kapton width 50 mkm
   G4double fCuprumWidth = 5*um;//cuprum width on capton (one size) 5 mkm
   G4double fCascadeWidth = fKaptonWidth+fCuprumWidth*2; // fKaptonWidth+fCuprumWidth*2; (60 mkm)
-  G4double fTransferLength = 1.5*cm; //1.5 mm
+  G4double fTransferLength = 1.5*mm; 
   G4double fInductionLength  = 2.0*mm; //induction length
   G4double fPadWidth = 15.*um;   //Pad width 15 mkm
   G4double fGEMWidth;   //total GEM width calculated from other parameters
@@ -76,6 +76,7 @@ class GEMDetector
   G4Material * Ar;
   public:
     GEMDetector(void);
+    ~GEMDetector(void);
     G4double GetWidth(void) { return fGEMWidth; }
     G4LogicalVolume * GetLogicalVolume(void) {return LV.get();}
     G4LogicalVolume * GetDriftVolume(void) { return fDriftVolume.get(); }
