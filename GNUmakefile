@@ -7,10 +7,6 @@ LDFLAGS :=  `root-config --libs`  \
 			-lboost_filesystem \
 		#	-lMinuit  \
 
-#ifndef G4INSTALL
-#  G4INSTALL = ../../../..
-#endif
-#
 ifndef G4DUMMY_VARIABLE
   include $(G4INSTALL)/config/architecture.gmk
 endif
@@ -22,9 +18,10 @@ TMP=$(G4TMP)/$(G4SYSTEM)/$(G4TARGET)
 
 all: lib bin
 
+EXTRALIBS := $(TMP)/Config.o $(TMP)/RootEvent.o
 EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRoot.so 
 
-$(TMP)/libRoot.so : $(TMP)/RootEvent.o $(TMP)/Config.o $(TMP)/RootDict.o  
+$(TMP)/libRoot.so : $(TMP)/RootEvent.o $(TMP)/Config.o $(TMP)/RootDict.o 
 		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
 		@echo Creating shared library $@
 
