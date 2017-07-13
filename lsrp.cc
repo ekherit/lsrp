@@ -65,18 +65,20 @@ void clean_argc_argv(int * ARGC, char ** ARGV, boost::program_options::variables
 int main(int argc,char** argv)
 {
   namespace po=boost::program_options;
+  std::string input_file="run.mac";
   po::options_description opt_desc("Allowed options");
   opt_desc.add_options()
-    ("help", "Print this help")
-    ("seed",po::value<unsigned long>(&Cfg.seed),"Seed of the engine")
+    ("help,h", "Print this help")
+    ("seed,s",po::value<unsigned long>(&Cfg.seed),"Seed of the engine")
+    ("input_file,i",po::value<std::string>(&input_file),"Input *.mac file")
     ;
   po::positional_options_description pos;
-  //pos.add("output",-1);
+  pos.add("input_file",-1);
   po::variables_map opt; //options container
   try
   {
-    //po::store(po::command_line_parser(argc, argv).options(opt_desc).positional(pos).run(), opt);
-    po::store(parse_command_line(argc, argv, opt_desc), opt);
+    po::store(po::command_line_parser(argc, argv).options(opt_desc).positional(pos).run(), opt);
+    //po::store(parse_command_line(argc, argv, opt_desc), opt);
     //std::ifstream config_file("fit.cfg");
     //po::store(po::parse_config_file(config_file,opt_desc,true), opt);
     po::notify(opt);
@@ -95,7 +97,7 @@ int main(int argc,char** argv)
     exit(0);
   }
   //remove my own program options
-  clean_argc_argv(&argc, argv, opt);
+  //clean_argc_argv(&argc, argv, opt);
   for(int i=0;i<argc;i++)
   {
     cout << i << ": " << argv[i] << endl;
@@ -146,7 +148,7 @@ int main(int argc,char** argv)
   // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
   G4String command = "/control/execute ";
-  G4String fileName = argv[1];
+  G4String fileName = input_file;
   UImanager->ApplyCommand(command+fileName);
 
 
