@@ -90,6 +90,10 @@ void EventAction::EndOfEventAction(const G4Event* event)
       }
     }
   }
+  auto npad = fPads.size(); 
+  //remove pads with a charge under threshold 
+  fPads.remove_if([](const auto & pad) { return pad.charge < Cfg.gem.pad.threshold; });
+
   //Now we have pad list with number of hits and with the photon track list in each pad
   std::map <unsigned,std::list<Pad> > tracks;  // photon trackID -> padlist
   for(auto & p : fPads)
@@ -103,7 +107,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
     }
   };
 
-  auto npad = fPads.size();
 
   if(Cfg.root.one_pad_per_track == 1)  //refill the pad list keep only signle pad for each registered track
   {

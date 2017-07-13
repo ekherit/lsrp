@@ -80,7 +80,7 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {  
   int volid = aStep->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber();
   // energy deposit in the volume
-  G4double Edep = aStep->GetTotalEnergyDeposit();
+  G4double Edep = aStep->GetTotalEnergyDeposit() - aStep->GetNonIonizingEnergyDeposit();
   if(Edep<=0) return false;
   //G4double charge = edep/(85.7*eV);
   G4double charge = Edep/(26*eV);
@@ -102,6 +102,7 @@ G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
   newHit->FindPad(); //get pad which correspond the hit (first approximation without drift and spread
 
   newHit->SetCharge(charge*GetAmplification(newHit->GetVolumeID()));
+  //std::cout << " charge = " << charge << " Ampl charge = " << newHit->GetCharge() <<  "  Edep = " << Edep/keV << "   total = " << aStep->GetTotalEnergyDeposit()/keV << "   nonionazing = " << aStep->GetNonIonizingEnergyDeposit() <<std::endl;
 
   std::list<Pad> pad_list;
   if(Cfg.gem.drift_spread)
