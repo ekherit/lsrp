@@ -114,6 +114,8 @@ DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
   AddCmdString(Cfg.mirror.material         , "/lsrp/Mirror/Material"         , "Mirror material");
   AddCmdString(Cfg.flange.material         , "/lsrp/Flange/Material"         , "Flange material");
   AddCmdString(Cfg.vacuum_chamber_material , "/lsrp/VacuumChamber/Material"  , "Vacuum chamber material");
+  AddCmdInt(Cfg.root.save_hits , "/lsrp/SaveAllHits"  , "Save all hits");
+  AddCmdInt(Cfg.root.one_pad_per_track , "/lsrp/SaveOnePadPerTrack"  , "Save only one pad per track");
 }
 
 
@@ -131,6 +133,15 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   }
 
   {
+    auto p = fCmdMapInt.find(command);
+    if (  p!=fCmdMapInt.end() ) 
+    {
+      *p->second.data = static_cast<G4UIcmdWithAnInteger*>(command)->GetNewIntValue(newValue);
+      std::cout << command->GetCommandPath() << " = " <<  *p->second.data << " (" << newValue << ")\n";
+    }
+  }
+
+  {
     auto p = fCmdMapString.find(command);
     if (  p!=fCmdMapString.end() ) 
     {
@@ -142,23 +153,44 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
 void DetectorMessenger::AddCmdDouble(double & par, const std::string & name, const std::string & title, const  std::string & unit)
 {
-    auto command = new G4UIcmdWithADoubleAndUnit(name.c_str(), this); //create a command
-    command->SetGuidance(title.c_str()); //set description
-    std::vector<std::string> nms;
-    boost::split(nms,name,boost::is_any_of("/")); //find parameter name (without dirs)
-    command->SetParameterName(nms.back().c_str(), false); //set parameter name
-    command->SetUnitCategory(unit.c_str()); //set units
-    command->AvailableForStates(G4State_Idle); //???
-    //emplace effectively construct object in the heep at the map avoiding 
-    //temporary variable and copying
-    fCmdMapDouble.emplace //register in the list of known command
-        (
-            std::make_pair<G4UIcommand*,  CmdItem_t<double> > 
-            (
-                static_cast<G4UIcommand*>(command),
-                {std::unique_ptr<G4UIcommand>(command), &par, name}
-            )
-        ); 
+  auto command = new G4UIcmdWithADoubleAndUnit(name.c_str(), this); //create a command
+  command->SetGuidance(title.c_str()); //set description
+  std::vector<std::string> nms;
+  boost::split(nms,name,boost::is_any_of("/")); //find parameter name (without dirs)
+  command->SetParameterName(nms.back().c_str(), false); //set parameter name
+  command->SetUnitCategory(unit.c_str()); //set units
+  command->AvailableForStates(G4State_Idle); //???
+  //emplace effectively construct object in the heep at the map avoiding 
+  //temporary variable and copying
+  fCmdMapDouble.emplace //register in the list of known command
+    (
+     std::make_pair<G4UIcommand*,  CmdItem_t<double> > 
+     (
+      static_cast<G4UIcommand*>(command),
+      {std::unique_ptr<G4UIcommand>(command), &par, name}
+     )
+    ); 
+}
+
+void DetectorMessenger::AddCmdInt(int & par, const std::string & name, const std::string & title)
+{
+  auto command = new G4UIcmdWithAnInteger(name.c_str(), this); //create a command
+  command->SetGuidance(title.c_str()); //set description
+  std::vector<std::string> nms;
+  boost::split(nms,name,boost::is_any_of("/")); //find parameter name (without dirs)
+  command->SetParameterName(nms.back().c_str(), false); //set parameter name
+  //command->SetUnitCategory(unit.c_str()); //set units
+  command->AvailableForStates(G4State_Idle); //???
+  //emplace effectively construct object in the heep at the map avoiding 
+  //temporary variable and copying
+  fCmdMapInt.emplace //register in the list of known command
+    (
+     std::make_pair<G4UIcommand*,  CmdItem_t<int> > 
+     (
+      static_cast<G4UIcommand*>(command),
+      {std::unique_ptr<G4UIcommand>(command), &par, name}
+     )
+    ); 
 }
 
 void DetectorMessenger::AddCmdString(std::string & par, const std::string & name, const std::string & title)

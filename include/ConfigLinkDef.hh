@@ -17,6 +17,6 @@
  */
 
 #ifdef __CLING__
-#pragma link C++ class Config+;
+#pragma link C++ class Config_t+;
 #endif
 

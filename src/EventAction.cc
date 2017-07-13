@@ -60,7 +60,7 @@ EventAction::~EventAction()
 
 void EventAction::BeginOfEventAction(const G4Event* )
 {  
-  fPads.clear();
+  //fPads.clear();
   //G4int eventID = event->GetEventID();
   //if ( eventID % fPrintModulo == 0) 
   //{ 
@@ -95,43 +95,34 @@ void EventAction::EndOfEventAction(const G4Event* event)
   Revent.Eb = PGA->fBeamEnergy;
   Revent.P = PGA->fPolarization;
   Revent.nhit = hc->GetSize();
-  Revent.hit.resize(hc->GetSize());
 
-
+  std::list<Pad> fPads; //collection of pads
+  //Make total hit pad list
+  //One photon can produce many hits
+  //each hit can hit many pads
   for(unsigned i=0; i< hc->GetSize();i++)
   {
-    GEMHit * hit = (GEMHit*)hc->GetHit(i);
-    Revent.hit[i].trackID = hit->GetTrackID();
-    Revent.hit[i].OrigTrackID = hit->GetOriginalTrackID();
-    Revent.hit[i].pid = hit->GetParticleID();
-    Revent.hit[i].volumeID = hit->GetVolumeID();
-    Revent.hit[i].E = hit->GetEdep()/MeV;
-    Revent.hit[i].x = hit->GetPos().x()/mm;
-    Revent.hit[i].y = hit->GetPos().y()/mm;
-    Revent.hit[i].z = hit->GetPos().z()/mm;
-    Revent.hit[i].rho = hypot(Revent.hit[i].y,Revent.hit[i].y);
-    Revent.hit[i].phi = hit->GetPos().phi();
-    //Revent.hit[i].q = hit->GetCharge()/coulomb*1e15;
-    Revent.hit[i].q = hit->GetCharge();
-    for(auto & pad : hit->GetPads())
+    for(auto & pad : static_cast<GEMHit*>(hc->GetHit(i))->GetPads())
     {
       auto p = std::find(std::begin(fPads),std::end(fPads), pad);
-      if(p==fPads.end()) 
+      if(p==fPads.end()) //new hit pad
       {
-        fPads.push_back(pad);
+        fPads.push_back(pad);//here nhit=1
       }
-      else
-      {
-        p->nhit++;
-        p->charge+= pad.charge;
+      else //already find the pad with hit
+      { 
+        p->nhit++; //increase number of hits
+        p->charge+= pad.charge; //collect charge
+        //register the track ids
         p->tracks.insert(std::end(p->tracks), std::begin(pad.tracks), std::end(pad.tracks));
       }
     }
   }
-
+  //Now we have pad list with number of hits and with the photon track list in each pad
   std::map <unsigned,std::list<Pad> > tracks;  // photon trackID -> padlist
   for(auto & p : fPads)
   {
+    //keep only unique track for each pad
     p.tracks.sort();
     p.tracks.unique();
     for(auto track_id : p.tracks)
@@ -140,14 +131,39 @@ void EventAction::EndOfEventAction(const G4Event* event)
     }
   };
 
-  fPads.clear();
-  for(auto & item : tracks)
+  if(Cfg.root.one_pad_per_track == 1)  //refill the pad list keep only signle pad for each registered track
   {
-    ///auto track_id = item.first;
-    auto & pad_list = item.second;
-    pad_list.sort([](const Pad & p1, const Pad & p2){return p1.charge < p2.charge; });
-    //pad_list.erase(++fPads.begin(), fPads.end());
-    fPads.push_back(pad_list.front());
+    fPads.clear();
+    for(auto & item : tracks)
+    {
+      ///auto track_id = item.first;
+      auto & pad_list = item.second;
+      pad_list.sort([](const Pad & p1, const Pad & p2){return p1.charge < p2.charge; });
+      //pad_list.erase(++fPads.begin(), fPads.end());
+      fPads.push_back(pad_list.front()); //keep only pad with highest charge
+    }
+  }
+
+  if(Cfg.root.save_hits == 1)
+  {
+    //Loop over all hit collection
+    Revent.hit.resize(hc->GetSize());
+    for(unsigned i=0; i< hc->GetSize();i++)
+    {
+      GEMHit * hit = (GEMHit*)hc->GetHit(i);
+      Revent.hit[i].trackID = hit->GetTrackID();
+      Revent.hit[i].OrigTrackID = hit->GetOriginalTrackID();
+      Revent.hit[i].pid = hit->GetParticleID();
+      Revent.hit[i].volumeID = hit->GetVolumeID();
+      Revent.hit[i].E = hit->GetEdep()/MeV;
+      Revent.hit[i].x = hit->GetPos().x()/mm;
+      Revent.hit[i].y = hit->GetPos().y()/mm;
+      Revent.hit[i].z = hit->GetPos().z()/mm;
+      Revent.hit[i].rho = hypot(Revent.hit[i].y,Revent.hit[i].y);
+      Revent.hit[i].phi = hit->GetPos().phi();
+      //Revent.hit[i].q = hit->GetCharge()/coulomb*1e15;
+      Revent.hit[i].q = hit->GetCharge();
+    }
   }
 
   Revent.npad = fPads.size();
@@ -156,8 +172,9 @@ void EventAction::EndOfEventAction(const G4Event* event)
   for(auto & p : fPads) 
   {
     PadEvent & epad=Revent.pad[i];
-    p.tracks.sort(); //sort initial photon track identificators
-    p.tracks.unique(); //remove doubles
+    //tracks should be already unique
+    //p.tracks.sort(); //sort initial photon track identificators
+    //p.tracks.unique(); //remove doubles
     phot_list.insert(std::end(phot_list), std::begin(p.tracks), std::end(p.tracks)); //write tracks id to global registered photon list
     epad.X = p.x();
     epad.Y = p.y();
@@ -177,6 +194,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
     epad.r = hypot(epad.x,epad.y);
     //variate amplification
     do { epad.q = p.charge*(1+0.3*G4RandGauss::shoot()); } while(epad.q <=0);
+    //std::cout << "epad.q = " << epad.q << std::endl;
+    //std::cout << "p.charge = " << p.charge << std::endl;
     //scale charge
     //epad.q = epad.q/coulomb*1e15; //fC or femtocoulomb 
     epad.nhit = p.nhit;
@@ -237,11 +256,27 @@ void EventAction::EndOfEventAction(const G4Event* event)
   // periodic printing
 
   static long geometry_print_index=0;
-  bool ispr1 = eventID < 100;
-  bool ispr100 = eventID < 1000 && eventID%100==0;
-  bool ispr10k = eventID%10000==0;
+  auto isprint = [](int id, int period)  -> bool
+  {
+    return (id < period*10) && (id % period == 0);
+  };
+  class index_print
+  {
+    int a;
+
+  };
+
+  bool ispr1 = isprint(eventID,1);
+  bool ispr10 = isprint(eventID,10);
+  bool ispr100 = isprint(eventID,100);
+  bool ispr1000 = isprint(eventID,1000);
+  bool ispr10000 = isprint(eventID,10000);
+
+  //bool ispr100 = eventID < 1000 && eventID%100==0;
+  //bool ispr1000 = eventID < 10000 && eventID%1000==0;
+  //bool ispr10k = eventID%10000==0;
   if(eventID==0) geometry_print_index=0;
-  if (ispr1 || ispr100 || ispr10k)
+  if (ispr1 || ispr100 || ispr10000)
   {
     G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
     G4cout << ">>> Event: " << eventID  <<  ".  ";

@@ -26,6 +26,8 @@
 #include "G4Tubs.hh"
 #include "G4PVPlacement.hh"
 
+#include "G4SystemOfUnits.hh"
+
 class G4UserLimits;
 
 class GEMDetector 
@@ -33,15 +35,15 @@ class GEMDetector
   G4double fSizeX; // GEM size X
   G4double fSizeY; // GEM size Y
   G4double fRadius; // GEM radius 50 mm
-  G4int fCascadeNumber; //number of amplification cascades
-  G4double fStefWidth; //width of the stef 1.5 mm
-  G4double fDriftLength; //drift length 3 mm
-  G4double fKaptonWidth; //kapton width 50 mkm
-  G4double fCuprumWidth;//cuprum width on capton (one size) 5 mkm
-  G4double fCascadeWidth; // fKaptonWidth+fCuprumWidth*2; (60 mkm)
-  G4double fTransferLength; //1.5 mm
-  G4double fInductionLength; //induction length
-  G4double fPadWidth;   //Pad width 15 mkm
+  G4int fCascadeNumber = 3; //number of amplification cascades
+  G4double fStefWidth = 1.5*mm; //width of the stef 1.5 mm
+  G4double fDriftLength = 3*mm; //drift length 3 mm
+  G4double fKaptonWidth = 50*um; //kapton width 50 mkm
+  G4double fCuprumWidth = 5*um;//cuprum width on capton (one size) 5 mkm
+  G4double fCascadeWidth = fKaptonWidth+fCuprumWidth*2; // fKaptonWidth+fCuprumWidth*2; (60 mkm)
+  G4double fTransferLength = 1.5*cm; //1.5 mm
+  G4double fInductionLength  = 2.0*mm; //induction length
+  G4double fPadWidth = 15.*um;   //Pad width 15 mkm
   G4double fGEMWidth;   //total GEM width calculated from other parameters
   G4double fPadZposition; // z position of the pad
   std::unique_ptr<G4LogicalVolume> LV;

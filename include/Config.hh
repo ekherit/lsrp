@@ -20,6 +20,7 @@
 #ifndef IBN_LSRP_CONFIG_H
 #define IBN_LSRP_CONFIG_H
 
+#include <iostream>
 #include <string>
 
 #include <TObject.h>
@@ -48,8 +49,8 @@ struct Object
 class Config_t : public TObject
 {
   public:
-  Config_t(void);
-  virtual ~Config_t(void){}
+  Config_t(void){};
+  virtual ~Config_t(void) { }
   unsigned long seed=0;
   unsigned long run=0;
   double photon_number=0; //number of photons in one pulse
@@ -74,7 +75,7 @@ class Config_t : public TObject
 
   struct 
   {
-    unsigned cascade_number; //number of amplification cascades 3
+    unsigned cascade_number = 3; //number of amplification cascades 3
     double   amplification=1e4;  //1e4
     unsigned drift_spread;
     struct
@@ -145,6 +146,8 @@ class Config_t : public TObject
   {
     std::string file; //the name of ROOT file to save
     std::string auto_generate_root_files = "no";
+    int save_hits = 1; //save all hits into ROOT file
+    int one_pad_per_track = 1; //save only one track
   } root;
 
   ClassDef(Config_t, 1); //The class title

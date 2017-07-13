@@ -169,18 +169,18 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
       );
 
   // Sensitive detectors
-  G4String trackerChamberSDname = "slrp/GEMSD";
+  G4String trackerChamberSDname = "lsrp/GEMSD";
   fGEMSensitiveDetector = new GEMSensitiveDetector(trackerChamberSDname, "GEMHitsCollection");
   fGEMSensitiveDetector->SetPadZ(fGEMPadPosition.z());
   G4SDManager::GetSDMpointer()->AddNewDetector(fGEMSensitiveDetector);
-  GEM->GetDriftVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
+  //GEM->GetDriftVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
   GEM->GetTransferVolume()->SetSensitiveDetector(fGEMSensitiveDetector);
   //fLogicPresampler->SetSensitiveDetector(fGEMSensitiveDetector);
   //fLogicPresampler->SetUserLimits(new G4UserLimits(fPresamplerWidth/10.));
   //GEM->SetUserLimits(new G4UserLimits(0.1*mm));
   //GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
-  fVol["SensBeforeConverter"].logic->SetSensitiveDetector(fGEMSensitiveDetector);
-  fVol["SensBeforeConverter"].logic->SetUserLimits(new G4UserLimits(1*mm));
+  //fVol["SensBeforeConverter"].logic->SetSensitiveDetector(fGEMSensitiveDetector);
+  //fVol["SensBeforeConverter"].logic->SetUserLimits(new G4UserLimits(1*mm));
 
   return fVol["World"].phys.get(); 
 }

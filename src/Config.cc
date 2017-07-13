@@ -18,8 +18,7 @@
 
 #include "Config.hh"
 
-Config_t Cfg;
 
 ClassImp(Config_t)
-Config_t::Config_t(void) { }
+//Config_t::Config_t(void) { }
 

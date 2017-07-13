@@ -69,6 +69,13 @@ void GEMSensitiveDetector::Initialize(G4HCofThisEvent* hce)
   hce->AddHitsCollection( hcID, fHitsCollection ); 
 }
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  GetHitPadList
+ *  Description:  Spread the total charge over many pads by using monte carlo
+ * =====================================================================================
+ */
 std::list<Pad> GetHitPadList(G4ThreeVector hit_pos, double total_charge, double spot_size, unsigned N=400)
 {
   std::list<Pad> Pads;
@@ -80,10 +87,12 @@ std::list<Pad> GetHitPadList(G4ThreeVector hit_pos, double total_charge, double 
     auto p = std::find(std::begin(Pads),std::end(Pads), pad);
     if(p==Pads.end()) 
     {
+      //new pad
       Pads.push_back(pad);
     }
     else
     {
+      //alrady hit
       p->nhit++;
     }
   }
@@ -99,58 +108,52 @@ std::list<Pad> GetHitPadList(G4ThreeVector hit_pos, double total_charge, double 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 G4bool GEMSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {  
-  // energy deposit
-  G4double edep = aStep->GetTotalEnergyDeposit();
+  int volid = aStep->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber();
+  // energy deposit in the volume
+  G4double Edep = aStep->GetTotalEnergyDeposit();
+  if(Edep<=0) return false;
   //G4double charge = edep/(85.7*eV);
-  G4double charge = edep/(26*eV);
+  G4double charge = Edep/(26*eV);
   G4ThreeVector r = aStep->GetPostStepPoint()->GetPosition(); //hit position 
 
-  //if (edep==0.) return false;
-
-  GEMHit* newHit = new GEMHit();
+  GEMHit* newHit = new GEMHit(); //create a hit
+  newHit->SetEdep(Edep);
+  newHit->SetPos(r);
 
   auto track = aStep->GetTrack();
-  TrackInformation* info = (TrackInformation*)(track->GetUserInformation());
+  newHit->SetMomentum(track->GetVertexMomentumDirection());
 
+  TrackInformation* info = (TrackInformation*)(track->GetUserInformation());
   newHit->SetTrackID  (track->GetTrackID());
   newHit->SetOriginalTrackID (info->GetOriginalTrackID());
   newHit->SetParticleID(track->GetParticleDefinition()->GetPDGEncoding());
   newHit->SetVolumeID(aStep->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber());
-  newHit->SetEdep(edep);
-  newHit->SetPos(r);
-  newHit->SetMomentum(track->GetVertexMomentumDirection());
-  if(newHit->GetVolumeID()==666  && newHit->GetMomentum().z() < 0 ) 
-  {
-    delete newHit;
-    return false;
-  }
   
-  if(newHit->GetVolumeID()!=666 && edep > 0)
+  newHit->FindPad(); //get pad which correspond the hit (first approximation without drift and spread
+
+  newHit->SetCharge(charge*GetAmplification(newHit->GetVolumeID()));
+
+  std::list<Pad> pad_list;
+  if(Cfg.gem.drift_spread)
   {
-	  newHit->FindPad();
-	  newHit->SetCharge(charge*GetAmplification(newHit->GetVolumeID()));
-	  std::list<Pad> pad_list;
-	  if(Cfg.gem.drift_spread)
-	  {
-		  // calculate drift length
-		  G4double  drift_length = fPadZPosition - r.z();
-		  G4double  drift_speed = 15*um/mm;
-		  G4double  spot_size = drift_speed*drift_length;
-		  pad_list = GetHitPadList(r, newHit->GetCharge(), spot_size);
-	  }
-	  else 
-	  {
-		  pad_list.push_back(newHit->GetPad());
-	  }
-	  //Fill information about original photon
-	  for(auto & p : pad_list)
-	  {
-		  p.tracks.clear();
-		  p.tracks.push_back(info->GetOriginalTrackID());
-		  //no there is only one id in each pad.
-	  }
-	  newHit->SetPads(pad_list);
+    // calculate drift length
+    G4double  drift_length = fPadZPosition - r.z();
+    G4double  drift_speed = 15*um/mm;
+    G4double  spot_size = drift_speed*drift_length;
+    pad_list = GetHitPadList(r, newHit->GetCharge(), spot_size);
   }
+  else 
+  {
+    pad_list.push_back(newHit->GetPad());
+  }
+  //Fill information about original photon
+  for(auto & p : pad_list)
+  {
+    p.tracks.clear();
+    p.tracks.push_back(info->GetOriginalTrackID());
+    //no there is only one id in each pad.
+  }
+  newHit->SetPads(pad_list);
 
   /*  
    *  As I have seen in the G4THitCoolections code. Hit Collection is realized through the vector.  
@@ -164,7 +167,11 @@ G4double GEMSensitiveDetector::GetAmplification(int volume_id)
 {
   double K0 = Cfg.gem.amplification; //maximum amplification coeff
   double Nc = Cfg.gem.cascade_number; //number amplif cascades
-  double K =  pow(K0, (Nc-volume_id)/Nc);
+  //amplification for the volume_id
+  //0 : K0
+  //1 : K0^{2/3}
+  //2 : K0^{1/3}
+  double K =  pow(K0, (Nc-volume_id)/Nc); 
   return K;
 }
 

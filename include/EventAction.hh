@@ -53,7 +53,6 @@ class EventAction : public G4UserEventAction
 
     // Set methods
     void SetPrintModulo(G4int value);
-    std::list<Pad> fPads;
   private:
     G4int  fPrintModulo;
 };

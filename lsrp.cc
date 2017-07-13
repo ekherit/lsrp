@@ -29,6 +29,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 
+Config_t Cfg;
+
 void clean_argc_argv(int * ARGC, char ** ARGV, boost::program_options::variables_map & opt)
 {
   int argc=0;

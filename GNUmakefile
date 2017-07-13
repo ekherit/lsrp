@@ -28,14 +28,16 @@ all: lib bin
 #myclean : clean
 #			rm -rf  *.o *.so *.pcm src/*Dict.cc  src/*Dict.h src/*.pcm
 
-EXTRALIBS := -L$(TMP) -lConfig -lRootEvent RootEvent.o Config.o
+EXTRALIBS := $(TMP)/Config.o $(TMP)/RootEvent.o
 EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRootEvent.so  $(TMP)/libConfig.so
 
 $(TMP)/libRootEvent.so : $(TMP)/RootEvent.o $(TMP)/RootEventDict.o 
 		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
-		@g++ -o $(TMP)/libRootEvent.a  -fPIC -c  $^   $(LDFLAGS) 
 		@echo Creating shared library $@
 
+
+#RootEvent.o, Config.o and RootEventDict.o ConfigDict.o automaticaly
+#compiled by GENAT4  make script
 
 #$(TMP)/RootEvent.o : src/RootEvent.cc
 #		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
@@ -50,7 +52,6 @@ src/RootEventDict.cc :  include/RootEvent.hh include/RootEventLinkDef.hh
 
 $(TMP)/libConfig.so : $(TMP)/Config.o  $(TMP)/ConfigDict.o 
 		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
-		@g++ -o $(TMP)/libConfig.a  -fPIC  -c $^   $(LDFLAGS) 
 		@echo Creating shared library $@
 
 #$(TMP)/Config.o : src/Config.cc

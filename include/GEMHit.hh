@@ -87,7 +87,6 @@ class GEMHit : public G4VHit
     const std::list<Pad> & GetPads(void) const { return fPads; };
 
 
-
   private:
 
       G4int         fTrackID;

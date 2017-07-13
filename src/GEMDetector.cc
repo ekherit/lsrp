@@ -131,9 +131,13 @@ GEMDetector::GEMDetector(void)
   fTransferLength = 1.5*mm;
   fInductionLength = 2.0*mm;
   fPadWidth = 15.*um;
-  fGEMWidth = fStefWidth*2 + fDriftLength 
-    + fCascadeNumber*fCascadeWidth +(fCascadeNumber-1)*fTransferLength
-    + fInductionLength + fPadWidth*2;
+  fGEMWidth = fStefWidth*2 
+              + fDriftLength 
+              + fCascadeNumber*fCascadeWidth 
+              + (fCascadeNumber-1)*fTransferLength
+              + fInductionLength 
+              + fPadWidth*2;
+
 
   G4Tubs * solid_volume = new G4Tubs("GEM",0,fRadius, fGEMWidth/2.,0.*deg,360.*deg);
   SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(solid_volume));
@@ -146,17 +150,23 @@ GEMDetector::GEMDetector(void)
   G4LogicalVolume * stefLV = new G4LogicalVolume(StefSV, StefMaterial(),"Stef");
   fStefVolume = stefLV;
   //place front stef
-  PhysicalVolumeListList.emplace_back ( 
-          std::unique_ptr<G4VPhysicalVolume>(
-  new G4PVPlacement(0, //no rotation
-      G4ThreeVector(0,0,-fGEMWidth/2.0+fStefWidth/2.0), //position
-      stefLV,
-      "Stef", //the name
-      LV.get(), //mother logical volume
-      false, //no boolen operations
-      0, //copy number
-      fCheckOverlaps) //check overlaps
-  ));
+  PhysicalVolumeListList.emplace_back 
+    ( 
+      std::unique_ptr<G4VPhysicalVolume>
+      (
+       new G4PVPlacement
+       (
+         0, //no rotation
+         G4ThreeVector(0,0,-fGEMWidth/2.0+fStefWidth/2.0), //position
+         stefLV,
+         "Stef", //the name
+         LV.get(), //mother logical volume
+         false, //no boolen operations
+         0, //copy number
+         fCheckOverlaps //check overlaps
+         ) 
+      )
+    );
   //place back stef
   PhysicalVolumeListList.emplace_back ( 
           std::unique_ptr<G4VPhysicalVolume>(
@@ -238,7 +248,7 @@ GEMDetector::GEMDetector(void)
   //describe TransfereVolume
   G4Tubs * TransferSV = new G4Tubs("Transfere",0.,fRadius,fTransferLength/2.0,0.*deg,360.*deg);
   SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(TransferSV));
-  fTransferVolume.reset(new G4LogicalVolume(TransferSV, Ar,"TransfereVolume"));
+  fTransferVolume.reset(new G4LogicalVolume(TransferSV, Cu,"TransfereVolume"));
   for(int i=0;i<fCascadeNumber-1;i++)
   {
     G4double z0 = -fGEMWidth/2.0+fStefWidth+fDriftLength+fCascadeWidth;
