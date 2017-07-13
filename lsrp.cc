@@ -8,8 +8,8 @@
 
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
+
 #include "FTFP_BERT.hh"
-#include "QGSP_BERT_HP.hh"
 
 #include "Randomize.hh"
 
@@ -117,7 +117,14 @@ int main(int argc,char** argv)
   auto detector_construction = new DetectorConstruction();
   runManager->SetUserInitialization(detector_construction);
 
+  /*
+   *  'typical' HEP collider detector
+   *   Recommended: FTFP_BERT
+   *   http://geant4.cern.ch/support/proc_mod_catalog/physics_lists/useCases.shtml
+   * 
+   */
   G4VModularPhysicsList* physicsList = new FTFP_BERT;
+  physicsList->SetVerboseLevel(0);
   runManager->SetUserInitialization(physicsList);
     
   // Set user action classes

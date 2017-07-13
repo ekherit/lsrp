@@ -5,6 +5,8 @@
 #
 #/tracking/verbose 1
 #/hits/verbose 0
+/run/verbose 0
+/process/verbose 0
 /tracking/verbose 0
 /hits/verbose 0
 #/random/setSeeds 1 2
