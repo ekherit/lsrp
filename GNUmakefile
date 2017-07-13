@@ -17,16 +17,13 @@ endif
 
 TMP=$(G4TMP)/$(G4SYSTEM)/$(G4TARGET)
 
-#test:
-#		echo $(G4INCLUDE)
-
 .PHONY: all
 
 
 all: lib bin
 
-#myclean : clean
-#			rm -rf  *.o *.so *.pcm src/*Dict.cc  src/*Dict.h src/*.pcm
+myclean : clean
+			rm -rf  *.o *.so *.pcm src/*Dict.cc  src/*Dict.h src/*.pcm
 
 EXTRALIBS := $(TMP)/Config.o $(TMP)/RootEvent.o
 EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRootEvent.so  $(TMP)/libConfig.so
@@ -34,6 +31,7 @@ EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRootEvent.so  $(TMP)/libConfig.so
 $(TMP)/libRootEvent.so : $(TMP)/RootEvent.o $(TMP)/RootEventDict.o 
 		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
 		@echo Creating shared library $@
+		@mv -f src/*rdict.pcm $(TMP)/
 
 
 #RootEvent.o, Config.o and RootEventDict.o ConfigDict.o automaticaly
@@ -53,6 +51,7 @@ src/RootEventDict.cc :  include/RootEvent.hh include/RootEventLinkDef.hh
 $(TMP)/libConfig.so : $(TMP)/Config.o  $(TMP)/ConfigDict.o 
 		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
 		@echo Creating shared library $@
+		@mv -f src/*rdict.pcm $(TMP)/
 
 #$(TMP)/Config.o : src/Config.cc
 #		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<

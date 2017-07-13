@@ -18,7 +18,13 @@
 
 #include "Config.hh"
 
-
+ClassImp(Pad_t)
+ClassImp(Gem_t)
+ClassImp(Converter_t)
+ClassImp(Flange_t)
+ClassImp(Mirror_t)
+ClassImp(Beam_t)
+ClassImp(Laser_t)
+ClassImp(Root_t)
 ClassImp(Config_t)
-//Config_t::Config_t(void) { }
 

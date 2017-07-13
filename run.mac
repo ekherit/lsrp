@@ -59,3 +59,9 @@
 /lsrp/SaveOnePadPerTrack 0
 /lsrp/GEM/pad/Threshold  23423.2
 /run/beamOn 100
+/lsrp/GEM/pad/Threshold  2.2
+/run/beamOn 100
+/lsrp/GEM/pad/Threshold  3.5
+/run/beamOn 100
+/lsrp/GEM/pad/Threshold  5
+/run/beamOn 100

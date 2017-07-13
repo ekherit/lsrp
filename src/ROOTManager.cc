@@ -68,10 +68,12 @@ void ROOTManager::InitTree(void)
 {
   tree = new TTree("lsrp","Laser polarimeter simulation");
   tree->Branch("event",&event);
+  //tree->Branch("config",&Cfg);
 }
 
 void ROOTManager::Write(void)
 {
-    if(tree) tree->Write();
+  Cfg.Write("cfg");
+  if(tree!=nullptr) tree->Write();
 }
 

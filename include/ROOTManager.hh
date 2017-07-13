@@ -33,6 +33,7 @@ class ROOTManager
     static ROOTManager* Instance(void);
     TFile* file = nullptr;
     TTree* tree= nullptr;
+    //TTree* head_tree= nullptr;
     RootEvent event;
     void SetRootFile(const char * file="");
     ~ROOTManager(); 

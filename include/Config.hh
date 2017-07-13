@@ -48,6 +48,108 @@ struct Object
   std::string   material;
 };
 
+struct Pad_t: public TObject
+{
+  Pad_t(void){}
+  virtual ~Pad_t(void){}
+  double size         = 1*mm;  //size of signe pad in mm
+  double size_x       = 1*mm;  //x size of signe pad in mm
+  double size_y       = 1*mm;  //y size of signe pad in mm
+  double rough_size_x = 2*mm;
+  double rough_size_y = 2*mm;
+  double threshold    = 0;
+  ClassDef(Pad_t, 1); //The class title
+};
+
+struct Gem_t: public TObject
+{
+  Gem_t(void){}
+  virtual ~Gem_t(void){}
+  unsigned cascade_number = 3; //number of amplification cascades 3
+  double   amplification=1e4;  //1e4
+  unsigned drift_spread;
+  Pad_t pad;
+  double high_sens_size_x=64;
+  double high_sens_size_y=20;
+  double width;                    // gem width  will calculated from GEM
+  double size = 50*cm;             // gem size
+  double size_x=50*cm;             // xy size of the gem in mm
+  double size_y=50*cm;             // xy size of the gem in mm
+  ClassDef(Gem_t, 1); //The class title
+};
+
+struct Converter_t: public TObject
+{
+  Converter_t(void){}
+  virtual ~Converter_t(void){}
+  double width=12*mm;        // converter width in mm
+  double size=50*cm;         // size of the converter
+  double size_x = 50*cm;
+  double size_y = 50*cm;
+  std::string material = "G4_Pb";
+  ClassDef(Converter_t, 1); //The class title
+};
+
+
+struct Flange_t: public TObject
+{
+  Flange_t(void){}
+  virtual ~Flange_t(void){}
+  double width = 0.5*mm;   
+  double size=20*cm; //the size of flange and vacuum chamber (vacuum chamber is round);
+  std::string material    = "G4_STAINLESS-STEEL";
+  ClassDef(Flange_t, 1); //The class title
+};
+
+struct Mirror_t: public TObject
+{
+  Mirror_t(void){}
+  virtual ~Mirror_t(void){}
+  double width = 4*mm;          // the vacuum mirrror width
+  double size_x = 10*cm;        // The mirror size x
+  double size_y = 10*cm;        // The mirror size y
+  double rotation_y =  45*deg;  // Rotation around axis y
+  std::string material    = "quartz" ;
+  ClassDef(Mirror_t, 1); //The class title
+};
+
+struct  Beam_t: public TObject
+{
+  Beam_t(void){}
+  virtual ~Beam_t(void){}
+  double I=1*mA; //current
+  double E=5*GeV; //energy
+  double sigmaY=21.2*mkrad;
+  double sigmaX=104*mkrad;
+  double revolution_frequency=818.924*kHz; //Hz
+  double x = 0*mm,y =0*mm; //bunch position x and y
+  ClassDef(Beam_t, 1); //The class title
+};
+
+struct Laser_t: public TObject
+{
+  Laser_t(void){}
+  virtual ~Laser_t(void){}
+  double lambda=527*nm; //metr laser wave length
+  double pulse_energy= 100*mkJ;  //laser pulse energy, Joule
+  double pulse_time =  6*ns;   //laser pulse time
+  double pulse_size =  3*mm; //meters
+  double frequency=4*kHz; //laser frequency, Hz
+  double focus_length=15*cm; //laser focuse length
+  ClassDef(Laser_t, 1); //The class title
+};
+
+struct Root_t: public TObject
+{
+  Root_t(void){}
+  virtual ~Root_t(void){}
+  std::string file; //the name of ROOT file to save
+  std::string auto_generate_root_files = "no";
+  int save_hits = 1; //save all hits into ROOT file
+  int one_pad_per_track = 1; //save only one track
+  ClassDef(Root_t, 1); //The class title
+};
+
 class Config_t : public TObject
 {
   public:
@@ -75,83 +177,17 @@ class Config_t : public TObject
 
   double step_max=1000*mm; //Max allowed step
 
-  struct 
-  {
-    unsigned cascade_number = 3; //number of amplification cascades 3
-    double   amplification=1e4;  //1e4
-    unsigned drift_spread;
-    struct
-    {
-      double size         = 1*mm;  //size of signe pad in mm
-      double size_x       = 1*mm;  //x size of signe pad in mm
-      double size_y       = 1*mm;  //y size of signe pad in mm
-      double rough_size_x = 2*mm;
-      double rough_size_y = 2*mm;
-      double threshold    = 0;
-    } pad;
-    double high_sens_size_x=64;
-    double high_sens_size_y=20;
-    double width;                    // gem width  will calculated from GEM
-    double size = 50*cm;             // gem size
-    double size_x=50*cm;             // xy size of the gem in mm
-    double size_y=50*cm;             // xy size of the gem in mm
-  } gem;
+  Gem_t gem;
+  Converter_t converter;
+  Flange_t flange;
+  Mirror_t mirror;
+  Beam_t beam;
+  Laser_t laser;
+  Root_t root;
 
-  struct
-  {
-    double width=12*mm;        // converter width in mm
-    double size=50*cm;         // size of the converter
-    double size_x = 50*cm;
-    double size_y = 50*cm;
-    std::string material = "G4_Pb";
-  } converter;
-
-
-  struct
-  {
-    double width = 0.5*mm;   
-    double size=20*cm; //the size of flange and vacuum chamber (vacuum chamber is round);
-    std::string material    = "G4_STAINLESS-STEEL";
-  } flange;
-
-  struct
-  {
-    double width = 4*mm;          // the vacuum mirrror width
-    double size_x = 10*cm;        // The mirror size x
-    double size_y = 10*cm;        // The mirror size y
-    double rotation_y =  45*deg;  // Rotation around axis y
-    std::string material    = "quartz" ;
-  } mirror;
 
   unsigned test_beam = 0;
 
-  struct 
-  {
-    double I=1*mA; //current
-    double E=5*GeV; //energy
-    double sigmaY=21.2*mkrad;
-    double sigmaX=104*mkrad;
-    double revolution_frequency=818.924*kHz; //Hz
-    double x = 0*mm,y =0*mm; //bunch position x and y
-  } beam;
-
-  struct
-  {
-    double lambda=527*nm; //metr laser wave length
-    double pulse_energy= 100*mkJ;  //laser pulse energy, Joule
-    double pulse_time =  6*ns;   //laser pulse time
-    double pulse_size =  3*mm; //meters
-    double frequency=4*kHz; //laser frequency, Hz
-    double focus_length=15*cm; //laser focuse length
-  } laser;
-
-  struct
-  {
-    std::string file; //the name of ROOT file to save
-    std::string auto_generate_root_files = "no";
-    int save_hits = 1; //save all hits into ROOT file
-    int one_pad_per_track = 1; //save only one track
-  } root;
 
   ClassDef(Config_t, 1); //The class title
 };

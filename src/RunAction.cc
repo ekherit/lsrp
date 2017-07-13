@@ -94,8 +94,8 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
 void RunAction::EndOfRunAction(const G4Run*)
 {
-  auto RM = ROOTManager::Instance();
-  if(RM->tree !=nullptr) RM->tree->Write();
+  ROOTManager::Instance()->Write();
+  //if(RM->tree !=nullptr) RM->tree->Write();
   //Long64_t Nup0 = RM->gen_tree->GetEntries("y>0&&P>0") + RM->gen_tree->GetEntries("y<0&&P<0");
   //Long64_t Ndown0 = RM->gen_tree->GetEntries("y<0&&P>0")+ RM->gen_tree->GetEntries("y>0&&P<0");
   //ibn::valer<double> eps0 = get_epsilon(Nup0,Ndown0);
