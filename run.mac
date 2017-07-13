@@ -24,6 +24,9 @@
 
 /lsrp/GEM/Size  50 cm
 
+
+#/lsrp/GEM/pad/Threshold  0
+
 /lsrp/Converter/Size  50 cm
 /lsrp/Converter/Width 12 mm
 /lsrp/Converter/DistanceToGEM 20 mm
@@ -41,13 +44,18 @@
 /lsrp/Mirror/Material quartz  #or G4_Cu
 /lsrp/Mirror/Width    5 mm  #or 10 mm for G4_cu
 
-/lsrp/RootFile test1.root
-/lsrp/SaveAllHits 0
-/run/beamOn 1000
-/lsrp/RootFile test2.root
-/lsrp/SaveAllHits 1
-/run/beamOn 1000
-/lsrp/RootFile test3.root
+#/lsrp/RootFile test1.root
+#/lsrp/SaveAllHits 0
+#/run/beamOn 100
+#/lsrp/RootFile test2.root
+#/lsrp/SaveAllHits 1
+#/run/beamOn 100
+#/lsrp/RootFile test3.root
+#/lsrp/SaveAllHits 0
+#/lsrp/SaveOnePadPerTrack 0
+#/run/beamOn 100
+#
 /lsrp/SaveAllHits 0
 /lsrp/SaveOnePadPerTrack 0
-/run/beamOn 1000
+/lsrp/GEM/pad/Threshold  23423.2
+/run/beamOn 100

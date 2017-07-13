@@ -44,6 +44,8 @@ class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWithAnInteger;
 class G4UIcmdWithADouble;
 
+#include <boost/variant.hpp>
+
 class DetectorMessenger: public G4UImessenger
 {
   public:
@@ -57,20 +59,11 @@ class DetectorMessenger: public G4UImessenger
     static DetectorMessenger * fgInstance;
     std::unique_ptr<G4UIdirectory>    fDirectory;
 
-    template<typename DataType> 
-    struct CmdItem_t
-    {
-        std::unique_ptr<G4UIcommand>  command;
-        DataType * data;
-        std::string name;
-    };
+    //all G4UIcommand variose types in the map with boost::variant 
+    std::map<G4UIcommand*,  boost::variant<int *, double*,  std::string*>  >  fCmdMap;
+    //add command to fCmdMap
+    template<typename Type> void AddCmd(Type & par, const std::string & name, const std::string & title, const std::string unit = "");
 
-    std::map<G4UIcommand*,  CmdItem_t <double> >      fCmdMapDouble; //continer with the Double G4UIcommands
-    std::map<G4UIcommand*,  CmdItem_t <std::string> > fCmdMapString; //continer with the String G4UIcommands
-    std::map<G4UIcommand*,  CmdItem_t <int> >         fCmdMapInt;    //continer with the Integer G4UIcommands
-
-    void AddCmdDouble(double & par, const std::string & name, const std::string & title, const std::string & unit);
-    void AddCmdString(std::string & par, const std::string & name, const std::string & title);
-    void AddCmdInt(int & par, const std::string & name, const std::string & title);
 };
+
 #endif

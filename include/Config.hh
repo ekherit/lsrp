@@ -85,6 +85,7 @@ class Config_t : public TObject
       double size_y       = 1*mm;  //y size of signe pad in mm
       double rough_size_x = 2*mm;
       double rough_size_y = 2*mm;
+      double threshold    = 0;
     } pad;
     double high_sens_size_x=64;
     double high_sens_size_y=20;
