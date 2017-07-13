@@ -238,11 +238,13 @@ void EventAction::EndOfEventAction(const G4Event* event)
   {
     if(print_predicate(event_printed, 30)) 
     {
-      for(unsigned i=0; i<head1.size()-1; i++) G4cout << "#";
-      G4cout<<'\n';
+      G4cout<<'#';
+      for(unsigned i=0; i<head1.size()-3; i++) G4cout << "-";
+      G4cout<<"#\n";
       G4cout << head1 << head2;
-      for(unsigned i=0;i<head1.size()-1; i++) G4cout << "#";
-      G4cout<<'\n';
+      G4cout<<'#';
+      for(unsigned i=0;i<head1.size()-3; i++) G4cout << "-";
+      G4cout<<"#\n";
     }
     G4cout << fmt % eventID % Revent.nphot % Revent.ndet % Revent.nhit % Revent.hit.size() %  npad  %  Revent.pad.size() << std::endl;
     event_printed++;
