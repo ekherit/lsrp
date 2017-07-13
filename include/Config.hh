@@ -109,6 +109,7 @@ struct Mirror_t: public TObject
   double width = 4*mm;          // the vacuum mirrror width
   double size_x = 10*cm;        // The mirror size x
   double size_y = 10*cm;        // The mirror size y
+  double size =  10*cm;        // The mirror size y
   double rotation_y =  45*deg;  // Rotation around axis y
   std::string material    = "quartz" ;
   ClassDef(Mirror_t, 1); //The class title

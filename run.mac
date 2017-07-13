@@ -37,6 +37,7 @@
 
 #define Mirror
 /lsrp/Mirror/Material quartz  #or G4_Cu
+/lsrp/Mirror/DistanceToFlange 1 m
 /lsrp/Mirror/Width    5 mm  #or 10 mm for G4_cu
 
 /run/beamOn 1500

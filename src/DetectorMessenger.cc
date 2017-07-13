@@ -88,11 +88,13 @@ DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
 
   AddCmd(Cfg.flange_gem_distance           , "/lsrp/Flange/DistanceToGEM"    , "The distance from flange to GEM detector"              , "Length");
   AddCmd(Cfg.flange.width                  , "/lsrp/Flange/Width"            , "Flange width"                                          , "Length");
+  AddCmd(Cfg.flange.size                   , "/lsrp/Flange/Size"             , "Vacuum chamber (Flange)size"                           , "Length");
 
-  AddCmd(Cfg.mirror_flange_distance        , "/lsrp/MirrorFlangeDistance"    , "Mirror - flange distance"                              , "Length");
+  AddCmd(Cfg.mirror_flange_distance        , "/lsrp/Mirror/DistanceToFlange" , "Mirror - flange distance"                              , "Length");
   AddCmd(Cfg.mirror.width                  , "/lsrp/Mirror/Width"            , "Mirror width"                                          , "Length");
   AddCmd(Cfg.mirror.size_x                 , "/lsrp/Mirror/SizeX"            , "Mirror size x"                                         , "Length");
   AddCmd(Cfg.mirror.size_y                 , "/lsrp/Mirror/SizeY"            , "Mirror size y"                                         , "Length");
+  AddCmd(Cfg.mirror.size                   , "/lsrp/Mirror/Size"             , "Mirror size x and y"                                   , "Length");
   AddCmd(Cfg.flange.size                   , "/lsrp/VacuumChamber/Size"      , "Vacuum chamber size"                                   , "Length");
   AddCmd(Cfg.photon_flight_length          , "/lsrp/PhotonFlightLength"      , "Photon Flight length"                                  , "Length");
 

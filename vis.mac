@@ -65,5 +65,9 @@
 
 # Грани
 /vis/geometry/set/forceAuxEdgeVisible VacuumChamber 0 true
+
+/lsrp/Converter/DistanceToGEM  10 m
+/lsrp/Flange/DistanceToGEM  12 m
+/lsrp/PhotonFlightLength  15 m
 /run/beamOn 2
 
