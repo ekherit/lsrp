@@ -28,6 +28,8 @@
 
 #include "G4Types.hh"
 #include "G4SystemOfUnits.hh"
+
+
 const G4double Hz  = 1.0/second;
 const G4double kHz = 1e3*Hz;
 const G4double MHz = 1e6*Hz;
