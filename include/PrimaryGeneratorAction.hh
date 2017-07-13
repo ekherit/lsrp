@@ -36,7 +36,7 @@
 #include "G4ParticleDefinition.hh"
 #include "globals.hh"
 
-#include <ibn/phys/compton.h>
+#include "Compton.h"
 
 #include <memory>
 

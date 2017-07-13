@@ -39,7 +39,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include <ibn/valer.h>
 #include "Utils.h"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -85,13 +84,13 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-ibn::valer<double> get_epsilon(Long64_t N1, Long64_t N2)
-{
-  ibn::valer<double> eps;
-  eps.value = double(N1-N2)/double(N1+N2);
-  eps.error = sqrt(ibn::sq(2.0*N2/ibn::sq(double(N1+N2)))*N1 + ibn::sq(2.0*N1/ibn::sq(double(N1+N2)))*N2);
-  return eps;
-}
+//ibn::valer<double> get_epsilon(Long64_t N1, Long64_t N2)
+//{
+//  ibn::valer<double> eps;
+//  eps.value = double(N1-N2)/double(N1+N2);
+//  eps.error = sqrt(ibn::sq(2.0*N2/ibn::sq(double(N1+N2)))*N1 + ibn::sq(2.0*N1/ibn::sq(double(N1+N2)))*N2);
+//  return eps;
+//}
 
 void RunAction::EndOfRunAction(const G4Run*)
 {

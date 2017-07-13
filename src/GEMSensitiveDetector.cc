@@ -28,7 +28,6 @@
 /// \file GEMSensitiveDetector.cc
 /// \brief Implementation of the GEMSensitiveDetector class
 
-#include <ibn/math.h>
 #include "GEMSensitiveDetector.hh"
 #include "ROOTManager.hh"
 #include "TrackInformation.hh"

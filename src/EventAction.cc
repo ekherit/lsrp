@@ -32,7 +32,6 @@
 #include "ROOTManager.hh"
 #include "Pad.hh"
 #include "GEMHit.hh"
-#include <ibn/math.h>
 #include "Config.hh"
 #include "PrimaryGeneratorAction.hh"
 
@@ -98,6 +97,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
   Revent.nhit = hc->GetSize();
   Revent.hit.resize(hc->GetSize());
 
+
   for(unsigned i=0; i< hc->GetSize();i++)
   {
     GEMHit * hit = (GEMHit*)hc->GetHit(i);
@@ -109,7 +109,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
     Revent.hit[i].x = hit->GetPos().x()/mm;
     Revent.hit[i].y = hit->GetPos().y()/mm;
     Revent.hit[i].z = hit->GetPos().z()/mm;
-    Revent.hit[i].rho = sqrt(ibn::sq(Revent.hit[i].y) + ibn::sq(Revent.hit[i].y));
+    Revent.hit[i].rho = hypot(Revent.hit[i].y,Revent.hit[i].y);
     Revent.hit[i].phi = hit->GetPos().phi();
     //Revent.hit[i].q = hit->GetCharge()/coulomb*1e15;
     Revent.hit[i].q = hit->GetCharge();
@@ -143,7 +143,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
   fPads.clear();
   for(auto & item : tracks)
   {
-    auto track_id = item.first;
+    ///auto track_id = item.first;
     auto & pad_list = item.second;
     pad_list.sort([](const Pad & p1, const Pad & p2){return p1.charge < p2.charge; });
     //pad_list.erase(++fPads.begin(), fPads.end());
@@ -161,7 +161,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
     phot_list.insert(std::end(phot_list), std::begin(p.tracks), std::end(p.tracks)); //write tracks id to global registered photon list
     epad.X = p.x();
     epad.Y = p.y();
-    epad.R = sqrt(ibn::sq(epad.X)+ibn::sq(epad.Y));
+    epad.R = hypot(epad.X,epad.Y);
     epad.nx = p.nx();
     epad.ny = p.ny();
     epad.xhit = p.xhit;
@@ -174,7 +174,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
       epad.x = p.x() + p.xsize()*(G4UniformRand()-0.5);
       epad.y = p.y() + p.ysize()*(G4UniformRand()-0.5);
     } while (Pad(epad.x, epad.y) != p);
-    epad.r = ibn::rho(epad.x,epad.y);
+    epad.r = hypot(epad.x,epad.y);
     //variate amplification
     do { epad.q = p.charge*(1+0.3*G4RandGauss::shoot()); } while(epad.q <=0);
     //scale charge

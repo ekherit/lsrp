@@ -44,8 +44,7 @@
 #include "G4Electron.hh"
 
 #include "Randomize.hh"
-#include <ibn/integral.h>
-#include <ibn/phys/constant.h>
+#include "PhysConstant.h"
 extern GeneratorEvent makeGeneratorEvent(const ibn::phys::compton &c);
 
 PrimaryGeneratorAction * PrimaryGeneratorAction::fgInstance = 0;
@@ -124,7 +123,7 @@ void PrimaryGeneratorAction::Init(void)
   G4cout << "Laser photon energy = " << photon_energy/eV << " eV" << G4endl;// eV, should be 2.48 eV
   G4double Ngamma = pulse_energy/photon_energy;
   G4cout << "Laser photon number = " << Ngamma << G4endl;
-  G4double ngamma = Ngamma/(pulse_length*ibn::sq(pulse_size)*M_PI/4.0);
+  G4double ngamma = Ngamma/(pulse_length*pulse_size*pulse_size*M_PI/4.0);
   G4cout << "Laser photon density = " << ngamma*(cm*cm*cm) << " cm^-3" <<G4endl;
 
   //const double hc = 197.326968e-15; // MeV*m;
@@ -137,17 +136,18 @@ void PrimaryGeneratorAction::Init(void)
   fThetaMax = Ymax/fFlightLength;
   G4cout << "\tfThetaMax = " << fThetaMax/mrad << " mrad"  << G4endl;
   G4cout << "\tCharacteristic spot size on detector: " << G4endl;
-  G4cout << "\t\tsize_x = " << 2*sqrt(ibn::sq(fSigmaX*fFlightLength) + ibn::sq(0.511*MeV/fBeamEnergy))/mm << " mm" << G4endl;
-  G4cout << "\t\tsize_y = " << 2*sqrt(ibn::sq(fSigmaY*fFlightLength) + ibn::sq(0.511*MeV/fBeamEnergy))/mm << " mm" << G4endl;
+  G4cout << "\t\tsize_x = " << 2*hypot(fSigmaX*fFlightLength, 0.511*MeV/fBeamEnergy)/mm << " mm" << G4endl;
+  G4cout << "\t\tsize_y = " << 2*hypot(fSigmaY*fFlightLength,0.511*MeV/fBeamEnergy)/mm << " mm" << G4endl;
   fCompton.reset(new ibn::phys::compton(fBeamEnergy/MeV,photon_energy/MeV,0,0));
   double cos_rf = fCompton->cos_rf(cos(fThetaMax));
   double xmax = fCompton->xcos(cos_rf);
   double xmin = 1./(1.0+2.0*fCompton->chi);
   G4cout << "\txmin = " << xmin << G4endl;
   G4cout << "\txmax = " << xmax << G4endl;
-  double Integral  = ibn::dgaus(*fCompton,xmin,xmax,1e-13);
-  G4cout << "\tIntegral = " << Integral << endl;
-  G4double sigma = M_PI*ibn::sq(ibn::phys::r_e)/fCompton->chi*Integral*m*m; //m^2
+  //double Integral  = ibn::dgaus(*fCompton,xmin,xmax,1e-13);
+  //G4cout << "\tIntegral = " << Integral << endl;
+  //G4double sigma = M_PI*ibn::sq(ibn::phys::r_e)/fCompton->chi*Integral*m*m; //m^2
+  G4double sigma = 0.65e-24*cm*cm;
   G4cout << "\tsigma = " << sigma/(cm*cm) << " cm^2" << " (" << sigma/barn << " b)"<<G4endl;
   G4double nu = sigma*(ibn::phys::c*m/s)*Ne*ngamma;
   G4cout << "\tRate = " << nu/GHz << " GHz" << G4endl;
