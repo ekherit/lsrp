@@ -86,6 +86,7 @@ struct Converter_t: public TObject
   double size=50*cm;         // size of the converter
   double size_x = 50*cm;
   double size_y = 50*cm;
+  double step = 1*mm; //the step for Geant 
   std::string material = "G4_Pb";
   ClassDef(Converter_t, 1); //The class title
 };
@@ -145,7 +146,7 @@ struct Root_t: public TObject
   virtual ~Root_t(void){}
   std::string file; //the name of ROOT file to save
   std::string auto_generate_root_files = "no";
-  int save_hits = 1; //save all hits into ROOT file
+  int save_hits = 0; //save all hits into ROOT file
   int one_pad_per_track = 1; //save only one track
   ClassDef(Root_t, 1); //The class title
 };
@@ -168,7 +169,7 @@ class Config_t : public TObject
   double converter_gem_distance=3*mm;  // distance between converter and GEM detector
   double flange_gem_distance = 19*m;   // distance between vacuum chamber flange and detector
   double mirror_flange_distance = 1*m; // mirror flange distance
-  double photon_flight_length=25*m;    // Photon flight length in mm
+  double photon_flight_length=31*m;    // Photon flight length in mm
 
   std::string world_material     = "G4_AIR";
   std::string vacuum_chamber_material = "G4_Galactic";

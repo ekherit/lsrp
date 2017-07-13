@@ -1,39 +1,5 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-// $Id$
-//
-/// \file EventAction.cc
-/// \brief Implementation of the EventAction class
-
-#include "EventAction.hh"
-#include "ROOTManager.hh"
-#include "Pad.hh"
-#include "GEMHit.hh"
-#include "Config.hh"
-#include "PrimaryGeneratorAction.hh"
+#include <algorithm>
+#include <boost/format.hpp>
 
 #include "G4Event.hh"
 #include "G4EventManager.hh"
@@ -41,13 +7,20 @@
 #include "G4Trajectory.hh"
 #include "G4ios.hh"
 
-#include <algorithm>
+
+#include "EventAction.hh"
+#include "Utils.h"
+#include "ROOTManager.hh"
+#include "Pad.hh"
+#include "GEMHit.hh"
+#include "Config.hh"
+#include "PrimaryGeneratorAction.hh"
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 EventAction::EventAction()
-: G4UserEventAction(),
-  fPrintModulo(1000)
+: G4UserEventAction()
 {
 }
 
@@ -60,7 +33,6 @@ EventAction::~EventAction()
 
 void EventAction::BeginOfEventAction(const G4Event* )
 {  
-  //fPads.clear();
   //G4int eventID = event->GetEventID();
   //if ( eventID % fPrintModulo == 0) 
   //{ 
@@ -130,6 +102,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
       tracks[track_id].push_back(p);
     }
   };
+
+  auto npad = fPads.size();
 
   if(Cfg.root.one_pad_per_track == 1)  //refill the pad list keep only signle pad for each registered track
   {
@@ -253,44 +227,25 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
   if(RM->tree != nullptr) RM->tree->Fill();
 
-  // periodic printing
+  static long event_printed=0; //I whant to keep this value from event to event
+  if(eventID==0) event_printed = 0; //reset for new run
 
-  static long geometry_print_index=0;
-  auto isprint = [](int id, int period)  -> bool
+  static auto  head1 = boost::format("#%10s %10s %10s %10s %10s %10s %10s        #\n") % "Event id" % "photons"  % "photons"   % "hits"   % "hits"   % "pads"  % "pads";
+  static auto  head2 = boost::format("#%10s %10s %10s %10s %10s %10s %10s        #\n") % ""         % "scattered" % "detected"  % "number" % "stored" % "hited" % "stored";
+  static auto  fmt   = boost::format(" %10d %10d %10d %10d %10d %10d %10d        #");
+
+  if (print_predicate(eventID, {1,10,100,1000,10000,100000}))
   {
-    return (id < period*10) && (id % period == 0);
-  };
-  class index_print
-  {
-    int a;
-
-  };
-
-  bool ispr1 = isprint(eventID,1);
-  bool ispr10 = isprint(eventID,10);
-  bool ispr100 = isprint(eventID,100);
-  bool ispr1000 = isprint(eventID,1000);
-  bool ispr10000 = isprint(eventID,10000);
-
-  //bool ispr100 = eventID < 1000 && eventID%100==0;
-  //bool ispr1000 = eventID < 10000 && eventID%1000==0;
-  //bool ispr10k = eventID%10000==0;
-  if(eventID==0) geometry_print_index=0;
-  if (ispr1 || ispr100 || ispr10000)
-  {
-    G4VHitsCollection* hc = event->GetHCofThisEvent()->GetHC(0);
-    G4cout << ">>> Event: " << eventID  <<  ".  ";
-    G4cout << Revent.ndet << " photons, "  
-      << hc->GetSize() << " hits and " 
-      << Revent.npad << " pads stored in this event.";
-    if(geometry_print_index % 10 ==0)
+    if(print_predicate(event_printed, {30})) 
     {
-      G4cout << " ( Nphot=" << Revent.nphot << ", dPb=" << Cfg.converter.width/mm << " mm" 
-             << ", l="  << Cfg.converter_gem_distance/mm<< " mm"
-             << ", psx=" << Cfg.gem.pad.size_x/mm << " mm, psy=" << Cfg.gem.pad.size_y/mm << " mm )" ;
+      for(unsigned i=0; i<head1.size()-1; i++) G4cout << "#";
+      G4cout<<'\n';
+      G4cout << head1 << head2;
+      for(unsigned i=0;i<head1.size()-1; i++) G4cout << "#";
+      G4cout<<'\n';
     }
-    geometry_print_index++;
-    G4cout<< G4endl;
+    G4cout << fmt % eventID % Revent.nphot % Revent.ndet % Revent.nhit % Revent.hit.size() %  npad  %  Revent.pad.size() << std::endl;
+    event_printed++;
   }
   Revent.clear();
 }  

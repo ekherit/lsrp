@@ -1,33 +1,3 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-// $Id$
-//
-/// \file DetectorConstruction.cc
-/// \brief Implementation of the DetectorConstruction class
-
 #include "Config.hh"
 
 #include "DetectorConstruction.hh"
@@ -122,11 +92,6 @@ void DetectorConstruction::DefineMaterials()
 
 G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
 {
-  //for(int i=0;i<10;i++)
-  //std::cout << "###################################################" << std::endl;
-  //std::cout << "                    IN DEFINE VOLUMES " << std::endl;
-  //for(int i=0;i<10;i++)
-  //std::cout << "###################################################" << std::endl;
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(Cfg.world_size_z);
   GEM.reset(new GEMDetector);
   CalculateGeometry();
@@ -151,6 +116,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   rm->rotateY(45*deg);		// rotation      
   MakeVolume("Mirror",mater(Cfg.mirror.material), BOX, Cfg.mirror.size_x, Cfg.mirror.size_y, Cfg.mirror.width, "VacuumChamber", fMirrorPosition - fVacuumChamberPosition, rm);
   MakeVolume("Converter", mater(Cfg.converter.material), BOX, Cfg.converter.size, Cfg.converter.size,Cfg.converter.width, "World", fConverterPosition);
+  fVol["Converter"].logic->SetUserLimits(new G4UserLimits(std::min(Cfg.converter.step, Cfg.converter.width*0.5)));
   MakeVolume("SensBeforeConverter",  mater(Cfg.world_material), BOX, Cfg.converter.size, Cfg.converter.size, 1*mm,"World", fSensBeforeConverterPosition, nullptr, 666);
 
   //-------------------------------------------------------------------------
@@ -181,7 +147,6 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes()
   //GEM->GetLogicalVolume()->SetVisAttributes(chamberVisAtt);
   //fVol["SensBeforeConverter"].logic->SetSensitiveDetector(fGEMSensitiveDetector);
   //fVol["SensBeforeConverter"].logic->SetUserLimits(new G4UserLimits(1*mm));
-
   return fVol["World"].phys.get(); 
 }
 
@@ -205,6 +170,7 @@ void DetectorConstruction::CalculateGeometry(void)
   Cfg.world_size_y = *std::max_element(ysizes.begin(), ysizes.end());
   Cfg.world_size_x = *std::max_element(xsizes.begin(), xsizes.end());
   Cfg.world_size_z =  GEM->GetWidth() + 2*Cfg.gem_world_distance + Cfg.photon_flight_length;
+  std::cout << "Photon flight length = " << Cfg.photon_flight_length/m << " m" << std::endl;
   auto world_wall = Cfg.world_size_z/2;
   auto gem_half_width = GEM->GetWidth()/2.0;
   fGEMPosition = G4ThreeVector(0, 0, world_wall - gem_half_width - Cfg.gem_world_distance);
@@ -245,6 +211,7 @@ void DetectorConstruction::UpdateGeometry(void)
   fVol["World"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.world_material.c_str()));
   fVol["Converter"].update_geometry(Cfg.converter.size,Cfg.converter.size, Cfg.converter.width, fConverterPosition);
   fVol["Converter"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.converter.material.c_str()));
+  fVol["Converter"].logic->SetUserLimits(new G4UserLimits(std::min(Cfg.converter.step, Cfg.converter.width*0.5)));
   fVol["SensBeforeConverter"].update_geometry(Cfg.converter.size,Cfg.converter.size, Cfg.sens_before_converter_width, fSensBeforeConverterPosition);
   fVol["SensBeforeConverter"].logic->SetMaterial(nistManager->FindOrBuildMaterial(Cfg.world_material.c_str()));
   fVol["VacuumChamber"].update_geometry(Cfg.flange.size,Cfg.flange.size, fVacuumChamberLength, fVacuumChamberPosition);

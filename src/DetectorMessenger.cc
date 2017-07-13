@@ -83,7 +83,7 @@ DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
 
   AddCmd(Cfg.converter.width               , "/lsrp/Converter/Width"         , "Converter width"                                       , "Length");
   AddCmd(Cfg.converter.size                , "/lsrp/Converter/Size"          , "Converter size xy"                                     , "Length");
-
+  AddCmd(Cfg.converter.step                , "/lsrp/Converter/Step"          , "Converter step for calcualtion"                        , "Length");
   AddCmd(Cfg.converter_gem_distance        , "/lsrp/Converter/DistanceToGEM" , "Converter - GEM distance"                              , "Length");
 
   AddCmd(Cfg.flange_gem_distance           , "/lsrp/Flange/DistanceToGEM"    , "The distance from flange to GEM detector"              , "Length");
@@ -116,27 +116,27 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   {
     if ( typeid(*command) == typeid(G4UIcmdWithADoubleAndUnit) ) 
     {
-      auto data = *boost::get<double*>(p->second);
-      data = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
-      std::cout << command->GetCommandPath() << " = " <<  data  << " (" << newValue << ")\n";
+      auto data = boost::get<double*>(p->second);
+      *data = static_cast<G4UIcmdWithADoubleAndUnit*>(command)->GetNewDoubleValue(newValue);
+      std::cout << command->GetCommandPath() << " = " <<  *data  << " (" << newValue << ")\n";
     }
     if ( typeid(*command) == typeid(G4UIcmdWithADouble) ) 
     {
-      auto & data = *boost::get<double*>(p->second);
-      data = static_cast<G4UIcmdWithADouble*>(command)->GetNewDoubleValue(newValue);
-      std::cout << command->GetCommandPath() << " = " <<  data  << " (" << newValue << ")\n";
+      auto  data = boost::get<double*>(p->second);
+      *data = static_cast<G4UIcmdWithADouble*>(command)->GetNewDoubleValue(newValue);
+      std::cout << command->GetCommandPath() << " = " <<  *data  << " (" << newValue << ")\n";
     }
     if ( typeid(*command) == typeid(G4UIcmdWithAnInteger) ) 
     {
-      auto & data = *boost::get<int*>(p->second);
-      data = static_cast<G4UIcmdWithAnInteger*>(command)->GetNewIntValue(newValue);
-      std::cout << command->GetCommandPath() << " = " <<  data  << " (" << newValue << ")\n";
+      auto  data = boost::get<int*>(p->second);
+      *data = static_cast<G4UIcmdWithAnInteger*>(command)->GetNewIntValue(newValue);
+      std::cout << command->GetCommandPath() << " = " <<  *data  << " (" << newValue << ")\n";
     }
     if ( typeid(*command) == typeid(G4UIcmdWithAString) ) 
     {
-      auto & data = *boost::get<std::string*>(p->second);
-      data = newValue;
-      std::cout << command->GetCommandPath() << " = " <<  data  << " (" << newValue << ")\n";
+      auto * data = boost::get<std::string*>(p->second);
+      *data = newValue;
+      std::cout << command->GetCommandPath() << " = " <<  *data  << " (" << newValue << ")\n";
     }
   }
 }

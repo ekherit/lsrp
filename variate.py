@@ -4,6 +4,8 @@
 # and generate start run command (/run/beamOn) with the number of events
 
 from argparse import *
+#example
+# ../variate.py  -N 10 --begin=1 --end=30 --step=1 --command="/lsrp/Converter/Width %f mm"  --format="%04.1f.root" run.mac
 
 parser = ArgumentParser(description='')
 parser.add_argument('file',type=str, help='input file')
@@ -26,10 +28,13 @@ for line in f:
 
 x = args.begin
 #for  x in xfrange(args.begin, args.end, args.step):
+print ("")
 while  x < args.end:
     rootfile = args.prefix+args.format % x
     print ("/lsrp/RootFile %s" % rootfile)
     print (args.command % x )
     print ("/run/beamOn ", args.N)
+    print ("")
     x += args.step
+
 

@@ -9,7 +9,6 @@
 /hits/verbose 0
 #/random/setSeeds 1 2
 
-
 /lsrp/PhotonFlightLength 31 m
 /lsrp/beam/Energy  4.100 GeV
 /lsrp/beam/SigmaY  50 mkrad
@@ -24,19 +23,15 @@
 
 /lsrp/GEM/Size  50 cm
 
-
-#/lsrp/GEM/pad/Threshold  0
-
 /lsrp/Converter/Size  50 cm
 /lsrp/Converter/Width 12 mm
-/lsrp/Converter/DistanceToGEM 20 mm
+/lsrp/Converter/DistanceToGEM 1 mm
 /lsrp/Converter/Material G4_Pb
 
 /lsrp/Flange/Width 0.5 mm
 /lsrp/Flange/DistanceToGEM 20 m
 
 /lsrp/World/Material G4_AIR
-#/lsrp/World/Material G4_AIR
 
 /lsrp/Flange/Material G4_STAINLESS-STEEL
 
@@ -44,24 +39,4 @@
 /lsrp/Mirror/Material quartz  #or G4_Cu
 /lsrp/Mirror/Width    5 mm  #or 10 mm for G4_cu
 
-#/lsrp/RootFile test1.root
-#/lsrp/SaveAllHits 0
-#/run/beamOn 100
-#/lsrp/RootFile test2.root
-#/lsrp/SaveAllHits 1
-#/run/beamOn 100
-#/lsrp/RootFile test3.root
-#/lsrp/SaveAllHits 0
-#/lsrp/SaveOnePadPerTrack 0
-#/run/beamOn 100
-#
-/lsrp/SaveAllHits 0
-/lsrp/SaveOnePadPerTrack 0
-/lsrp/GEM/pad/Threshold  23423.2
-/run/beamOn 100
-/lsrp/GEM/pad/Threshold  2.2
-/run/beamOn 100
-/lsrp/GEM/pad/Threshold  3.5
-/run/beamOn 100
-/lsrp/GEM/pad/Threshold  5
-/run/beamOn 100
+/run/beamOn 1500
