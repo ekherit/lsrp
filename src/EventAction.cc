@@ -234,9 +234,9 @@ void EventAction::EndOfEventAction(const G4Event* event)
   static auto  head2 = boost::format("#%10s %10s %10s %10s %10s %10s %10s        #\n") % ""         % "scattered" % "detected"  % "number" % "stored" % "hited" % "stored";
   static auto  fmt   = boost::format(" %10d %10d %10d %10d %10d %10d %10d        #");
 
-  if (print_predicate(eventID, {1,10,100,1000,10000,100000}))
+  if (print_predicate(eventID, 1,10,100,1000,10000,100000))
   {
-    if(print_predicate(event_printed, {30})) 
+    if(print_predicate(event_printed, 30)) 
     {
       for(unsigned i=0; i<head1.size()-1; i++) G4cout << "#";
       G4cout<<'\n';

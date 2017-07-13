@@ -15,8 +15,10 @@
  *
  * =====================================================================================
  */
-
 #pragma once 
+
+#include <vector>
+
 inline long GetPhysMemUsage(void)
 { //Note: this value is in KB!
   FILE* file = fopen("/proc/self/status", "r");
@@ -57,14 +59,21 @@ inline void print_memory_usage(long run = 0)
 class print_predicate
 {
   public:
-    print_predicate(long long event, const std::vector<int> && denom) 
+    template<typename Number>
+    print_predicate(Number event, const std::vector<Number> && denom) 
     {
       for(size_t i=0; i<denom.size();i++)
       {
         isprint  = isprint || ( (event < denom[i+1] || i==(denom.size()-1) ) && (event % denom[i] == 0) );
       }
     }
-    bool operator()(void) const { return isprint; }
+
+    template<typename Number, typename ...Types >
+    print_predicate(Number event, Types ...args) :  print_predicate(event, {args...})
+    {
+    }
+
+    bool operator()(void) const noexcept{ return isprint; }
     explicit operator bool() const noexcept { return isprint; }
   private:
     bool isprint=false;
