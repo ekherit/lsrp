@@ -31,7 +31,7 @@
 #include "RunAction.hh"
 #include "ROOTManager.hh"
 #include "PrimaryGeneratorAction.hh"
-#include "Config.h"
+#include "Config.hh"
 #include "DetectorConstruction.hh"
 
 #include "G4Run.hh"

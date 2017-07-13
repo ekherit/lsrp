@@ -18,7 +18,7 @@
 
 #include <TSystem.h>
 #include "ROOTManager.hh"
-#include "Config.h"
+#include "Config.hh"
 
 #include <stdio.h>
 

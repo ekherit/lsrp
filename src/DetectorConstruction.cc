@@ -28,7 +28,7 @@
 /// \file DetectorConstruction.cc
 /// \brief Implementation of the DetectorConstruction class
 
-#include "Config.h"
+#include "Config.hh"
 
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"

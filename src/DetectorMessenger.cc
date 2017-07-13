@@ -33,7 +33,7 @@
 #include "ROOTManager.hh"
 #include "DetectorMessenger.hh"
 #include "DetectorConstruction.hh"
-#include "Config.h"
+#include "Config.hh"
 
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithAString.hh"

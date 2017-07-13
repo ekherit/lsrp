@@ -31,7 +31,7 @@
 #ifndef GEMHit_h
 #define GEMHit_h 1
 
-#include "Config.h"
+#include "Config.hh"
 #include "G4VHit.hh"
 #include "G4THitsCollection.hh"
 #include "G4Allocator.hh"

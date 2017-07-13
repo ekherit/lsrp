@@ -26,7 +26,7 @@
 
 #include <vector>
 
-#include "Config.h"
+#include "Config.hh"
 
 
 class PadEvent : public TObject

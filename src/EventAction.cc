@@ -33,7 +33,7 @@
 #include "Pad.hh"
 #include "GEMHit.hh"
 #include <ibn/math.h>
-#include "Config.h"
+#include "Config.hh"
 #include "PrimaryGeneratorAction.hh"
 
 #include "G4Event.hh"
@@ -59,7 +59,7 @@ EventAction::~EventAction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void EventAction::BeginOfEventAction(const G4Event* event)
+void EventAction::BeginOfEventAction(const G4Event* )
 {  
   fPads.clear();
   //G4int eventID = event->GetEventID();

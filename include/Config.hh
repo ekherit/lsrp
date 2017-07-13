@@ -48,7 +48,7 @@ struct Object
 class Config_t : public TObject
 {
   public:
-  Config_t(void){};
+  Config_t(void);
   virtual ~Config_t(void){}
   unsigned long seed=0;
   unsigned long run=0;

@@ -20,7 +20,7 @@
 #include "G4Tubs.hh"
 #include "G4UserLimits.hh"
 #include "G4GeometryManager.hh"
-#include "Config.h"
+#include "Config.hh"
 
 #include "G4SystemOfUnits.hh"
 #include <boost/lexical_cast.hpp>

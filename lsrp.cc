@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "Config.hh"
 #include "DetectorConstruction.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "RunAction.hh"

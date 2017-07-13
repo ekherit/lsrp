@@ -31,7 +31,7 @@
 #include "PrimaryGeneratorAction.hh"
 #include "ROOTManager.hh"
 #include "DetectorConstruction.hh"
-#include "Config.h"
+#include "Config.hh"
 
 #include "G4LogicalVolumeStore.hh"
 #include "G4LogicalVolume.hh"

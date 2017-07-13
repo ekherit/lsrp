@@ -11,44 +11,62 @@ ifndef G4INSTALL
   G4INSTALL = ../../../..
 endif
 
+ifndef G4DUMMY_VARIABLE
+  include $(G4INSTALL)/config/architecture.gmk
+endif
+
+TMP=$(G4TMP)/$(G4SYSTEM)/$(G4TARGET)
+
+#test:
+#		echo $(G4INCLUDE)
 
 .PHONY: all
 
-TARGET = RootEvent
 
-all: lib$(TARGET).so lib bin  libConfig.so
+all: lib bin
+
+#myclean : clean
+#			rm -rf  *.o *.so *.pcm src/*Dict.cc  src/*Dict.h src/*.pcm
+
+EXTRALIBS := -L$(TMP) -lConfig -lRootEvent RootEvent.o Config.o
+EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRootEvent.so  $(TMP)/libConfig.so
+
+$(TMP)/libRootEvent.so : $(TMP)/RootEvent.o $(TMP)/RootEventDict.o 
+		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
+		@g++ -o $(TMP)/libRootEvent.a  -fPIC -c  $^   $(LDFLAGS) 
+		@echo Creating shared library $@
 
 
-lib$(TARGET).so : $(TARGET).o $(TARGET)Dict.o 
-		g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
+#$(TMP)/RootEvent.o : src/RootEvent.cc
+#		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
 
-
-RootEvent.o : src/RootEvent.cc
-		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
-
-RootEventDict.o : src/RootEventDict.cc
-		g++ -o $@ -I/$(G4INCLUDE) $(CPPFLAGS)  -c $< 
+#$(TMP)/RootEventDict.o : src/RootEventDict.cc
+#		@g++ -o $@ -I$(G4INCLUDE) $(CPPFLAGS)  -c $< 
+#		@echo Compiling RootEventDict.cc
 
 src/RootEventDict.cc :  include/RootEvent.hh include/RootEventLinkDef.hh
-		rootcling -f $@ -I$(G4INCLUDE) -c $^
+		@rootcling -f $@ -I$(G4INCLUDE) -c $^
+		@echo Generating RootEventDict.cc
 
-libConfig.so : Config.o  ConfigDict.o 
-		g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
+$(TMP)/libConfig.so : $(TMP)/Config.o  $(TMP)/ConfigDict.o 
+		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
+		@g++ -o $(TMP)/libConfig.a  -fPIC  -c $^   $(LDFLAGS) 
+		@echo Creating shared library $@
 
-Config.o : src/Config.cc
-		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
+#$(TMP)/Config.o : src/Config.cc
+#		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
 
-ConfigDict.o : src/ConfigDict.cc
-		g++ -o $@ -I/$(G4INCLUDE) $(CPPFLAGS)  -c $< 
+#$(TMP)/ConfigDict.o : src/ConfigDict.cc
+#		@g++ -o $@ -I$(G4INCLUDE) $(CPPFLAGS)  -c $< 
+#		@echo Compiling ConfigDict.cc
 
-src/ConfigDict.cc :  include/Config.h include/ConfigLinkDef.hh
-		rootcling -f $@ -I$(G4INCLUDE) -c $^
+src/ConfigDict.cc :  include/Config.hh include/ConfigLinkDef.hh
+		@rootcling -f $@ -I$(G4INCLUDE) -c $^
+		@echo Generating ConfigDict.cc
 
-
-myclean :
-			rm -rf dict.* $(G4TMP)/$(G4SYSTEM)/lsrp *.o *.so src/$(TARGET)Dict.cc src/*.pcm   *.pcm
 
 include $(G4INSTALL)/config/binmake.gmk
+
 
 visclean:
 	rm -f g4*.prim g4*.eps g4*.wrl
