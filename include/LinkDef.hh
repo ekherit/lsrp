@@ -17,6 +17,14 @@
  */
 
 #ifdef __CLING__
+
+#pragma link C++ class RootEvent+;
+#pragma link C++ class GeneratorEvent+;
+#pragma link C++ class HitEvent+;
+#pragma link C++ class PadEvent+;
+#pragma link C++ class Config+;
+
+
 #pragma link C++ class Pad_t+;
 #pragma link C++ class Gem_t+;
 #pragma link C++ class Converter_t+;

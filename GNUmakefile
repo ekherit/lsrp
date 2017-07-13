@@ -22,16 +22,20 @@ TMP=$(G4TMP)/$(G4SYSTEM)/$(G4TARGET)
 
 all: lib bin
 
-myclean : clean
-			rm -rf  *.o *.so *.pcm src/*Dict.cc  src/*Dict.h src/*.pcm
+#EXTRALIBS := $(TMP)/Config.o $(TMP)/RootEvent.o
+#EXTRALIBS := $(TMP)/RootEvent.o
+#EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRootEvent.so  $(TMP)/libConfig.so
+EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRoot.so 
+#EXTRA_LINK_DEPENDENCIES :=  $(TMP)/RootDict.o
 
-EXTRALIBS := $(TMP)/Config.o $(TMP)/RootEvent.o
-EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRootEvent.so  $(TMP)/libConfig.so
+#$(TMP)/libRootEvent.so : $(TMP)/RootEvent.o $(TMP)/RootEventDict.o 
+#		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
+#		@echo Creating shared library $@
+#		@mv -f src/*rdict.pcm $(TMP)/
 
-$(TMP)/libRootEvent.so : $(TMP)/RootEvent.o $(TMP)/RootEventDict.o 
+$(TMP)/libRoot.so : $(TMP)/RootEvent.o $(TMP)/Config.o $(TMP)/RootDict.o  
 		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
 		@echo Creating shared library $@
-		@mv -f src/*rdict.pcm $(TMP)/
 
 
 #RootEvent.o, Config.o and RootEventDict.o ConfigDict.o automaticaly
@@ -44,14 +48,18 @@ $(TMP)/libRootEvent.so : $(TMP)/RootEvent.o $(TMP)/RootEventDict.o
 #		@g++ -o $@ -I$(G4INCLUDE) $(CPPFLAGS)  -c $< 
 #		@echo Compiling RootEventDict.cc
 
-src/RootEventDict.cc :  include/RootEvent.hh include/RootEventLinkDef.hh
+#src/RootEventDict.cc :  include/RootEvent.hh include/RootEventLinkDef.hh
+#		@rootcling -f $@ -I$(G4INCLUDE) -c $^
+#		@echo Generating RootEventDict.cc
+#
+$(TMP)/RootDict.cc :  include/RootEvent.hh include/Config.hh include/LinkDef.hh
 		@rootcling -f $@ -I$(G4INCLUDE) -c $^
-		@echo Generating RootEventDict.cc
+		@echo Generating RootDict.cc
 
-$(TMP)/libConfig.so : $(TMP)/Config.o  $(TMP)/ConfigDict.o 
-		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
-		@echo Creating shared library $@
-		@mv -f src/*rdict.pcm $(TMP)/
+#$(TMP)/libConfig.so : $(TMP)/Config.o  $(TMP)/ConfigDict.o 
+#		@g++ -o $@ -shared -fPIC  $^   $(LDFLAGS) 
+#		@echo Creating shared library $@
+#		@mv -f src/*rdict.pcm $(TMP)/
 
 #$(TMP)/Config.o : src/Config.cc
 #		g++ -o $@ -I/$(G4INCLUDE)  $(CPPFLAGS)  -c $<
@@ -60,9 +68,9 @@ $(TMP)/libConfig.so : $(TMP)/Config.o  $(TMP)/ConfigDict.o
 #		@g++ -o $@ -I$(G4INCLUDE) $(CPPFLAGS)  -c $< 
 #		@echo Compiling ConfigDict.cc
 
-src/ConfigDict.cc :  include/Config.hh include/ConfigLinkDef.hh
-		@rootcling -f $@ -I$(G4INCLUDE) -c $^
-		@echo Generating ConfigDict.cc
+#src/ConfigDict.cc :  include/Config.hh include/ConfigLinkDef.hh
+#		@rootcling -f $@ -I$(G4INCLUDE) -c $^
+#		@echo Generating ConfigDict.cc
 
 
 include $(G4INSTALL)/config/binmake.gmk
