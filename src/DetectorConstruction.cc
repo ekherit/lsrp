@@ -205,7 +205,7 @@ void DetectorConstruction::UpdateGeometry(void)
   for (auto & p : fVol) p.second.open_geometry();
   GEM->open_geometry();
   fGem->SetTranslation(fGEMPosition);
-  GEM->update_geometry(Cfg.gem.size);
+  GEM->update_geometry();
   //GEM->GetLogicalVolume().logic->SetUserLimits(new G4UserLimits(std::min(Cfg.converter.step, Cfg.converter.width*0.5)));
 
   fVol["World"].update_geometry(Cfg.world_size_x,Cfg.world_size_y, Cfg.world_size_z, {0,0,0});

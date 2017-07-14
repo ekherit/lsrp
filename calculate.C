@@ -96,7 +96,7 @@ TGraphErrors * proceed (const char * prefix, int begin=0, int end=100, const cha
     char buf[1024]; 
     for ( i = begin; i <= end; i += 1 ) 
     {
-      sprintf(buf, "%s%d.root", prefix, i);
+      sprintf(buf,prefix, i);
       if(gSystem->AccessPathName(buf) == 0)
       {
         std::cout << buf << std::endl;

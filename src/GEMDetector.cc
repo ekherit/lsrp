@@ -24,35 +24,37 @@
 
 #include "G4SystemOfUnits.hh"
 #include <boost/lexical_cast.hpp>
-GEMDetector::AmplificationCascade::AmplificationCascade(G4double size, G4double kapton_width, G4double cuprum_width)
+GEMDetector::AmplificationCascade::AmplificationCascade()
 {
-  fCuprumWidth=cuprum_width;
-  fKaptonWidth=kapton_width;
-  fWidth=kapton_width+2.0*cuprum_width;
-  fRadius=size/2.0;
+  fCuprumWidth=Cfg.gem.cuprum_width;
+  fKaptonWidth=Cfg.gem.kapton_width;
+  fWidth=fCuprumWidth*2 + fKaptonWidth;
+  fRadius=Cfg.gem.size/2.0;
   kapton = G4NistManager::Instance()->FindOrBuildMaterial("G4_KAPTON");
   Cu     = G4NistManager::Instance()->FindOrBuildMaterial("G4_Cu");
   G4Tubs * KaptonSV = new G4Tubs("Kapton",0,fRadius, fWidth/2.,0.*deg,360.*deg);
   G4Tubs * CuprumSV = new G4Tubs("Cuprum",0,fRadius, fCuprumWidth/2.,0.*deg,360.*deg);
 
-  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(KaptonSV));
-  SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(CuprumSV));
-  //define logical volume for kapton
+  SolidVolumeListList.emplace(std::pair<std::string, std::unique_ptr<G4VSolid>>{"Kapton",std::unique_ptr<G4VSolid>(KaptonSV)});
+  SolidVolumeListList.emplace(std::pair<std::string, std::unique_ptr<G4VSolid>>{"Cuprum",std::unique_ptr<G4VSolid>(CuprumSV)});
+
   LV.reset(new G4LogicalVolume(KaptonSV, kapton,"Kapton"));
   //define cuprum
   G4LogicalVolume * CuprumLV = new G4LogicalVolume(CuprumSV,Cu,"Cuprum");
   //place logical cuprum inside logical kapton
   for(int i=0;i<2;i++)
   {
+    std::string name = ("Cuprum"+std::to_string(i));
     auto pv = new G4PVPlacement(0, //no rotation
         G4ThreeVector(0,0,(2*i-1)*(fKaptonWidth+fCuprumWidth)/2.0), //position
         CuprumLV,
-        "Cuprum", //the name
+        name.c_str(), //the name
         LV.get(), //mother logical volume
         false, //no boolen operations
         i, //copy number
         true); //check overlaps
-    PhysicalVolumeListList.emplace_back(std::unique_ptr<G4VPhysicalVolume>(pv));
+    //PhysicalVolumeListList.emplace_back();
+    PhysicalVolumeListList.emplace(std::pair<int, std::unique_ptr<G4VPhysicalVolume>>{i,std::unique_ptr<G4VPhysicalVolume>(pv)});
   }
 }
 
@@ -61,7 +63,7 @@ void GEMDetector::AmplificationCascade::open_geometry(void)
     G4GeometryManager * geometry=G4GeometryManager::GetInstance();
     for(auto & pv : PhysicalVolumeListList)
     {
-        geometry->OpenGeometry(pv.get());
+        geometry->OpenGeometry(pv.second.get());
     }
 }
 
@@ -70,17 +72,29 @@ void GEMDetector::AmplificationCascade::close_geometry(void)
     G4GeometryManager * geometry=G4GeometryManager::GetInstance();
     for(auto & pv : PhysicalVolumeListList)
     {
-        geometry->CloseGeometry(pv.get());
+        geometry->CloseGeometry(pv.second.get());
     }
 }
 
-void GEMDetector::AmplificationCascade::update_geometry(double size)
+void GEMDetector::AmplificationCascade::update_geometry(void)
 {
-    for(auto & p : SolidVolumeListList)
-    {
-        G4Tubs * sv = static_cast<G4Tubs*>( p.get());
-        sv->SetOuterRadius(size/2.0);
-    }
+
+  fCuprumWidth=Cfg.gem.cuprum_width;
+  fKaptonWidth=Cfg.gem.kapton_width;
+  fWidth=fCuprumWidth*2 + fKaptonWidth;
+  fRadius=Cfg.gem.size/2.0;
+  dynamic_cast<G4Tubs*>(SolidVolumeListList["Cuprum"].get())->SetZHalfLength(fCuprumWidth/2.0);
+  dynamic_cast<G4Tubs*>(SolidVolumeListList["Kapton"].get())->SetZHalfLength(fWidth/2.0);
+  for(int i=0;i<2;i++)
+  {
+    auto pos = G4ThreeVector(0,0,(2*i-1)*(fKaptonWidth + fCuprumWidth)/2.0);
+    PhysicalVolumeListList[i]->SetTranslation(pos);
+  }
+  for(auto & p : SolidVolumeListList)
+  {
+    G4Tubs * sv = static_cast<G4Tubs*>( p.second.get());
+    sv->SetOuterRadius(fRadius);
+  }
 }
 
 
@@ -118,26 +132,8 @@ G4Material * StefMaterial(void)
 
 GEMDetector::GEMDetector(void)
 {
+  CalculateGeometry();
   //describe main size
-  fSizeX = Cfg.gem.size_x;
-  fSizeY = Cfg.gem.size_y;
-  fRadius = std::max(fSizeX, fSizeY)/2.0;
-  fStefWidth=1.5*mm;
-  fDriftLength = 3*mm;
-  fCascadeNumber=Cfg.gem.cascade_number; //should be 3
-  fKaptonWidth = 50*um;
-  fCuprumWidth = 5*um;
-  fCascadeWidth = fKaptonWidth+fCuprumWidth*2;
-  fTransferLength = 1.5*mm;
-  fInductionLength = 2.0*mm;
-  fPadWidth = 15.*um;
-  fGEMWidth = fStefWidth*2 
-              + fDriftLength 
-              + fCascadeNumber*fCascadeWidth 
-              + (fCascadeNumber-1)*fTransferLength
-              + fInductionLength 
-              + fPadWidth*2;
-
 
   G4Tubs * solid_volume = new G4Tubs("GEM",0,fRadius, fGEMWidth/2.,0.*deg,360.*deg);
   SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(solid_volume));
@@ -227,7 +223,7 @@ GEMDetector::GEMDetector(void)
   ));
 
   //Describe amplification cascade
-  fAmplCascade.reset(new AmplificationCascade(2*fRadius, fKaptonWidth, fCuprumWidth));
+  fAmplCascade.reset(new AmplificationCascade());
   for(int i=0;i<fCascadeNumber; i++)
   {
     G4double z0 = -fGEMWidth/2.0+fStefWidth+fDriftLength;
@@ -269,6 +265,28 @@ GEMDetector::GEMDetector(void)
   PrintGeometry();
 }
 
+void GEMDetector::CalculateGeometry(void)
+{
+  fSizeX = Cfg.gem.size_x;
+  fSizeY = Cfg.gem.size_y;
+  fRadius = std::max(fSizeX, fSizeY)/2.0;
+  fStefWidth=Cfg.gem.stef_width;
+  fDriftLength = Cfg.gem.drift_length;
+  fCascadeNumber=Cfg.gem.cascade_number; //should be 3
+  fKaptonWidth = Cfg.gem.kapton_width;
+  fCuprumWidth = Cfg.gem.cuprum_width;
+  fCascadeWidth = fKaptonWidth+fCuprumWidth*2;
+  fTransferLength = Cfg.gem.transfer_length;
+  fInductionLength = Cfg.gem.induction_length;
+  fPadWidth = Cfg.gem.pad.width;
+  fGEMWidth = fStefWidth*2 
+              + fDriftLength 
+              + fCascadeNumber*fCascadeWidth 
+              + (fCascadeNumber-1)*fTransferLength
+              + fInductionLength 
+              + fPadWidth*2;
+}
+
 GEMDetector::~GEMDetector(void)
 {
   std::cout << "~GEMDetector " << std::endl;
@@ -291,16 +309,16 @@ void GEMDetector::open_geometry(void)
     fAmplCascade->open_geometry();
 }
 
-void GEMDetector::update_geometry(double size)
+void GEMDetector::update_geometry()
 {
     for(auto & p : SolidVolumeListList)
     {
         G4Tubs * sv = static_cast<G4Tubs*>( p.get());
-        sv->SetOuterRadius(size/2.0);
+        sv->SetOuterRadius(Cfg.gem.size/2.0);
     }
-    fAmplCascade->update_geometry(size);
-    fSizeY = size;
-    fSizeX = size;
+    fAmplCascade->update_geometry();
+    fSizeY = Cfg.gem.size;
+    fSizeX = Cfg.gem.size;
     PrintGeometry();
 }
 

@@ -57,17 +57,17 @@ class GEMDetector
     G4Material * kapton;
     G4Material * Cu;
     std::unique_ptr<G4LogicalVolume>  LV;
-    std::list<std::unique_ptr<G4VSolid>>  SolidVolumeListList;
-    std::list<std::unique_ptr<G4VPhysicalVolume>>  PhysicalVolumeListList;
+    std::map<std::string, std::unique_ptr<G4VSolid>>  SolidVolumeListList;
+    std::map<int, std::unique_ptr<G4VPhysicalVolume>>  PhysicalVolumeListList;
     public:
     G4LogicalVolume * GetLogicalVolume(void) { return LV.get(); }
-    AmplificationCascade(G4double size, G4double kapton_width=50e-6*CLHEP::m, G4double cuprum_width=5e-6*CLHEP::m);
+    AmplificationCascade(void);
     G4double GetWidth(void) const { return fKaptonWidth+2*fCuprumWidth;}
     G4double GetKaptonWidth(void) const { return fKaptonWidth; }
     G4double GetCuprumWidth(void) const { return fCuprumWidth; }
-    void open_geometry(void);
-    void update_geometry(double size);
-    void close_geometry(void);
+    void open_geometry();
+    void update_geometry();
+    void close_geometry();
   };
   std::unique_ptr<AmplificationCascade> fAmplCascade;
   std::unique_ptr<G4LogicalVolume> fTransferVolume;
@@ -87,10 +87,11 @@ class GEMDetector
     G4double GetPadZ(void) const {return fPadZposition;}
     bool fCheckOverlaps=true;
     void SetUserLimits(G4UserLimits * );
+    void CalculateGeometry();
 
-    void open_geometry(void);
-    void update_geometry(double size);
-    void close_geometry(void);
+    void open_geometry();
+    void update_geometry();
+    void close_geometry();
 };
 
 #endif

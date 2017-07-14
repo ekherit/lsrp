@@ -53,13 +53,6 @@ DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
 
   AddCmd(Cfg.photon_number                 , "/lsrp/PhotonNumberPerPulse"    , "Number of photons per pulse"                           , "");
   AddCmd(Cfg.step_max                      , "/lsrp/StepMax"                 , "Miximum allowed step"                                  , "Length");
-  AddCmd(Cfg.gem.pad.size                  , "/lsrp/GEM/pad/Size"            , "Size of the pad"                                       , "Length");
-  AddCmd(Cfg.gem.pad.size_x                , "/lsrp/GEM/pad/SizeX"           , "X size of the pad"                                     , "Length");
-  AddCmd(Cfg.gem.pad.size_y                , "/lsrp/GEM/pad/SizeY"           , "Y size of the pad"                                     , "Length");
-  AddCmd(Cfg.gem.pad.rough_size_x          , "/lsrp/GEM/pad/RoughSizeX"      , "Big pad size x"                                        , "Length");
-  AddCmd(Cfg.gem.pad.rough_size_y          , "/lsrp/GEM/pad/RoughSizeY"      , "Big pad size y"                                        , "Length");
-  AddCmd(Cfg.gem.high_sens_size_x          , "/lsrp/GEM/HighSensSizeX"       , "X High sensitive width"                                , "Length");
-  AddCmd(Cfg.gem.high_sens_size_y          , "/lsrp/GEM/HighSensSizeY"       , "Y High sensitive width"                                , "Length");
   AddCmd(Cfg.beam.sigmaX                   , "/lsrp/beam/SigmaX"             , "Beam X angular spread"                                 , "Angle");
   AddCmd(Cfg.beam.sigmaY                   , "/lsrp/beam/SigmaY"             , "Beam Y angular spread"                                 , "Angle");
   AddCmd(Cfg.beam.I                        , "/lsrp/beam/Current"            , "Beam current"                                          , "Electric current");
@@ -80,6 +73,22 @@ DetectorMessenger::DetectorMessenger(void) : G4UImessenger()
   AddCmd(Cfg.gem.size_x                    , "/lsrp/GEM/SizeX"               , "GEM size x"                                            , "Length");
   AddCmd(Cfg.gem.size_x                    , "/lsrp/GEM/SizeY"               , "GEM size y"                                            , "Length");
   AddCmd(Cfg.gem_world_distance            , "/lsrp/GEM/DistanceToWorldEdge" , "GEM-world distance"                                    , "Length");
+
+  AddCmd(Cfg.gem.stef_width                    , "/lsrp/GEM/StefWidth"           , "Stef Width"                                            , "Length");
+  AddCmd(Cfg.gem.kapton_width                  , "/lsrp/GEM/KaptonWidth"         , "Capton width"                                          , "Length");
+  AddCmd(Cfg.gem.cuprum_width                  , "/lsrp/GEM/CuprumWidth"         , "Cuprum width"                                          , "Length");
+  AddCmd(Cfg.gem.drift_length                  , "/lsrp/GEM/DriftLength"         , "Drift length"                                          , "Length");
+  AddCmd(Cfg.gem.transfer_length               , "/lsrp/GEM/TransferLength"      , "Transfer length"                                       , "Length");
+  AddCmd(Cfg.gem.induction_length              , "/lsrp/GEM/InductionLength"     , "Induction length"                                      , "Length");
+
+  AddCmd(Cfg.gem.pad.size                  , "/lsrp/GEM/pad/Size"            , "Size of the pad"                                       , "Length");
+  AddCmd(Cfg.gem.pad.size_x                , "/lsrp/GEM/pad/SizeX"           , "X size of the pad"                                     , "Length");
+  AddCmd(Cfg.gem.pad.size_y                , "/lsrp/GEM/pad/SizeY"           , "Y size of the pad"                                     , "Length");
+  AddCmd(Cfg.gem.pad.rough_size_x          , "/lsrp/GEM/pad/RoughSizeX"      , "Big pad size x"                                        , "Length");
+  AddCmd(Cfg.gem.pad.rough_size_y          , "/lsrp/GEM/pad/RoughSizeY"      , "Big pad size y"                                        , "Length");
+  AddCmd(Cfg.gem.high_sens_size_x          , "/lsrp/GEM/HighSensSizeX"       , "X High sensitive width"                                , "Length");
+  AddCmd(Cfg.gem.high_sens_size_y          , "/lsrp/GEM/HighSensSizeY"       , "Y High sensitive width"                                , "Length");
+  AddCmd(Cfg.gem.width                     , "/lsrp/GEM/pad/Width"           , "GEM pad width"                                         , "Length");
 
   AddCmd(Cfg.converter.width               , "/lsrp/Converter/Width"         , "Converter width"                                       , "Length");
   AddCmd(Cfg.converter.size                , "/lsrp/Converter/Size"          , "Converter size xy"                                     , "Length");

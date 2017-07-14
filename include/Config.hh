@@ -58,6 +58,7 @@ struct Pad_t: public TObject
   double rough_size_x = 2*mm;
   double rough_size_y = 2*mm;
   double threshold    = 0;
+  double width = 15*um;
   ClassDef(Pad_t, 1); //The class title
 };
 
@@ -66,6 +67,13 @@ struct Gem_t: public TObject
   Gem_t(void){}
   virtual ~Gem_t(void){}
   unsigned cascade_number = 3; //number of amplification cascades 3
+  double stef_width = 1.5*mm;
+  double drift_length = 3*mm;
+  double kapton_width = 50*um;
+  double cuprum_width = 5*um;
+  double cascade_width; //calculated from cuprum width and kapton
+  double transfer_length = 1.5*mm; //calculated from cuprum width and kapton
+  double induction_length = 2.0*mm;
   double   amplification=1e4;  //1e4
   unsigned drift_spread;
   Pad_t pad;
@@ -75,6 +83,8 @@ struct Gem_t: public TObject
   double size = 50*cm;             // gem size
   double size_x=50*cm;             // xy size of the gem in mm
   double size_y=50*cm;             // xy size of the gem in mm
+
+
   ClassDef(Gem_t, 1); //The class title
 };
 
