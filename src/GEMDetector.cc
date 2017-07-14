@@ -15,6 +15,7 @@
  *
  * =====================================================================================
  */
+#include <regex>
 #include <boost/format.hpp>
 
 #include "GEMDetector.hh"
@@ -200,7 +201,7 @@ GEMDetector::GEMDetector(void)
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,fGEMWidth/2.0-fPadWidth/2.0), //position
       padLV,
-      "Pad", //the name
+      "Back", //the name
       LV.get(), //mother logical volume
       false, //no boolen operations
       1, //copy number
@@ -217,7 +218,7 @@ GEMDetector::GEMDetector(void)
   new G4PVPlacement(0, //no rotation
       G4ThreeVector(0,0,-fGEMWidth/2.0+fStefWidth+fDriftLength/2.0), //position
       fDriftVolume.get(),
-      "DriftVolume", //the name
+      "DriftVol", //the name
       LV.get(), //mother logical volume
       false, //no boolen operations
       0, //copy number
@@ -228,13 +229,14 @@ GEMDetector::GEMDetector(void)
   fAmplCascade.reset(new AmplificationCascade());
   for(int i=0;i<fCascadeNumber; i++)
   {
+    std::string name = "GEM" + std::to_string(i+1);
     G4double z0 = -fGEMWidth/2.0+fStefWidth+fDriftLength;
       PhysicalVolumeListList.emplace_back ( 
               std::unique_ptr<G4VPhysicalVolume>(
             new G4PVPlacement(0, //no rotation
                 G4ThreeVector(0,0,z0 + fCascadeWidth/2. + i*(fCascadeWidth+fTransferLength)), //position
                 fAmplCascade->GetLogicalVolume(),
-                "AmplificationCascadeVolume", //the name
+                name.c_str(), //the name
                 LV.get(), //mother logical volume
                 false, //no boolen operations
                 i, //copy number
@@ -246,11 +248,11 @@ GEMDetector::GEMDetector(void)
   //describe TransfereVolume
   G4Tubs * TransferSV = new G4Tubs("Transfere",0.,fRadius,fTransferLength/2.0,0.*deg,360.*deg);
   SolidVolumeListList.emplace_back(std::unique_ptr<G4VSolid>(TransferSV));
-  fTransferVolume.reset(new G4LogicalVolume(TransferSV, Cu,"TransfereVolume"));
+  fTransferVolume.reset(new G4LogicalVolume(TransferSV, Ar,"TransfereVolume"));
   for(int i=0;i<fCascadeNumber-1;i++)
   {
     G4double z0 = -fGEMWidth/2.0+fStefWidth+fDriftLength+fCascadeWidth;
-    std::string name = "TransfereVolume"+boost::lexical_cast<std::string>(i+1);
+    std::string name = "TransferVol"+std::to_string(i+1);
     PhysicalVolumeListList.emplace_back ( 
             std::unique_ptr<G4VPhysicalVolume>(
     new G4PVPlacement(0, //no rotation
@@ -372,6 +374,76 @@ void GEMDetector::PrintGeometry(void)
   col.print_line('-');
   col.print_line('#');
   G4cout << col << G4endl;
+
+  PhysicalVolumeListList.sort
+    (
+     [](auto && pv1, auto && pv2) 
+      { 
+        return pv1->GetTranslation().z() < pv2->GetTranslation().z();
+      }
+    );
+  for(auto && pv : PhysicalVolumeListList)
+  {
+    double z = pv->GetTranslation().z();
+    double width = dynamic_cast<G4Tubs*>(pv->GetLogicalVolume()->GetSolid())-> GetZHalfLength();
+    double z1 = z - width*0.5;
+    double z2 = z + width*0.5;
+    std::cout << pv->GetName() << " width = " << width/mm << " z1 = " << z1 << "  z2  = " << z2 << std::endl;
+  }
+
+  column_printer Col;
+  Col.set_float_format(".3");
+  Col(10, "volume");
+  for(auto it=std::begin(PhysicalVolumeListList); it!=std::end(PhysicalVolumeListList);++it)
+  {
+    Col(7,(*it)->GetName());
+  }
+  Col.print_head();
+  Col << "material";
+  for(auto it=std::begin(PhysicalVolumeListList); it!=std::end(PhysicalVolumeListList);++it)
+  {
+    auto & pv = (*it);
+    auto lv = pv->GetLogicalVolume();
+    auto sv = dynamic_cast<G4Tubs*>(lv->GetSolid());
+    std::smatch sm;
+    std::regex re("^(G4_)?(.+)");
+    std::regex_match(lv->GetMaterial()->GetName(),sm,re);
+    Col << (sm.size()==3 ? sm[2] : sm[1] );
+  }
+  Col << "width";
+  for(auto it=std::begin(PhysicalVolumeListList); it!=std::end(PhysicalVolumeListList);++it)
+  {
+    auto & pv = (*it);
+    auto lv = pv->GetLogicalVolume();
+    auto sv = dynamic_cast<G4Tubs*>(lv->GetSolid());
+    Col << 2*sv->GetZHalfLength();
+  }
+  Col << "z";
+  for(auto it=std::begin(PhysicalVolumeListList); it!=std::end(PhysicalVolumeListList);++it)
+  {
+    auto & pv = (*it);
+    auto lv = pv->GetLogicalVolume();
+    auto sv = dynamic_cast<G4Tubs*>(lv->GetSolid());
+    Col << pv->GetTranslation().z();
+  }
+  Col << "zleft";
+  for(auto it=std::begin(PhysicalVolumeListList); it!=std::end(PhysicalVolumeListList);++it)
+  {
+    auto & pv = (*it);
+    auto lv = pv->GetLogicalVolume();
+    auto sv = dynamic_cast<G4Tubs*>(lv->GetSolid());
+    Col << pv->GetTranslation().z() - sv->GetZHalfLength();
+  }
+  Col << "zright";
+  for(auto it=std::begin(PhysicalVolumeListList); it!=std::end(PhysicalVolumeListList);++it)
+  {
+    auto & pv = (*it);
+    auto lv = pv->GetLogicalVolume();
+    auto sv = dynamic_cast<G4Tubs*>(lv->GetSolid());
+    Col << pv->GetTranslation().z() + sv->GetZHalfLength();
+  }
+  std::cout << Col;
+
 }
 
 

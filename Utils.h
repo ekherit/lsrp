@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 #pragma once 
-
+#include <algorithm>
 #include <vector>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
@@ -104,6 +104,23 @@ class column_printer
       ++index %= v.size();
       return *this;
     }
+
+    column_printer & operator()(size_t size, std::string  h)
+    {
+      v.push_back(std::max(size, h.length()+2));
+      head.push_back(h);
+      return *this;
+    }
+
+    void print_head(void)
+    {
+      index = 0;
+      for(unsigned i=0;i<v.size();i++)
+      {
+        *this << head[i];
+      }
+    }
+
     std::string operator()(void)
     {
       std::string s = os.str();
@@ -145,6 +162,7 @@ class column_printer
 
   private:
     std::vector<int> v;
+    std::vector<std::string> head;
     unsigned index=0;
     boost::format fmt;
     std::ostringstream os;
