@@ -346,22 +346,29 @@ void GEMDetector::PrintGeometry(void)
   G4cout << "KaptonWidth: " << fKaptonWidth/um << " mkm " << G4endl;
   G4cout << "Numbero of amplification cascades: " << fCascadeNumber << G4endl;
 
-  auto k = {5,10};
-  std::vector<int> v{6,7};
+  auto k = {7,10};
+  std::vector<int> v{7,7};
   for(unsigned i=0;i<Cfg.gem.cascade_number; i++) v.insert(v.end(),k);
   v.insert(v.end(),8);
   column_printer col(v);
+  col.set_float_format(".2");
+  double kwidth = fCuprumWidth*2 + fKaptonWidth;
 
+  col.set_begin_line("#");
+  col.set_end_line("#");
   col.print_line('#');
   col.print_title("  GEM GEOMETRY LAYOUT mm units  ",'#');
   col.print_line('-');
+  col.set_align("=");
   col << "STEF" << "DRIFT";
-  for(unsigned i=0;i<Cfg.gem.cascade_number-1;i++) col << "K1" << "TRNSFR";
-  col << "K1"  << "INDCN" << "STEF";
+  for(unsigned i=0;i<Cfg.gem.cascade_number-1;i++) col << ("K"+boost::lexical_cast<std::string>(i+1)) << "TRNSFR";
+  col << ("K"+boost::lexical_cast<std::string>(Cfg.gem.cascade_number))  << "INDCN" << "STEF";
   col.print_line('-');
+  col.set_begin_line(" ");
   col << fStefWidth/mm << fDriftLength/mm;   
-  for(unsigned i=0;i<Cfg.gem.cascade_number-1;i++) col << fKaptonWidth/mm << fTransferLength/mm;
-  col << fKaptonWidth/mm <<  fInductionLength/mm << fStefWidth/mm;
+  for(unsigned i=0;i<Cfg.gem.cascade_number-1;i++) col << kwidth/mm << fTransferLength/mm;
+  col << kwidth/mm <<  fInductionLength/mm << fStefWidth/mm;
+  col.set_begin_line("#");
   col.print_line('-');
   col.print_line('#');
   G4cout << col << G4endl;
