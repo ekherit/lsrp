@@ -15,12 +15,14 @@
  *
  * =====================================================================================
  */
+#include <boost/format.hpp>
 
 #include "GEMDetector.hh"
 #include "G4Tubs.hh"
 #include "G4UserLimits.hh"
 #include "G4GeometryManager.hh"
 #include "Config.hh"
+#include "Utils.h"
 
 #include "G4SystemOfUnits.hh"
 #include <boost/lexical_cast.hpp>
@@ -343,6 +345,28 @@ void GEMDetector::PrintGeometry(void)
   G4cout << "CuprumWidth: " << fCuprumWidth/um << " mkm " << G4endl;
   G4cout << "KaptonWidth: " << fKaptonWidth/um << " mkm " << G4endl;
   G4cout << "Numbero of amplification cascades: " << fCascadeNumber << G4endl;
+
+  auto k = {5,10};
+  std::vector<int> v{6,7};
+  for(unsigned i=0;i<Cfg.gem.cascade_number; i++) v.insert(v.end(),k);
+  v.insert(v.end(),8);
+  column_printer col(v);
+
+  col.print_line('#');
+  col.print_title("  GEM GEOMETRY LAYOUT mm units  ",'#');
+  col.print_line('-');
+  col << "STEF" << "DRIFT";
+  for(unsigned i=0;i<Cfg.gem.cascade_number-1;i++) col << "K1" << "TRNSFR";
+  col << "K1"  << "INDCN" << "STEF";
+  col.print_line('-');
+  col << fStefWidth/mm << fDriftLength/mm;   
+  for(unsigned i=0;i<Cfg.gem.cascade_number-1;i++) col << fKaptonWidth/mm << fTransferLength/mm;
+  col << fKaptonWidth/mm <<  fInductionLength/mm << fStefWidth/mm;
+  col.print_line('-');
+  col.print_line('#');
+  G4cout << col << G4endl;
 }
+
+
 
 

@@ -18,6 +18,8 @@
 #pragma once 
 
 #include <vector>
+#include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 inline long GetPhysMemUsage(void)
 { //Note: this value is in KB!
@@ -78,3 +80,70 @@ class print_predicate
   private:
     bool isprint=false;
 };
+
+class column_printer
+{
+  public:
+    template<typename ...Cols>
+    column_printer(Cols ... cols) : v{cols...}
+    {
+      sum = 0;
+      for(auto i : v) sum+=i; 
+    }
+    template<typename T>
+    column_printer & operator<<(const T & data)
+    {
+      std::string c="s";
+      if(typeid(T) == typeid(std::string)) c = 's';
+      if(typeid(T) == typeid(double)) c = (float_format+'f');
+      if(typeid(T) == typeid(int)) c = 'd';
+      if(typeid(T) == typeid(unsigned)) c = 'd';
+      os << boost::format("%" +boost::lexical_cast<std::string>(v[index])+c) %  data;
+      if(index==(v.size()-1)) os << '\n';
+      ++index %= v.size();
+      return *this;
+    }
+    std::string operator()(void)
+    {
+      std::string s = os.str();
+      os.clear();
+      return s;
+    }
+
+    void set_float_format(const char * ff )
+    {
+     float_format = ff;
+    }
+
+    void print_line(char  delim)
+    {
+      for(int i=0;i<sum;i++) os << delim;
+      os << '\n';
+    }
+
+    void print_title(std::string title, char fill=' ')
+    {
+      size_t len = title.length();
+      int begin = (sum-len)/2;
+      int end = (sum+len)/2;
+      for(int i=0;i<begin;i++) os << fill;
+      os << title;
+      for(int i=end;i<sum;i++) os << fill;
+      os<<'\n';
+    }
+
+  private:
+    std::vector<int> v;
+    unsigned index=0;
+    boost::format fmt;
+    std::ostringstream os;
+    std::string float_format=".1";
+    int sum = 0;
+};
+
+inline std::ostream & operator<<(std::ostream & ostr, column_printer & col)
+{
+  ostr << col();
+  return ostr;
+}
+

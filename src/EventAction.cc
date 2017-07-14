@@ -253,6 +253,9 @@ void EventAction::EndOfEventAction(const G4Event* event)
     event_printed++;
   }
   Revent.clear();
+  //column_printer col(10,10,20,30);
+  //col << "this" << " is " << 3.1415926 << "test\n";
+  //std::cout << col << std::endl;
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
