@@ -89,6 +89,7 @@ class column_printer
     {
       sum = 0;
       for(auto i : v) sum+=i; 
+      set_align("");
     }
     template<typename T>
     column_printer & operator<<(const T & data)
@@ -99,16 +100,19 @@ class column_printer
       if(typeid(T) == typeid(double)) c = (float_format+'f');
       if(typeid(T) == typeid(int)) c = 'd';
       if(typeid(T) == typeid(unsigned)) c = 'd';
-      os << boost::format("%"+align +boost::lexical_cast<std::string>(v[index])+c) %  data;
+      os << boost::format("%"+align[index] +boost::lexical_cast<std::string>(v[index])+c) %  data;
       if(index==(v.size()-1)) os << end_line << '\n';
       ++index %= v.size();
       return *this;
     }
 
-    column_printer & operator()(size_t size, std::string  h)
+    column_printer & operator()(size_t size, std::string  h, const char * a="")
     {
-      v.push_back(std::max(size, h.length()+2));
+      size = std::max(size, h.length()+2);
+      v.push_back(size);
       head.push_back(h);
+      sum+=size;
+      set_align(v.size()-1, a);
       return *this;
     }
 
@@ -129,7 +133,15 @@ class column_printer
     }
     void set_align(const char * a)
     {
-      align = a;
+      for(size_t i = 0;i< v.size();i++)
+      {
+        set_align(i,a);
+      }
+    }
+
+    void set_align(int i, const char * a)
+    {
+        align[i] = a;
     }
 
     void set_float_format(const char * ff )
@@ -160,17 +172,23 @@ class column_printer
       os<<'\n';
     }
 
+    void format(int i, std::string s)
+    {
+      fmt[i] =  s;
+    } 
+
   private:
     std::vector<int> v;
     std::vector<std::string> head;
     unsigned index=0;
-    boost::format fmt;
     std::ostringstream os;
     std::string float_format=".1";
-    std::string align="";
+    //std::string align="";
     std::string begin_line="";
     std::string end_line="";
     int sum = 0;
+    std::map<int, std::string> fmt;
+    std::map<int, std::string> align;
 };
 
 inline std::ostream & operator<<(std::ostream & ostr, column_printer & col)

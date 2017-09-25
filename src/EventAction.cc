@@ -92,7 +92,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
   }
   auto npad = fPads.size(); 
   //remove pads with a charge under threshold 
-  fPads.remove_if([](const auto & pad) { return pad.charge < Cfg.gem.pad.threshold; });
+  fPads.remove_if([](const Pad & pad) { return pad.charge < Cfg.gem.pad.threshold; });
 
   //Now we have pad list with number of hits and with the photon track list in each pad
   std::map <unsigned,std::list<Pad> > tracks;  // photon trackID -> padlist

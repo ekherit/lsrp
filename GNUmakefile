@@ -1,10 +1,10 @@
 name := lsrp
 G4TARGET := $(name)
 G4EXLIB := true
-CPPFLAGS := -fPIC -std=c++1y `root-config --cflags` -I./  -I$(WORKDIR) -Wno-unused-variable -Wno-shadow
-LDFLAGS :=  `root-config --libs`  \
-			-lboost_program_options \
-			-lboost_filesystem \
+CPPFLAGS :=  -fPIC `root-config --cflags` -I./  -I$(WORKDIR) -Wno-unused-variable -Wno-shadow -Wno-deprecated-declarations
+LDFLAGS :=  `root-config --libs`
+LDFLAGS +=	-lboost_program_options \
+  		-lboost_filesystem \
 		#	-lMinuit  \
 
 ifndef G4DUMMY_VARIABLE
@@ -18,7 +18,7 @@ TMP=$(G4TMP)/$(G4SYSTEM)/$(G4TARGET)
 
 all: lib bin
 
-EXTRALIBS := $(TMP)/Config.o $(TMP)/RootEvent.o
+EXTRALIBS := $(TMP)/Config.o $(TMP)/RootEvent.o $(TMP)/RootDict.o
 EXTRA_LINK_DEPENDENCIES :=  $(TMP)/libRoot.so 
 
 $(TMP)/libRoot.so : $(TMP)/RootEvent.o $(TMP)/Config.o $(TMP)/RootDict.o 

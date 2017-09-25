@@ -62,6 +62,7 @@ void clean_argc_argv(int * ARGC, char ** ARGV, boost::program_options::variables
     ARGV[i] = argv[i];
   }
 }
+
 int main(int argc,char** argv)
 {
   namespace po=boost::program_options;
@@ -97,7 +98,7 @@ int main(int argc,char** argv)
     exit(0);
   }
   //remove my own program options
-  //clean_argc_argv(&argc, argv, opt);
+  clean_argc_argv(&argc, argv, opt);
   for(int i=0;i<argc;i++)
   {
     cout << i << ": " << argv[i] << endl;

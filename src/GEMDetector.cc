@@ -104,7 +104,7 @@ void GEMDetector::AmplificationCascade::update_geometry(void)
 
 G4Material * EpoxyMaterial(void)
 {
-  G4String name = "Epoxy";
+  G4String name = "EPOXY";
   G4Material* material = G4Material::GetMaterial(name, false);
   if(material) return material;
   material = new G4Material(name, 1.3*g/cm3,3);
@@ -120,7 +120,7 @@ G4Material * EpoxyMaterial(void)
 
 G4Material * StefMaterial(void)
 {
-  G4String name = "Stef";
+  G4String name = "STEF";
   G4Material* material = G4Material::GetMaterial(name, false);
   if(material) return material;
   material = new G4Material(name, 1.7*g/cm3,2);
@@ -377,27 +377,22 @@ void GEMDetector::PrintGeometry(void)
 
   PhysicalVolumeListList.sort
     (
-     [](auto && pv1, auto && pv2) 
+     [](std::unique_ptr<G4VPhysicalVolume> & pv1, std::unique_ptr<G4VPhysicalVolume> & pv2) 
       { 
         return pv1->GetTranslation().z() < pv2->GetTranslation().z();
       }
     );
-  for(auto && pv : PhysicalVolumeListList)
-  {
-    double z = pv->GetTranslation().z();
-    double width = dynamic_cast<G4Tubs*>(pv->GetLogicalVolume()->GetSolid())-> GetZHalfLength();
-    double z1 = z - width*0.5;
-    double z2 = z + width*0.5;
-    std::cout << pv->GetName() << " width = " << width/mm << " z1 = " << z1 << "  z2  = " << z2 << std::endl;
-  }
 
   column_printer Col;
-  Col.set_float_format(".3");
-  Col(10, "volume");
+  Col(15, "volume","-");
   for(auto it=std::begin(PhysicalVolumeListList); it!=std::end(PhysicalVolumeListList);++it)
   {
     Col(7,(*it)->GetName());
   }
+  Col.print_line('=');
+  Col.print_title("     Real GEM geometry    ", '*');
+  Col.print_line('-');
+  Col.set_float_format(".3");
   Col.print_head();
   Col << "material";
   for(auto it=std::begin(PhysicalVolumeListList); it!=std::end(PhysicalVolumeListList);++it)
@@ -442,6 +437,7 @@ void GEMDetector::PrintGeometry(void)
     auto sv = dynamic_cast<G4Tubs*>(lv->GetSolid());
     Col << pv->GetTranslation().z() + sv->GetZHalfLength();
   }
+  Col.print_line('=');
   std::cout << Col;
 
 }
