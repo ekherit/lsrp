@@ -90,41 +90,70 @@ void add_to_graph (TGraphErrors *g, double d, const char * file, const char * cu
 }
 
 
-TGraphErrors * proceed (const char * prefix, int begin=0, int end=100, const char * cut="")
+TGraphErrors * proceed (const char * format, double begin=0, double end=100, double step=1, const char * cut="")
 {
-    TGraphErrors * g = new TGraphErrors;
-    char buf[1024]; 
-    for ( i = begin; i <= end; i += 1 ) 
+  TCanvas * c = new TCanvas;
+  TGraphErrors * g = new TGraphErrors;
+  g->Draw("ap");
+  g->GetXaxis()->SetTitle("converter - GEM distance (mm)");
+  g->GetXaxis()->SetDecimals();
+  g->GetXaxis()->SetTitleOffset(1.2);
+  //g->GetYaxis()->SetRangeUser(0,0.2);
+  g->GetYaxis()->SetTitle("#Delta <y>/PV (mm)");
+  g->SetTitle("E=4.1 GeV, L_{IP}=31 m, L_{air}=20 m, quarz mirror 5 mm, GEM size 50 cm");
+  g->SetMarkerStyle(21);
+  TCanvas * sig_err_c = new TCanvas;
+  TGraphErrors * sig_err_g = new TGraphErrors;
+  sig_err_g->SetMarkerStyle(21);
+  sig_err_g->Draw("ap");
+  sig_err_g->GetYaxis()->SetTitle("#Delta / #sigma_{#Delta} / PV");
+  char file_name[1024]; 
+  for ( double x = begin; x<=end; x+=step)
+  {
+    sprintf(file_name, format, x);
+    if(gSystem->AccessPathName(file_name) == 0)
     {
-      sprintf(buf,prefix, i);
-      if(gSystem->AccessPathName(buf) == 0)
-      {
-        std::cout << buf << std::endl;
-        add_to_graph(g,i,buf,cut);
-      }
+      std::cout << file_name << std::endl;
+      double e, de;
+      calc(file_name, cut, &e, &de);
+      int n = g->GetN();
+      g->SetPoint(n, x, e);
+      g->SetPointError(n, 0, de);
+      c->Modified();
+      c->Update();
+      n = sig_err_g->GetN();
+      sig_err_g->SetPoint(n, x, e/de);
+      sig_err_g->SetPointError(n, 0, 1);
+      sig_err_c->Modified();
+      sig_err_c->Update();
     }
-    g->Draw("ap");
-    g->GetXaxis()->SetTitle("converter - GEM distance (mm)");
-    g->GetXaxis()->SetDecimals();
-    g->GetXaxis()->SetTitleOffset(1.2);
-    g->GetYaxis()->SetRangeUser(0,0.2);
-    g->GetYaxis()->SetTitle("#Delta <y>/PV (mm)");
-    g->SetTitle("E=4.1 GeV, L_{IP}=31 m, L_{air}=20 m, quarz mirror 5 mm, GEM size 50 cm");
-    g->SetMarkerStyle(21);
-    g->Fit("pol1");
-    gStyle->SetOptFit();
-    return g;
+  }
+  g->Fit("pol1");
+  gStyle->SetOptFit();
+  TF1 * f = new TF1("user", "[0] + [1]*sqrt(x)/( 1.0 + [2]*x )");
+  sig_err_g->Fit("user");
+  return g;
 }
 
-//void proceed2 (const char * prefix, const char * cut = "")
-//{
-//    TGraphErrors * g = new TGraphErrors;
-//
-//    for(int i=0;i<26;i++)
-//    {
-//        char buf[1024];
-//        sprintf(buf,"%d.root",i);
-//        add_to_graph(g,i,buf,cut);
-//    }
-//    g->Draw("a*");
-//}
+double mfun(double *x, double *p)
+{
+  double z = x[0]/p[0]; //scale the y
+  double y = sqrt(z)/(1.0 + z);
+  double sum = 0;
+  for(int i=0;i<3;i++)
+  {
+    sum += p[i+1]*pow(y,i);
+  }
+  return sum;
+}
+
+void init_fun(void)
+{
+  TF1 * f = new TF1("myfun", mfun,0,25,4);
+  f->SetParameter(0,20);
+  f->SetParName(0,"#lambda");
+  f->SetParName(1,"p0");
+  f->SetParameter(2,100);
+  f->SetParName(2,"p1");
+  f->SetParName(3,"p2");
+}
