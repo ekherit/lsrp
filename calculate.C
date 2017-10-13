@@ -108,6 +108,7 @@ TGraphErrors * proceed (const char * format, double begin=0, double end=100, dou
   sig_err_g->Draw("ap");
   sig_err_g->GetYaxis()->SetTitle("#Delta / #sigma_{#Delta} / PV");
   char file_name[1024]; 
+  std::ofstream ofs("result.txt", ios_base::app);
   for ( double x = begin; x<=end; x+=step)
   {
     sprintf(file_name, format, x);
@@ -126,6 +127,7 @@ TGraphErrors * proceed (const char * format, double begin=0, double end=100, dou
       sig_err_g->SetPointError(n, 0, 1);
       sig_err_c->Modified();
       sig_err_c->Update();
+      ofs << setw(20) << x << setw(20) << e << setw(20) << 0 << setw(20) << de << std::endl;
     }
   }
   g->Fit("pol1");
@@ -138,22 +140,68 @@ TGraphErrors * proceed (const char * format, double begin=0, double end=100, dou
 double mfun(double *x, double *p)
 {
   double z = x[0]/p[0]; //scale the y
-  double y = sqrt(z)/(1.0 + z);
+  double y = sqrt(z)/(1.0 + p[3]*z*z);
   double sum = 0;
-  for(int i=0;i<3;i++)
+  for(int i=0;i<2;i++)
   {
     sum += p[i+1]*pow(y,i);
   }
   return sum;
 }
 
-void init_fun(void)
+TF1 * init_fun(void)
 {
   TF1 * f = new TF1("myfun", mfun,0,25,4);
-  f->SetParameter(0,20);
   f->SetParName(0,"#lambda");
+  f->SetParameter(0,20);
+
   f->SetParName(1,"p0");
-  f->SetParameter(2,100);
+  f->FixParameter(1,0);
+
   f->SetParName(2,"p1");
+  f->SetParameter(2,100);
+
   f->SetParName(3,"p2");
+  //f->FixParameter(3,0);
+  return f;
 }
+
+void draw_effect_error_ratio(const char * fname, double error_scale=1)
+{
+  auto c = new TCanvas;
+  TGraphErrors * g = new TGraphErrors(fname);
+  TGraphErrors * g2 = new TGraphErrors(fname);
+  double ymax=0;
+  for(int i=0;i<g->GetN();i++)
+  {
+    double e = g->GetY()[i];
+    double de = g->GetErrorY(i)*error_scale;
+    double x = g->GetX()[i];
+    double r = e/de;
+    if(r>ymax) ymax = r;
+    g2->SetPoint(i, x, r);
+    g2->SetPointError(i, 0, 1);
+  }
+  double xmax =g->GetX()[g->GetN()-1];
+  std::cout << ymax << std::endl;
+  auto h = new TH2F("htmp","#Delta/#sigma_{#Delta} / PV",100,0,xmax*1.15,100,0,ymax*1.15);
+  h->Draw();
+  g2->Draw("*");
+  c->SetGridx();
+  c->SetGridy();
+  auto f = init_fun();
+  f->SetRange(0, xmax*1.5);
+  f->SetNpx(1000);
+  g2->Fit("myfun","R");
+  gStyle->SetOptFit();
+  gStyle->SetOptStat(kFALSE);
+  //g2->GetXaxis()->SetRangeUser(0,xmax);
+  //g2->GetYaxis()->SetRangeUser(0,ymax*1.2);
+  std::cout << "Maximum fit function value is " << f->GetMaximum() << " at "  << f->GetMaximumX() << " mm" << std::endl;
+//for myfun the extremum is 1/sqrt(3)*\lambda
+}
+
+
+
+
+
